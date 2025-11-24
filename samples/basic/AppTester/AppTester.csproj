@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		
+		<!-- force the output directory just to create shorter relative paths in the factos.json file -->
+		<OutputPath>out</OutputPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+	</PropertyGroup>
+	
+	<ItemGroup>
+		<ProjectReference Include="..\..\..\src\Factos.Server\Factos.Server.csproj" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <None Update="factos.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
+</Project>

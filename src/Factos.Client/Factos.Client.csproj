@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net10.0;net10.0-android</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<RootNamespace>Factos</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="xunit.v3.assert" Version="3.2.0" />
+		<ProjectReference Include="..\Factos.Abstractions\Factos.Abstractions.csproj" />
+	</ItemGroup>
+
+</Project>

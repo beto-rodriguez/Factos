@@ -1,0 +1,11 @@
+﻿{
+  "version": "1.0",
+  "port": 6215,
+  "connectionTimeout": 300,
+  "windows": [
+    {
+      "name": "MAUI Windows",
+      "command": "dotnet run --project ../../MAUITests -f net10.0-windows10.0.19041.0"
+    }
+  ]
+}

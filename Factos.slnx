@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/samples/" />
+  <Folder Name="/samples/basic/">
+    <Project Path="samples/basic/AppTester/AppTester.csproj" />
+  </Folder>
+  <Folder Name="/samples/basic/testedApps/">
+    <Project Path="samples/basic/MAUITests/MAUITests.csproj" />
+    <Project Path="samples/basic/WPFTests/WPFTests.csproj" />
+  </Folder>
+  <Project Path="src/Factos.Abstractions/Factos.Abstractions.csproj" />
+  <Project Path="src/Factos.Client/Factos.Client.csproj" />
+  <Project Path="src/Factos.MAUI/Factos.MAUI.csproj" />
+  <Project Path="src/Factos.Server/Factos.Server.csproj" />
+  <Project Path="src/Factos.WPF/Factos.WPF.csproj" />
+</Solution>
