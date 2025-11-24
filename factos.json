@@ -7,5 +7,11 @@
       "name": "MAUI Windows",
       "command": "dotnet run --project samples/basic/MAUITests -f net10.0-windows10.0.19041.0"
     }
+  ],
+  "linux": [
+    {
+      "name": "MAUI Android",
+      "command": "dotnet run --project samples/basic/MAUITests -f net10.0-android"
+    }
   ]
 }

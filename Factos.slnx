@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/config/">
+    <File Path="config.readme.md" />
+    <File Path="factos.json" />
+  </Folder>
   <Folder Name="/samples/" />
   <Folder Name="/samples/basic/">
     <Project Path="samples/basic/AppTester/AppTester.csproj" />
