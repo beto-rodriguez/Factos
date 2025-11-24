@@ -33,7 +33,8 @@ jobs:
       - name: run tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 35-ext15
+          api-level: 35
+          system-image-api-level: 35-ext15
           script: dotnet run --project samples/basic/AppTester
 
 
