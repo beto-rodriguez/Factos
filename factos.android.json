@@ -8,5 +8,17 @@
       "name": "MAUI Android",
       "command": "dotnet run --project samples/basic/MAUITests -f net10.0-android"
     }
+  ],
+  "macos": [
+    {
+      "name": "MAUI Android",
+      "command": "dotnet run --project samples/basic/MAUITests -f net10.0-android"
+    }
+  ],
+  "windows": [
+    {
+      "name": "MAUI Android",
+      "command": "dotnet run --project samples/basic/MAUITests -f net10.0-android"
+    }
   ]
 }

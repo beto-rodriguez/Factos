@@ -1,6 +1,7 @@
 ﻿using Factos.Abstractions;
 using Factos.Abstractions.Dto;
 using Factos.Server.Settings;
+using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
@@ -10,9 +11,11 @@ using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.Services;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Xml.Linq;
 
 namespace Factos.Server.ClientConnection;
 
@@ -113,13 +116,17 @@ internal sealed class TcpServerTestSession
                     // specially when running the same project for different targets.
                     tmip.Namespace = $"[{appName}] {tmip.Namespace}";
                 }
-
-                yield return new TestNode
+                
+                var testNode = new TestNode
                 {
                     DisplayName = $"[{appName}]{nodeDto.DisplayName}",
                     Uid = $"[{testRunner.Name}]{nodeDto.Uid}",
                     Properties = nodeDto.Properties.AsPropertyBagResult()
                 };
+
+                FillTrxProperties(testNode, nodeDto);
+
+                yield return testNode;
             }
 
             await appRunner.DisposeProcess(
@@ -176,6 +183,18 @@ internal sealed class TcpServerTestSession
         return sb.ToString();
     }
 
+    private static void FillTrxProperties(TestNode testNode, TestNodeDto dto)
+    {
+        testNode.Properties.Add(new TrxFullyQualifiedTypeNameProperty(dto.Uid));
+
+        var errors = dto.Properties
+            .Where(x => x is ErrorTestNodeStatePropertyDto or FailedTestNodeStatePropertyDto)
+            .Aggregate(string.Empty, (a, b) => a + ((TestNodePropertyDto)b).Explanation);
+
+        if (!string.IsNullOrEmpty(errors))
+            testNode.Properties.Add(new TrxExceptionProperty("Exception", errors));
+    }
+
     private async Task<TestRunnerAppSettings[]> GetPlatformRunnersAppSettings(CancellationToken cancellationToken)
     {
         if (OperatingSystem.IsWindows())
@@ -188,14 +207,14 @@ internal sealed class TcpServerTestSession
         if (OperatingSystem.IsLinux())
         {
             await deviceWritter.Dimmed(
-                $"{settings.Windows.Length} app(s) will run on Linux", cancellationToken);
+                $"{settings.Linux.Length} app(s) will run on Linux", cancellationToken);
             return settings.Linux;
         }
 
         if (OperatingSystem.IsMacOS())
         {
             await deviceWritter.Dimmed(
-                $"{settings.Windows.Length} app(s) will run on MacOS", cancellationToken);
+                $"{settings.MacOS.Length} app(s) will run on MacOS", cancellationToken);
             return settings.MacOS;
         }
 

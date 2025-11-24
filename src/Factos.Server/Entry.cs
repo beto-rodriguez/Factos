@@ -1,5 +1,6 @@
 ﻿using Factos.Server.ClientConnection;
 using Factos.Server.Settings;
+using Microsoft.Testing.Extensions;
 using Microsoft.Testing.Platform.Builder;
 using Microsoft.Testing.Platform.Services;
 
@@ -18,6 +19,8 @@ public class Entry
             TestingFrameworkCapabilities.Create,
             (capabilities, serviceProvider) =>
                 new TestingFramework(serviceProvider.GetOutputDevice()));
+
+        builder.AddTrxReportProvider();
 
         using ITestApplication testApp = await builder.BuildAsync();
 

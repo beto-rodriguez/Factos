@@ -4,7 +4,9 @@ namespace Factos.Server;
 
 internal sealed class TestingFrameworkCapabilities : ITestFrameworkCapabilities
 {
-    public IReadOnlyCollection<ITestFrameworkCapability> Capabilities => [];
+    public TrxCapability TrxCapability { get; } = new();
+
+    public IReadOnlyCollection<ITestFrameworkCapability> Capabilities => [TrxCapability];
 
 #pragma warning disable IDE0060 // Remove unused parameter
     public static TestingFrameworkCapabilities Create(IServiceProvider serviceProvider) =>

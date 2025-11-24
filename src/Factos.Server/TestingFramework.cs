@@ -1,8 +1,10 @@
 ﻿using Factos.Server.ClientConnection;
+using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.OutputDevice;
+using System.Reflection;
 
 namespace Factos.Server;
 
