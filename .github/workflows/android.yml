@@ -19,7 +19,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Setup .NET MAUI
-        run: dotnet workload install maui-android
+        run: dotnet workload install maui
 
       - name: Setup Local .NET Tools
         run: dotnet tool restore
