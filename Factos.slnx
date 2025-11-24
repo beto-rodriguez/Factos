@@ -7,6 +7,9 @@
     <Project Path="samples/basic/MAUITests/MAUITests.csproj" />
     <Project Path="samples/basic/WPFTests/WPFTests.csproj" />
   </Folder>
+  <Folder Name="/workflows/">
+    <File Path=".github/workflows/android.yml" />
+  </Folder>
   <Project Path="src/Factos.Abstractions/Factos.Abstractions.csproj" />
   <Project Path="src/Factos.Client/Factos.Client.csproj" />
   <Project Path="src/Factos.MAUI/Factos.MAUI.csproj" />
