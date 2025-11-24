@@ -1,4 +1,4 @@
-name: Android Build
+name: Android 35 Build
 
 on:
   push:
@@ -33,7 +33,7 @@ jobs:
       - name: run tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 36
+          api-level: 35
           script: dotnet run --project samples/basic/AppTester
 
 
