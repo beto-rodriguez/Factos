@@ -1,7 +1,7 @@
 <Solution>
   <Folder Name="/config/">
     <File Path="config.readme.md" />
-    <File Path="factos.json" />
+    <File Path="factos.android.json" />
   </Folder>
   <Folder Name="/samples/" />
   <Folder Name="/samples/basic/">
