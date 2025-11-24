@@ -19,7 +19,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Setup .NET MAUI
-        run: dotnet workload install maui
+        run: dotnet workload install maui-android
 
       - name: Setup Local .NET Tools
         run: dotnet tool restore
@@ -37,5 +37,3 @@ jobs:
           target: google_apis
           arch: x86_64
           script: dotnet run --project samples/basic/AppTester
-
-
