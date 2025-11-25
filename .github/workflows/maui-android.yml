@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  build-android:
+  test-maui-android:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -40,9 +40,9 @@ jobs:
           arch: x86_64
           script: dotnet run --project samples/basic/AppTester --run-settings ./.github/workflows/maui-android.json --report-trx
 
-      - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: (!cancelled())
+      - name: Publish test results to GitHub UI
+        uses: dorny/test-reporter@v1
         with:
-          files: |
-            ./samples/basic/AppTester/out/TestResults/*.trx
+          name: Trx Results
+          path: ./samples/basic/AppTester/out/TestResults/*.trx
+          reporter: dotnet-trx

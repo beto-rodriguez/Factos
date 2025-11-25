@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  build-android:
+  test-wpf:
     runs-on: windows-2025
     permissions:
       contents: read
@@ -30,10 +30,9 @@ jobs:
       - name: Run Tests
         run: dotnet run --project samples\basic\AppTester --run-settings .\.github\workflows\wpf.json --report-trx
 
-      - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action/windows@v2
-        if: (!cancelled())
+      - name: Publish test results to GitHub UI
+        uses: dorny/test-reporter@v1
         with:
-          files: |
-            ./samples/basic/AppTester/out/TestResults/*.trx
-  
+          name: Trx Results
+          path: ./samples/basic/AppTester/out/TestResults/*.trx
+          reporter: dotnet-trx
