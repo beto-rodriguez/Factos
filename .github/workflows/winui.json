@@ -5,7 +5,7 @@
   "connectionTimeout": 600,
   "testedApps": [
     {
-      "name": "WPF",
+      "name": "WinUI",
       "commands": [
         "dotnet run --project samples/basic/WinUITests -r win-x64 -p:WindowsPackageType=None"
       ]

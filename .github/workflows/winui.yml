@@ -8,6 +8,10 @@ on:
 jobs:
   run:
     runs-on: windows-2025
+    permissions:
+      contents: read
+      actions: read
+      checks: write
 
     steps:
       - name: Checkout

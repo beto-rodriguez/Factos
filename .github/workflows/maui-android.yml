@@ -1,4 +1,4 @@
-name: Test .NET MAUI Android
+name: Test MAUI Android
 
 on:
   push:
@@ -8,6 +8,10 @@ on:
 jobs:
   run:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+      checks: write
 
     steps:
       - name: Checkout
