@@ -96,7 +96,7 @@ internal sealed class TcpServerTestSession
 
             await deviceWritter.Title($"Running {appName}", cancellationToken);
 
-            await appRunner.EnsureProcessIsRunning(testRunner.Command, appName, cancellationToken);
+            await appRunner.StartApp(testRunner.Commands, appName, cancellationToken);
 
             var testNodesJson = await session.ReadStream(
                 streamName, appName, settings.Timeout, cancellationToken);
@@ -129,8 +129,7 @@ internal sealed class TcpServerTestSession
                 yield return testNode;
             }
 
-            await appRunner.DisposeProcess(
-                session, testRunner.Command, appName, cancellationToken);
+            await appRunner.EndApp(session, [.. testRunner.Commands.Reverse()], appName, cancellationToken);
 
             var count = MTPResultsMapper.LogCount(appName, deviceWritter, cancellationToken);
 
@@ -145,17 +144,13 @@ internal sealed class TcpServerTestSession
     public async Task<string> ReadStream(
         string name, string appName, int timeOut, CancellationToken cancellationToken)
     {
-        await deviceWritter.Normal(
-            $"Waiting for {appName} on {listener.LocalEndpoint}...", cancellationToken);
+        await deviceWritter.Dimmed($"Waiting for {appName} to respond '{name}' on {listener.LocalEndpoint}...", cancellationToken);
 
         var ct = new CancellationTokenSource(TimeSpan.FromSeconds(timeOut)).Token;
 
         using var client = await listener.AcceptTcpClientAsync(ct);
         using var stream = client.GetStream();
         using var writer = new StreamWriter(stream) { AutoFlush = true };
-
-        await deviceWritter.Dimmed(
-            $"Requesting the client with the '{name}' command.", cancellationToken);
 
         writer.WriteLine(name);
 

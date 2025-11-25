@@ -1,11 +1,15 @@
 ﻿{
   "version": "1.0",
+  "descrition": "config used when running tests locally or using the test explorer",
   "port": 6215,
   "connectionTimeout": 300,
   "testedApps": [
     {
-      "name": "MAUI Windows",
-      "command": "dotnet run --project ../../MAUITests -f net10.0-windows10.0.19041.0"
+      "name": "MAUI Android",
+      "commands": [
+        "dotnet run scripts/start-android-emulator.cs",
+        "dotnet run --project ../../MAUITests -f net10.0-android"
+      ]
     }
   ]
 }

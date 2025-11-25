@@ -1,4 +1,4 @@
-name: Android
+name: Test .NET MAUI Android
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  test-maui-android:
+  run:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -43,6 +43,6 @@ jobs:
       - name: Publish test results to GitHub UI
         uses: dorny/test-reporter@v1
         with:
-          name: Trx Results
+          name: test-results
           path: ./samples/basic/AppTester/out/TestResults/*.trx
           reporter: dotnet-trx

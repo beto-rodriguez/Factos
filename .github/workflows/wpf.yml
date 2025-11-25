@@ -1,4 +1,4 @@
-name: Windows
+name: Test WPF
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  test-wpf:
+  run:
     runs-on: windows-2025
     permissions:
       contents: read
@@ -33,6 +33,6 @@ jobs:
       - name: Publish test results to GitHub UI
         uses: dorny/test-reporter@v1
         with:
-          name: Trx Results
+          name: test-results
           path: ./samples/basic/AppTester/out/TestResults/*.trx
           reporter: dotnet-trx

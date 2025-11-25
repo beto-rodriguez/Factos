@@ -6,7 +6,9 @@
   "testedApps": [
     {
       "name": "WPF",
-      "command": "dotnet run --project samples/basic/WPFTests"
+      "commands": [
+        "dotnet run --project samples/basic/WPFTests"
+      ]
     }
   ]
 }

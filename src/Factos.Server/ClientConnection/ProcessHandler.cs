@@ -67,13 +67,16 @@ internal class ProcessHandler
             else
             {
                 await deviceWritter.Dimmed(
-                    $"The process for command '{command}' has exited successfully with exit code {_process.ExitCode}.", cancellationToken);
+                    $"The process finished successfully for command '{command}'", cancellationToken);
             }
         };
 
         _process.Start();
         _process.BeginOutputReadLine();
         _process.BeginErrorReadLine();
+
+        _process.WaitForExit();
+        var a = 1;
     }
 
     public bool IsRunning => !_process?.HasExited == true;
