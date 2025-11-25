@@ -1,18 +1,17 @@
 <Solution>
-  <Folder Name="/config/">
-    <File Path="config.readme.md" />
-    <File Path="factos.android.json" />
-  </Folder>
   <Folder Name="/samples/" />
   <Folder Name="/samples/basic/">
     <Project Path="samples/basic/AppTester/AppTester.csproj" />
   </Folder>
   <Folder Name="/samples/basic/testedApps/">
-    <Project Path="samples/basic/MAUITests/MAUITests.csproj" />
+    <Project Path="samples/basic/MAUITests/MAUITests.csproj">
+      <Deploy Solution="Debug|*" />
+    </Project>
     <Project Path="samples/basic/WPFTests/WPFTests.csproj" />
   </Folder>
   <Folder Name="/workflows/">
-    <File Path=".github/workflows/android.yml" />
+    <File Path=".github/workflows/maui-android.json" />
+    <File Path=".github/workflows/maui-android.yml" />
   </Folder>
   <Project Path="src/Factos.Abstractions/Factos.Abstractions.csproj" />
   <Project Path="src/Factos.Client/Factos.Client.csproj" />

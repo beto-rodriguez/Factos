@@ -38,7 +38,7 @@ jobs:
           api-level: 35
           target: google_apis
           arch: x86_64
-          script: dotnet test --project samples/basic/AppTester --run-settings ./factos.android.json --report-trx
+          script: dotnet test --project samples/basic/AppTester --run-settings ./.github/workflows/maui-android.json --report-trx
 
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2

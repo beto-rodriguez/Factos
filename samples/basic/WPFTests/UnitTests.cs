@@ -21,8 +21,10 @@ public class SomeTests
     }
 
     [TestMethod]
+    [ExpectedToFail]
     public void FailedTest()
     {
-        Assert.Equal(8 + 2, 11);
+        // when marked as ExpectedToFail, this test will be reported as passed only if it fails
+        Assert.Equal(1 + 1, 3);
     }
 }
