@@ -13,6 +13,12 @@ internal class ProcessHandler
 
         var fileName = elements[0];
         var rawArgs = command[fileName.Length..].Trim();
+        var waitForExit = false;
+        if (fileName.StartsWith("[wait-for-exit]"))
+        {
+            fileName = fileName["[wait-for-exit]".Length..];
+            waitForExit = true;
+        }
 
         _process = new Process
         {
@@ -75,8 +81,8 @@ internal class ProcessHandler
         _process.BeginOutputReadLine();
         _process.BeginErrorReadLine();
 
-        _process.WaitForExit();
-        var a = 1;
+        if (waitForExit)
+            _process.WaitForExit();
     }
 
     public bool IsRunning => !_process?.HasExited == true;

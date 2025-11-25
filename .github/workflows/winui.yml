@@ -1,4 +1,4 @@
-name: Test WPF
+name: Test WinUI
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Run Tests
-        run: dotnet run --project samples\basic\AppTester --run-settings .\.github\workflows\wpf.json --report-trx
+        run: dotnet run --project samples\basic\AppTester --run-settings .\.github\workflows\winui.json --report-trx
 
       - name: Publish test results to GitHub UI
         uses: dorny/test-reporter@v1

@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 
 [assembly:InternalsVisibleTo("Factos.WPF")]
+[assembly: InternalsVisibleTo("Factos.WinUI")]
 [assembly: InternalsVisibleTo("Factos.MAUI")]

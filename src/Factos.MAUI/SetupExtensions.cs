@@ -11,7 +11,7 @@ public static class SetupExtensions
         var controller = new MAUIAppController(port, testAssembly);
 
         FactosApp.Started += async () =>
-            await AppController.InitializeController(controller);
+            await AppController.InitializeController(controller, DeviceInfo.Platform == DevicePlatform.Android);
 
         return app.UseMauiApp<FactosApp>();
     }

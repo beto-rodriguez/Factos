@@ -7,7 +7,7 @@ namespace Factos;
 
 public abstract class AppController(Assembly assembly, int port)
 {
-    TestExecutor _testExecutor = new ReflectionTestExecutor(assembly);
+    readonly TestExecutor _testExecutor = new ReflectionTestExecutor(assembly);
 
     public static AppController Current { get; internal set; } = null!;
     internal string Name { get; set; } = "?";
@@ -18,11 +18,11 @@ public abstract class AppController(Assembly assembly, int port)
         [Constants.QUIT_APP] = Current.QuitAppTask,
     };
 
-    public static async Task InitializeController(AppController controller)
+    public static async Task InitializeController(AppController controller, bool isAndroid)
     {
         await controller.NavigateToView(controller.GetWelcomeView());
         Current = controller;
-        _ = controller.Listen();
+        _ = controller.Listen(isAndroid);
     }
 
     public abstract Task NavigateToView(object view);
@@ -39,15 +39,12 @@ public abstract class AppController(Assembly assembly, int port)
 
     internal abstract object GetResultsView(string message);
 
-    internal virtual async Task Listen()
+    internal virtual async Task Listen(bool isAndroid)
     {
-        var addess = string.Empty;
+        var addess = isAndroid 
+            ? "10.0.2.2"
+            : "localhost";
 
-#if ANDROID
-        addess = "10.0.2.2";
-#else
-        addess = "localhost";
-#endif
         try
         {
             while (true)

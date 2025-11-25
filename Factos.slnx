@@ -3,6 +3,8 @@
   <Folder Name="/.github/workflows/">
     <File Path=".github/workflows/maui-android.json" />
     <File Path=".github/workflows/maui-android.yml" />
+    <File Path=".github/workflows/winui.json" />
+    <File Path=".github/workflows/winui.yml" />
     <File Path=".github/workflows/wpf.json" />
     <File Path=".github/workflows/wpf.yml" />
   </Folder>
@@ -14,11 +16,16 @@
     <Project Path="samples/basic/MAUITests/MAUITests.csproj">
       <Deploy Solution="Debug|*" />
     </Project>
+    <Project Path="samples/basic/WinUITests/WinUITests.csproj" Id="4246ccd9-284d-4f29-9f72-586f9a3c7958">
+      <Platform Project="x64" />
+      <Deploy />
+    </Project>
     <Project Path="samples/basic/WPFTests/WPFTests.csproj" />
   </Folder>
   <Project Path="src/Factos.Abstractions/Factos.Abstractions.csproj" />
   <Project Path="src/Factos.Client/Factos.Client.csproj" />
   <Project Path="src/Factos.MAUI/Factos.MAUI.csproj" />
   <Project Path="src/Factos.Server/Factos.Server.csproj" />
+  <Project Path="src/Factos.WinUI/Factos.WinUI.csproj" Id="0bb669fb-0fe3-41e5-a050-6c311bb82251" />
   <Project Path="src/Factos.WPF/Factos.WPF.csproj" />
 </Solution>
