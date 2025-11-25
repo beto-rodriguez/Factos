@@ -90,7 +90,7 @@ internal sealed class TcpServerTestSession
     private async IAsyncEnumerable<TestNode> GetTestNodesStream(
         TcpServerTestSession session, string streamName, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        foreach (var testRunner in await GetPlatformRunnersAppSettings(cancellationToken))
+        foreach (var testRunner in settings.TestedApps)
         {
             var appName = testRunner.Name ?? "test runner";
 
@@ -193,32 +193,5 @@ internal sealed class TcpServerTestSession
 
         if (!string.IsNullOrEmpty(errors))
             testNode.Properties.Add(new TrxExceptionProperty("Exception", errors));
-    }
-
-    private async Task<TestRunnerAppSettings[]> GetPlatformRunnersAppSettings(CancellationToken cancellationToken)
-    {
-        if (OperatingSystem.IsWindows())
-        {
-            await deviceWritter.Dimmed(
-                $"{settings.Windows.Length} app(s) will run on Windows", cancellationToken);
-            return settings.Windows;
-        }
-
-        if (OperatingSystem.IsLinux())
-        {
-            await deviceWritter.Dimmed(
-                $"{settings.Linux.Length} app(s) will run on Linux", cancellationToken);
-            return settings.Linux;
-        }
-
-        if (OperatingSystem.IsMacOS())
-        {
-            await deviceWritter.Dimmed(
-                $"{settings.MacOS.Length} app(s) will run on MacOS", cancellationToken);
-            return settings.MacOS;
-        }
-
-        throw new PlatformNotSupportedException(
-            "Unsupported OS platform. The runner server requires a desktop OS.");
     }
 }

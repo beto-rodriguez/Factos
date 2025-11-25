@@ -3,7 +3,7 @@
   "descrition": "config used by maui android.yml",
   "port": 6215,
   "connectionTimeout": 600,
-  "linux": [
+  "testedApps": [
     {
       "name": "MAUI Android",
       "command": "dotnet run --project samples/basic/MAUITests -f net10.0-android"
