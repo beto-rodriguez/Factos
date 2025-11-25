@@ -1,6 +1,6 @@
 ﻿{
   "version": "1.0",
-  "descrition": "config used by maui android.yml",
+  "descrition": "config used by maui-android.yml",
   "port": 6215,
   "connectionTimeout": 600,
   "testedApps": [

@@ -1,0 +1,12 @@
+﻿{
+  "version": "1.0",
+  "descrition": "config used by wpf.yml",
+  "port": 6215,
+  "connectionTimeout": 600,
+  "testedApps": [
+    {
+      "name": "WPF",
+      "command": "dotnet run --project samples/basic/WPFTests"
+    }
+  ]
+}

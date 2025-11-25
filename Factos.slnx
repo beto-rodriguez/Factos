@@ -1,4 +1,11 @@
 <Solution>
+  <Folder Name="/.github/" />
+  <Folder Name="/.github/workflows/">
+    <File Path=".github/workflows/maui-android.json" />
+    <File Path=".github/workflows/maui-android.yml" />
+    <File Path=".github/workflows/wpf.json" />
+    <File Path=".github/workflows/wpf.yml" />
+  </Folder>
   <Folder Name="/samples/" />
   <Folder Name="/samples/basic/">
     <Project Path="samples/basic/AppTester/AppTester.csproj" />
@@ -8,10 +15,6 @@
       <Deploy Solution="Debug|*" />
     </Project>
     <Project Path="samples/basic/WPFTests/WPFTests.csproj" />
-  </Folder>
-  <Folder Name="/workflows/">
-    <File Path=".github/workflows/maui-android.json" />
-    <File Path=".github/workflows/maui-android.yml" />
   </Folder>
   <Project Path="src/Factos.Abstractions/Factos.Abstractions.csproj" />
   <Project Path="src/Factos.Client/Factos.Client.csproj" />
