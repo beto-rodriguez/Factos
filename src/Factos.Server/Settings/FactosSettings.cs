@@ -7,7 +7,7 @@ namespace Factos.Server.Settings;
 internal class FactosSettings
 {
     public string Version { get; set; } = "1.0";
-    public int Timeout { get; set; } = 300;
+    public int ConnectionTimeout { get; set; } = 300;
     public int Port { get; set; } = Constants.DEFAULT_TCP_PORT;
     public TestRunnerAppSettings[] TestedApps { get; set; } = [];
 

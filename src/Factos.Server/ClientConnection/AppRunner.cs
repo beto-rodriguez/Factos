@@ -61,7 +61,7 @@ internal class AppRunner : BaseExtension, IOutputDeviceDataProducer
            $"{appName} is quitting...", cancellationToken);
 
         var quitRequest = await TcpServerTestSession.Current.ReadStream(
-            Constants.QUIT_APP, appName, settings.Timeout, cancellationToken);
+            Constants.QUIT_APP, appName, settings.ConnectionTimeout, cancellationToken);
 
         if (quitRequest == Constants.QUIT_APP)
             // at this point the client answers to the quit request

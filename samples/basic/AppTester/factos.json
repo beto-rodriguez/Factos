@@ -2,7 +2,7 @@
   "version": "1.0",
   "descrition": "config used when running tests locally or using the test explorer",
   "port": 6215,
-  "connectionTimeout": 300,
+  "connectionTimeout": 600,
   "testedApps": [
     {
       "name": "MAUI Windows",

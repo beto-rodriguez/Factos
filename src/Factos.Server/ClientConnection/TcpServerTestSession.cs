@@ -62,7 +62,7 @@ internal sealed class TcpServerTestSession
         await deviceWritter.Dimmed(
             $"""
              TCP server listening on {listener.LocalEndpoint}
-             Test runners app will timeout after {settings.Timeout} seconds if they don't connect.
+             Test runners app will timeout after {settings.ConnectionTimeout} seconds if they don't connect.
              """, cancellationToken);
     }
 
@@ -99,7 +99,7 @@ internal sealed class TcpServerTestSession
             await appRunner.StartApp(testRunner.Commands, appName, cancellationToken);
 
             var testNodesJson = await session.ReadStream(
-                streamName, appName, settings.Timeout, cancellationToken);
+                streamName, appName, settings.ConnectionTimeout, cancellationToken);
 
             var testNodes = JsonSerializer.Deserialize<TestNodeDto[]>(testNodesJson);
 
