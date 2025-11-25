@@ -68,9 +68,8 @@ public class ReflectionTestExecutor(Assembly assembly)
                 continue;
             }
 
-            // === OUTPUT HELPER IS NOT IMPLEMENTED YET
+            var passed = false;
             object? instance = Activator.CreateInstance(test.DeclaringType!);
-
             PropertyDto[]? properties = null;
 
             try
@@ -88,6 +87,7 @@ public class ReflectionTestExecutor(Assembly assembly)
                 await app.InvokeOnUIThread(InvokeMethodInfo());
 
                 properties = [new PassedTestNodeStatePropertyDto()];
+                passed = true;
             }
             catch (TargetInvocationException ex)
             {
@@ -100,6 +100,14 @@ public class ReflectionTestExecutor(Assembly assembly)
                 { 
                     Explanation = ex.Message + n + "Stack Trace:" + n + ex.StackTrace
                 }];
+            }
+
+            var expectedToFail = test.GetCustomAttribute<ExpectedToFailAttribute>() is not null;
+            if (expectedToFail)
+            {
+                properties = passed
+                    ? [new FailedTestNodeStatePropertyDto { Explanation = "Test was expected to fail but passed." }]
+                    : [new PassedTestNodeStatePropertyDto()];
             }
 
             nodes.Add(new TestNodeDto
