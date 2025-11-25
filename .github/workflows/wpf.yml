@@ -23,6 +23,10 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      # this is not necessesary when installing Factos from NuGet.. but locally it requires this workload
+      - name: Setup .NET MAUI
+        run: dotnet workload install maui-android
+
       - name: Run Tests
         run: dotnet run --project samples\basic\AppTester --run-settings .\.github\workflows\wpf.json --report-trx
 
