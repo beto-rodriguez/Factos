@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Xaml;
+﻿using Factos.WinUI;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Data;
@@ -27,8 +28,6 @@ namespace WinUITests
     /// </summary>
     public partial class App : Application
     {
-        private Window? _window;
-
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -44,24 +43,7 @@ namespace WinUITests
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            _window = new MainWindow();
-            _window.Activate();
-
-            Console.WriteLine("App Launched");
-            _ = LogActivity();
-        }
-
-        private async Task LogActivity()
-        {
-            var a = 0;
-            while (true)
-            {
-                Console.WriteLine("App is running...");
-                await Task.Delay(2000);
-                a++;
-                if (a > 20)
-                    Current.Exit();
-            }
+            this.UseFactosApp(typeof(App).Assembly);
         }
     }
 }
