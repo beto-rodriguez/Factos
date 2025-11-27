@@ -16,7 +16,7 @@
     <Project Path="samples/basic/MAUITests/MAUITests.csproj">
       <Deploy Solution="Debug|*" />
     </Project>
-    <Project Path="samples/basic/WinUITests/WinUITests.csproj" Id="4246ccd9-284d-4f29-9f72-586f9a3c7958">
+    <Project Path="samples/basic/WinUITests/WinUITests.csproj" Id="135c70dd-c6f1-4629-8d59-a23ea8e866f5">
       <Platform Project="x64" />
       <Deploy />
     </Project>

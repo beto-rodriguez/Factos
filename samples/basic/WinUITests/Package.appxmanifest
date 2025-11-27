@@ -8,11 +8,11 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="48d33eb7-cd9e-40dd-a9af-ca199813c948"
+    Name="8cbea05c-183d-4139-8a35-cac1e8c26842"
     Publisher="CN=btord"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="48d33eb7-cd9e-40dd-a9af-ca199813c948" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="8cbea05c-183d-4139-8a35-cac1e8c26842" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>WinUITests</DisplayName>
