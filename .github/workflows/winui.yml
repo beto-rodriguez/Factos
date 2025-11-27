@@ -38,9 +38,6 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Install VC++ runtime
-        run: choco install vcredist140 -y
-
       - name: Publish WinUI app (unpackaged, self-contained)
         run: |
           dotnet restore samples/basic/WinUITests/WinUITests.csproj
@@ -65,7 +62,7 @@ jobs:
 
       - name: Run app and capture exit code
         shell: powershell
-        working-directory: WinUITests/bin/Release/net8.0-windows10.0.19041.0/win-x64/publish
+        working-directory: samples/basic/WinUITests/bin/Release/net8.0-windows10.0.19041.0/win-x64/publish
         run: |
           $proc = Start-Process ".\WinUITests.exe" -PassThru
           $proc.WaitForExit()
