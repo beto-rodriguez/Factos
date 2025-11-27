@@ -25,11 +25,12 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      # the UseSrc is a workaround to prevent a winui issue where the windowsappsdk is packed twice... using a nuget references fixes the issue
       - name: Publish client app
         run: |
           dotnet restore samples/basic/WinUITests/WinUITests.csproj
           dotnet publish samples/basic/WinUITests/WinUITests.csproj -c Release -r win-x64 `
-            /p:UseSrc=false ` # the UseSrc is a workaround to prevent a winui issue where the windowsappsdk is packed twice... using a nuget references fixes the issue
+            /p:UseSrc=false `
             /p:WindowsPackageType=None `
             /p:WindowsAppSDKSelfContained=true `
             /p:PublishTrimmed=false `
