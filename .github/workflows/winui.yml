@@ -6,24 +6,86 @@ on:
   pull_request:
 
 jobs:
-  run:
-    runs-on: windows-2025
-    permissions:
-      contents: read
-      actions: read
-      checks: write
+  # run:
+  #   runs-on: windows-2025
+  #   permissions:
+  #     contents: read
+  #     actions: read
+  #     checks: write
 
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Setup .NET
+  #       uses: actions/setup-dotnet@v4
+  #       with:
+  #         dotnet-version: '10.0.x'
+
+  #     - name: Publish test runner
+  #       run: dotnet publish samples\basic\WinUITests -r win-x64 -c Release -p:WindowsPackageType=None -p:PublishTrimmed=false -p:PublishSingleFile=false
+
+  #     - name: Run test runner
+  #       run: samples\basic\WinUITests\bin\Release\net8.0-windows10.0.19041.0\win-x64\publish\WinUITests.exe
+
+  #       jobs:
+  run-winui:
+    runs-on: windows-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: '8.0.x'
 
-      - name: Publish test runner
-        run: dotnet publish samples\basic\WinUITests -r win-x64 -c Release --self-contained -p:WindowsPackageType=None -p:PublishProfile=win-x64 -p:PublishTrimmed=false
+      - name: Install VC++ runtime
+        run: choco install vcredist140 -y
 
-      - name: Run test runner
-        run: samples\basic\WinUITests\bin\Release\net8.0-windows10.0.19041.0\win-x64\publish\WinUITests.exe
+      - name: Publish WinUI app (unpackaged, self-contained)
+        run: |
+          dotnet restore samples/basic/WinUITests/WinUITests.csproj
+          dotnet publish samples/basic/WinUITests/WinUITests.csproj -c Release -r win-x64 `
+            /p:WindowsPackageType=None `
+            /p:WindowsAppSDKSelfContained=true `
+            /p:PublishTrimmed=false `
+            /p:PublishSingleFile=false
+
+      - name: Enable crash dumps and host tracing
+        shell: powershell
+        run: |
+          $dumpKey = "HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps\WinUITests.exe"
+          New-Item -Path $dumpKey -Force | Out-Null
+          New-ItemProperty -Path $dumpKey -Name DumpFolder -Value "C:\Dumps" -PropertyType ExpandString -Force | Out-Null
+          New-ItemProperty -Path $dumpKey -Name DumpType -Value 2 -PropertyType DWord -Force | Out-Null
+          New-ItemProperty -Path $dumpKey -Name DumpCount -Value 10 -PropertyType DWord -Force | Out-Null
+          New-Item -ItemType Directory -Force -Path "C:\Dumps" | Out-Null
+          echo "COREHOST_TRACE=1" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "COREHOST_TRACE_VERBOSITY=1" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "DOTNET_EnableDiagnostics=1" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Run app and capture exit code
+        shell: powershell
+        working-directory: WinUITests/bin/Release/net8.0-windows10.0.19041.0/win-x64/publish
+        run: |
+          $proc = Start-Process ".\WinUITests.exe" -PassThru
+          $proc.WaitForExit()
+          Write-Host "ExitCode=$($proc.ExitCode)"
+          exit $proc.ExitCode
+
+      - name: Export logs
+        if: always()
+        shell: powershell
+        run: |
+          wevtutil epl Application "$env:RUNNER_TEMP\Application.evtx"
+          wevtutil epl System "$env:RUNNER_TEMP\System.evtx"
+          if (Test-Path "C:\Dumps") { Compress-Archive -Path "C:\Dumps\*" -DestinationPath "$env:RUNNER_TEMP\winui-dumps.zip" -Force }
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: winui-diag
+          path: |
+            ${{ runner.temp }}\Application.evtx
+            ${{ runner.temp }}\System.evtx
+            ${{ runner.temp }}\winui-dumps.zip
