@@ -25,6 +25,9 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Setup .NET MAUI
+        run: dotnet workload install maui
+
       - name: Publish client app
         run: |
           dotnet restore samples/basic/MAUITests/MAUITests.csproj
