@@ -1,4 +1,4 @@
-name: WPF
+name: MAUI
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  run-test:
+  run-windows-test:
     runs-on: windows-2025
     defaults:
       run:
@@ -27,13 +27,13 @@ jobs:
 
       - name: Publish client app
         run: |
-          dotnet restore samples/basic/WPFTests/WPFTests.csproj
-          dotnet publish samples/basic/WPFTests/WPFTests.csproj -c Release
+          dotnet restore samples/basic/MAUITests/MAUITests.csproj
+          dotnet publish samples/basic/MAUITests/MAUITests.csproj -f net10.0-windows10.0.19041.0 -c Release
 
       - name: Start client app in background
         run:
           # ToDo: add logs if app fails to start?
-          start samples\basic\WPFTests\bin\Release\net10.0-windows\publish\WPFTests.exe
+          start samples/basic/MAUITests/bin/Release/net10.0-windows10.0.19041.0/win-x64/publish/MAUITests.exe
 
       - name: Start test server and run tests
         run:
