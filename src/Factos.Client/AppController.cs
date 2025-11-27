@@ -45,11 +45,13 @@ public abstract class AppController(Assembly assembly, int port)
             ? "10.0.2.2"
             : "localhost";
 
-        try
+        var resultsShown = false;
+
+        while (true)
         {
-            while (true)
+            try
             {
-                // ToDo, reuse the client connection instead of creating a new one each time
+                // ToDo, reuse or cache something?
                 using var client = new TcpClient();
                 await client.ConnectAsync(addess, port);
 
@@ -70,19 +72,22 @@ public abstract class AppController(Assembly assembly, int port)
 
                 await writter.WriteLineAsync(content);
                 await writter.WriteLineAsync(Constants.END_STREAM);
-
-                // special case to break the loop and end the app
-                if (content == Constants.QUIT_APP)
-                    break;
             }
-        }
-        catch
-        {
-            // most likely occurs when the tcp client connection failed
-            // because the server is not running, in this case we assume
-            // this is a debug session, lets just run tests
-            var result = await Current._testExecutor.Run(string.Empty);
-            await NavigateToView(GetResultsView(result));
+            catch
+            {
+                // most likely occurs when the tcp client connection failed because the server is not running,
+                // so we show the results only once (in case it is a debug session from the runner app)
+                // then we wait a bit before trying to connect again
+
+                if (!resultsShown)
+                {
+                    var result = await Current._testExecutor.Run(string.Empty);
+                    await NavigateToView(GetResultsView(result));
+                    resultsShown = true;
+                }
+
+                await Task.Delay(2000);
+            }
         }
     }
 

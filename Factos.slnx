@@ -3,6 +3,7 @@
   <Folder Name="/.github/workflows/">
     <File Path=".github/workflows/maui-android.json" />
     <File Path=".github/workflows/maui-android.yml" />
+    <File Path=".github/workflows/wait-for-process.json" />
     <File Path=".github/workflows/winui.json" />
     <File Path=".github/workflows/winui.yml" />
     <File Path=".github/workflows/wpf.json" />

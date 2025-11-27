@@ -43,7 +43,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7175" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.251106002" />
-    <PackageReference Include="Factos.WinUI" Version="0.1.1" />
+    <ProjectReference Condition="$(UseSrc) == ''" Include="..\..\..\src\Factos.WinUI\Factos.WinUI.csproj" />
+    <PackageReference Condition="$(UseSrc) == 'false'" Include="Factos.WinUI" Version="$(NuGetVersion)" />
   </ItemGroup>
 
   <!--

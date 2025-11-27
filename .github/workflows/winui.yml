@@ -22,17 +22,25 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Publish unpackaged test runner
+      # publish unpacked winui app
+      # the UseSrc is a workaround to prevent a winui issue where the windowsappsdk is packed twice...
+      # using a nuget references fixes the issue
+      - name: Publish client app
         run: |
           dotnet restore samples/basic/WinUITests/WinUITests.csproj
           dotnet publish samples/basic/WinUITests/WinUITests.csproj -c Release -r win-x64 `
+            /p:UseSrc=false `
             /p:WindowsPackageType=None `
             /p:WindowsAppSDKSelfContained=true `
             /p:PublishTrimmed=false `
             /p:PublishSingleFile=false
 
-      - name: Run Tests
-        run: dotnet run --project samples\basic\AppTester --run-settings .\.github\workflows\winui.json --report-trx
+      - name: Run tests server
+        run: |
+          # start the test server, in charge or controlling the client app and reporting the test results
+          dotnet run --project samples/basic/AppTester --run-settings ./.github/workflows/wait-for-process.json --report-trx
+          # start the client app to test
+          start samples/basic/WinUITests/bin/Release/net10.0-windows10.0.19041.0/win-x64/publish/WinUITests.exe
 
       - name: Publish results
         uses: dorny/test-reporter@v2.2.0

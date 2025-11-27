@@ -1,8 +1,8 @@
 ﻿{
   "version": "1.0",
-  "descrition": "config used when running tests locally or using the test explorer",
+  "description": "waits for the tcp client to connect, if no connection in 360 secs, then it fails.",
   "port": 6215,
-  "connectionTimeout": 600,
+  "connectionTimeout": 360,
   "testedApps": [
     {
       "name": "Test runner app",
