@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
@@ -47,6 +48,16 @@ namespace WinUITests
             _window.Activate();
 
             Console.WriteLine("App Launched");
+            _ = LogActivity();
+        }
+
+        private async Task LogActivity()
+        {
+            while (true)
+            {
+                Console.WriteLine("App is running...");
+                await Task.Delay(2000);
+            }
         }
     }
 }
