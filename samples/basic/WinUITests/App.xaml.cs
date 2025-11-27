@@ -59,7 +59,7 @@ namespace WinUITests
                 Console.WriteLine("App is running...");
                 await Task.Delay(2000);
                 a++;
-                if (a > 4)
+                if (a > 10)
                     Current.Exit();
             }
         }
