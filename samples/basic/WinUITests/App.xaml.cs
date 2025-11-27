@@ -53,10 +53,14 @@ namespace WinUITests
 
         private async Task LogActivity()
         {
+            var a = 0;
             while (true)
             {
                 Console.WriteLine("App is running...");
                 await Task.Delay(2000);
+                a++;
+                if (a > 4)
+                    Current.Exit();
             }
         }
     }
