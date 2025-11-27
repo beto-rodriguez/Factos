@@ -53,7 +53,8 @@ public abstract class AppController(Assembly assembly, int port)
             {
                 // ToDo, reuse or cache something?
                 using var client = new TcpClient();
-                await client.ConnectAsync(addess, port);
+                var ct = new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token;
+                await client.ConnectAsync(addess, port, ct);
 
                 using var stream = client.GetStream();
                 using var reader = new StreamReader(stream);
