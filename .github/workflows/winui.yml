@@ -8,6 +8,9 @@ on:
 jobs:
   run-test:
     runs-on: windows-2025
+    defaults:
+      run:
+        shell: pwsh
     permissions:
       contents: read
       actions: read
@@ -22,25 +25,35 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      # publish unpacked winui app
-      # the UseSrc is a workaround to prevent a winui issue where the windowsappsdk is packed twice...
-      # using a nuget references fixes the issue
       - name: Publish client app
         run: |
           dotnet restore samples/basic/WinUITests/WinUITests.csproj
           dotnet publish samples/basic/WinUITests/WinUITests.csproj -c Release -r win-x64 `
-            /p:UseSrc=false `
+            /p:UseSrc=false ` # the UseSrc is a workaround to prevent a winui issue where the windowsappsdk is packed twice... using a nuget references fixes the issue
             /p:WindowsPackageType=None `
             /p:WindowsAppSDKSelfContained=true `
             /p:PublishTrimmed=false `
             /p:PublishSingleFile=false
 
-      - name: Run tests server
+      - name: Start client app
         run: |
+          $log = "$(System.DefaultWorkingDirectory)\client.log"
+          Start-Process `
+            -FilePath "samples/basic/WinUITests/bin/Release/net10.0-windows10.0.19041.0/win-x64/publish/WinUITests.exe" `
+            -RedirectStandardOutput $log `
+            -RedirectStandardError $log `
+            -NoNewWindow
+
+      - name: Upload client logs
+        uses: actions/upload-artifact@v5.0.0
+        with:
+          name: client-logs
+          path: client.log
+
+      - name: Start test server and run tests
+        run:
           # start the test server, in charge or controlling the client app and reporting the test results
           dotnet run --project samples/basic/AppTester --run-settings ./.github/workflows/wait-for-process.json --report-trx
-          # start the client app to test
-          start samples/basic/WinUITests/bin/Release/net10.0-windows10.0.19041.0/win-x64/publish/WinUITests.exe
 
       - name: Publish results
         uses: dorny/test-reporter@v2.2.0
