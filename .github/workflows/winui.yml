@@ -36,20 +36,10 @@ jobs:
             /p:PublishTrimmed=false `
             /p:PublishSingleFile=false
 
-      - name: Start client app
-        run: |
-          $log = "$PWD\client.log"
-          Start-Process `
-            -FilePath "samples/basic/WinUITests/bin/Release/net10.0-windows10.0.19041.0/win-x64/publish/WinUITests.exe" `
-            -RedirectStandardOutput $log `
-            -RedirectStandardError $log `
-            -NoNewWindow
-
-      - name: Upload client logs
-        uses: actions/upload-artifact@v5.0.0
-        with:
-          name: client-logs
-          path: client.log
+      - name: Start client app in background
+        run:
+          # ToDo: add logs if app fails to start?
+          start samples/basic/WinUITests/bin/Release/net10.0-windows10.0.19041.0/win-x64/publish/WinUITests.exe
 
       - name: Start test server and run tests
         run:
