@@ -6,4 +6,11 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+	<PropertyGroup>
+		<PackageId>Factos.Abstractions</PackageId>
+		<Description>Factos abstractions package</Description>
+	</PropertyGroup>
+
+	<Import Project="../../nuget.props"/>
+
 </Project>

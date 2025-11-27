@@ -22,6 +22,12 @@
     </Project>
     <Project Path="samples/basic/WPFTests/WPFTests.csproj" />
   </Folder>
+  <Folder Name="/solution/">
+    <File Path=".gitignore" />
+    <File Path="directory.build.props" />
+    <File Path="nuget.config" />
+    <File Path="nuget.props" />
+  </Folder>
   <Project Path="src/Factos.Abstractions/Factos.Abstractions.csproj" />
   <Project Path="src/Factos.Client/Factos.Client.csproj" />
   <Project Path="src/Factos.MAUI/Factos.MAUI.csproj" />
