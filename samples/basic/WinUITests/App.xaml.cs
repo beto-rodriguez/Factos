@@ -43,7 +43,7 @@ namespace WinUITests
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            this.UseFactosApp(typeof(App).Assembly);
+            this.UseFactosApp();
         }
     }
 }

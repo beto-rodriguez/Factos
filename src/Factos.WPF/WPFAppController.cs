@@ -1,11 +1,10 @@
-using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace Factos.WPF;
 
-public class WPFAppController(Window window, int port, Assembly assembly) 
-    : AppController(assembly, port)
+public class WPFAppController(Window window, int port) 
+    : AppController(port)
 {
     public Window Window { get; } = window;
 

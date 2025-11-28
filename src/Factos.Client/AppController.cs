@@ -1,13 +1,12 @@
 ﻿using Factos.Abstractions;
 using Factos.RemoteTesters;
 using System.Net.Sockets;
-using System.Reflection;
 
 namespace Factos;
 
-public abstract class AppController(Assembly assembly, int port)
+public abstract class AppController(int port)
 {
-    readonly TestExecutor _testExecutor = new ReflectionTestExecutor(assembly);
+    readonly TestExecutor _testExecutor = new SourceGeneratedTestExecutor(); //new ReflectionTestExecutor(assembly);
 
     public static AppController Current { get; internal set; } = null!;
     internal string Name { get; set; } = "?";

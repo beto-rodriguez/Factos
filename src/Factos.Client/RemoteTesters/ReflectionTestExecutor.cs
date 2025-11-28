@@ -4,6 +4,7 @@ using System.Text.Json;
 
 namespace Factos.RemoteTesters;
 
+[Obsolete("Use SourceGeneratedTestExecutor instead.")]
 public class ReflectionTestExecutor(Assembly assembly) 
     : TestExecutor
 {

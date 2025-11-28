@@ -9,10 +9,10 @@ namespace Factos.WPF;
 public static class SetupExtensions
 {
     public static void UseFactosApp(
-        this Application app, Assembly testAssembly, int port = Constants.DEFAULT_TCP_PORT)
+        this Application app, int port = Constants.DEFAULT_TCP_PORT)
     {
         var window = new Window { Title = "Factos.WPF" };
-        var controller = new WPFAppController(window, port, testAssembly);
+        var controller = new WPFAppController(window, port);
 
         var content = new ContentControl
         {

@@ -9,7 +9,7 @@ public static class MauiProgram
 	{
 		var builder = MauiApp.CreateBuilder();
 		builder
-			.UseFactosApp(typeof(MauiProgram).Assembly)
+			.UseFactosApp()
             .ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

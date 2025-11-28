@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace Factos.WinUI;
 
-public class WinUIAppController(Window window, int port, Assembly assembly) 
-    : AppController(assembly, port)
+public class WinUIAppController(Window window, int port) 
+    : AppController(port)
 {
     public Window Window { get; } = window;
 

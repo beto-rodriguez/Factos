@@ -43,6 +43,10 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\..\..\src\Factos.MAUI\Factos.MAUI.csproj" />
+	<ProjectReference Include="..\..\..\src\Factos.MAUI\Factos.MAUI.csproj" />
+	<ProjectReference
+		Include="..\..\..\src\CodeGen\CodeGen.csproj"
+		OutputItemType="Analyzer"
+		ReferenceOutputAssembly="false" />
 	</ItemGroup>
 </Project>

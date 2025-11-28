@@ -1,9 +1,7 @@
 using Factos.Abstractions;
-using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
-using System.Reflection;
 using Windows.UI;
 
 namespace Factos.WinUI;
@@ -11,10 +9,10 @@ namespace Factos.WinUI;
 public static class SetupExtensions
 {
     public static void UseFactosApp(
-        this Application app, Assembly testAssembly, int port = Constants.DEFAULT_TCP_PORT)
+        this Application app, int port = Constants.DEFAULT_TCP_PORT)
     {
         var window = new Window { Title = "Factos.WinUI" };
-        var controller = new WinUIAppController(window, port, testAssembly);
+        var controller = new WinUIAppController(window, port);
 
         var content = new ContentControl
         {

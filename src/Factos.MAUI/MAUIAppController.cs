@@ -2,8 +2,8 @@ using System.Reflection;
 
 namespace Factos.MAUI;
 
-public class MAUIAppController(int port, Assembly assembly)
-    : AppController(assembly, port)
+public class MAUIAppController(int port)
+    : AppController(port)
 {
     public override async Task NavigateToView(object view)
     {
