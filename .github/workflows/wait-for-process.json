@@ -1,7 +1,7 @@
 ﻿{
   "version": "1.0",
   "description": "waits for the tcp client to connect, if no connection in 360 secs, then it fails.",
-  "port": 6215,
+  "tcpPort": 6215,
   "connectionTimeout": 360,
   "testedApps": [
     {
