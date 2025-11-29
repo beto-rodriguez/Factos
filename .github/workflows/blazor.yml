@@ -32,7 +32,7 @@ jobs:
 
       - name: Start browser
         run: |
-          start chrome http://localhost:5162 --headless --disable-gpu --remote-debugging-port=9222
+          Start-Process "chrome.exe" -ArgumentList "http://localhost:5162", "--headless", "--disable-gpu", "--remote-debugging-port=9222"
 
       - name: Start test server and run tests
         run:
