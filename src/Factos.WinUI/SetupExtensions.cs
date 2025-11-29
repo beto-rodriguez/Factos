@@ -1,4 +1,3 @@
-using Factos.Abstractions;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -8,11 +7,13 @@ namespace Factos.WinUI;
 
 public static class SetupExtensions
 {
-    public static void UseFactosApp(
-        this Application app, int port = Constants.DEFAULT_TCP_PORT)
+    public static void UseFactosApp(this Application app) =>
+        app.UseFactosApp(ControllerSettings.Default);
+
+    public static void UseFactosApp(this Application app, ControllerSettings settings)
     {
         var window = new Window { Title = "Factos.WinUI" };
-        var controller = new WinUIAppController(window, port);
+        var controller = new WinUIAppController(window, settings);
 
         var content = new ContentControl
         {
@@ -27,7 +28,7 @@ public static class SetupExtensions
         window.Content = content;
 
         content.Loaded += async (s, e) =>
-            await AppController.InitializeController(controller, false);
+            await AppController.InitializeController(controller);
 
         window.Activate();
     }

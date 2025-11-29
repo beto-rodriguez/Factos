@@ -9,15 +9,17 @@ internal class ProcessHandler
 
     public ProcessHandler(string command, DeviceWritter deviceWritter, CancellationToken cancellationToken)
     {
+        Command = command;
         var elements = command.Split(' ');
 
         var fileName = elements[0];
         var rawArgs = command[fileName.Length..].Trim();
-        var waitForExit = false;
-        if (fileName.StartsWith("[wait-for-exit]"))
+
+        if (fileName == "start")
         {
-            fileName = fileName["[wait-for-exit]".Length..];
-            waitForExit = true;
+            // special case for Windows 'start' command
+            fileName = "cmd.exe";
+            rawArgs = $"/c start {rawArgs}";
         }
 
         _process = new Process
@@ -81,11 +83,11 @@ internal class ProcessHandler
         _process.BeginOutputReadLine();
         _process.BeginErrorReadLine();
 
-        if (waitForExit)
-            _process.WaitForExit();
+        cancellationToken.Register(Dispose);
     }
 
     public bool IsRunning => !_process?.HasExited == true;
+    public string Command { get; }
 
     public void Dispose()
     {
@@ -93,7 +95,7 @@ internal class ProcessHandler
 
         if (!_process.HasExited)
         {
-            _process.Kill();
+            _process.Kill(true);
             _process.WaitForExit();
         }
 

@@ -2,6 +2,6 @@
 
 public abstract class TestExecutor
 {
-    public abstract Task<string> Discover(string command);
-    public abstract Task<string> Run(string command);
+    public abstract Task<string> Discover();
+    public abstract Task<string> Run();
 }

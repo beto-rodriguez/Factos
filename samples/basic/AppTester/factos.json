@@ -1,14 +1,16 @@
 ﻿{
   "version": "1.0",
   "descrition": "config used when running tests locally or using the test explorer",
-  "port": 6215,
+  "tcpPort": 6215,
   "connectionTimeout": 300,
   "testedApps": [
     {
       "name": "Test runner app",
-      "commands": [
-        "dotnet run --project ../../WPFTests/WPFTests.csproj"
-      ]
+      "startCommands": [
+        "dotnet run --project ../../BlazorTests/BlazorTests.csproj",
+        "start chrome http://localhost:5162"
+      ],
+      "endCommands": [ ]
     }
   ]
 }

@@ -1,5 +1,3 @@
-using Factos.Abstractions;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -8,11 +6,13 @@ namespace Factos.WPF;
 
 public static class SetupExtensions
 {
-    public static void UseFactosApp(
-        this Application app, int port = Constants.DEFAULT_TCP_PORT)
+    public static void UseFactosApp(this Application app)
+        => app.UseFactosApp(ControllerSettings.Default);
+
+    public static void UseFactosApp(this Application app, ControllerSettings settings)
     {
         var window = new Window { Title = "Factos.WPF" };
-        var controller = new WPFAppController(window, port);
+        var controller = new WPFAppController(window, settings);
 
         var content = new ContentControl
         {
@@ -27,7 +27,7 @@ public static class SetupExtensions
         window.Content = content;
 
         content.Loaded += async (s, e) =>
-            await AppController.InitializeController(controller, false);
+            await AppController.InitializeController(controller);
 
         app.MainWindow = window;
         window.Show();

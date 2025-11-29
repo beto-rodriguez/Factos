@@ -3,8 +3,8 @@ using System.Windows.Controls;
 
 namespace Factos.WPF;
 
-public class WPFAppController(Window window, int port) 
-    : AppController(port)
+public class WPFAppController(Window window, ControllerSettings settings)
+    : AppController(settings)
 {
     public Window Window { get; } = window;
 

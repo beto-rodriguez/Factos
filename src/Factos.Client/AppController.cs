@@ -1,27 +1,26 @@
-﻿using Factos.Abstractions;
+﻿using Factos.Protocols;
 using Factos.RemoteTesters;
-using System.Net.Sockets;
 
 namespace Factos;
 
-public abstract class AppController(int port)
+public abstract class AppController
 {
-    readonly TestExecutor _testExecutor = new SourceGeneratedTestExecutor(); //new ReflectionTestExecutor(assembly);
+    public AppController(ControllerSettings settings)
+    {
+        Settings = settings;
+        TestExecutor = new SourceGeneratedTestExecutor();
+        //TestExecutor = new ReflectionTestExecutor();
+    }
 
     public static AppController Current { get; internal set; } = null!;
-    internal string Name { get; set; } = "?";
-    private static Dictionary<string, Func<string, Task<string>>> Commands => new()
-    {
-        [Constants.START_DISCOVER_STREAM] = Current._testExecutor.Discover,
-        [Constants.START_RUN_STREAM] = Current._testExecutor.Run,
-        [Constants.QUIT_APP] = Current.QuitAppTask,
-    };
+    public TestExecutor TestExecutor { get; }
+    public ControllerSettings Settings { get; set; }
 
-    public static async Task InitializeController(AppController controller, bool isAndroid)
+    public static async Task InitializeController(AppController controller)
     {
         await controller.NavigateToView(controller.GetWelcomeView());
         Current = controller;
-        _ = controller.Listen(isAndroid);
+        _ = controller.Listen();
     }
 
     public abstract Task NavigateToView(object view);
@@ -38,62 +37,39 @@ public abstract class AppController(int port)
 
     internal abstract object GetResultsView(string message);
 
-    internal virtual async Task Listen(bool isAndroid)
+    internal virtual async Task Listen()
     {
-        var addess = isAndroid 
-            ? "10.0.2.2"
-            : "localhost";
+        IProtocolHandler protocolHandler = Settings.Protocol == ProtocolType.Http
+            ? new HTTPProtocolHandler()
+            : new TcpProtocolHandler();
 
         var resultsShown = false;
+        var finished = false;
 
-        while (true)
+        while (!finished)
         {
             try
             {
-                // ToDo, reuse or cache something?
-                using var client = new TcpClient();
-                var ct = new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token;
-                await client.ConnectAsync(addess, port, ct);
-
-                using var stream = client.GetStream();
-                using var reader = new StreamReader(stream);
-                using var writter = new StreamWriter(stream) { AutoFlush = true };
-
-                var commandAndParams = await reader.ReadLineAsync() ?? string.Empty;
-                var command = commandAndParams;
-
-                if (command.Contains(':'))
-                    command = commandAndParams.Split(':')[0];
-
-                if (!Commands.TryGetValue(command, out var commandTask))
-                    continue;
-
-                var content = await commandTask(commandAndParams);
-
-                await writter.WriteLineAsync(content);
-                await writter.WriteLineAsync(Constants.END_STREAM);
+                finished = await protocolHandler.Execute(this);
             }
             catch
             {
-                // most likely occurs when the tcp client connection failed because the server is not running,
-                // so we show the results only once (in case it is a debug session from the runner app)
-                // then we wait a bit before trying to connect again
+                // if there was an error connecting to the server (TCP/HTTP)
+                // we wait a bit before trying again
 
                 if (!resultsShown)
                 {
-                    var result = await Current._testExecutor.Run(string.Empty);
+                    // if the server is not reachable, most likely this is 
+                    // a local test run, so we run and show the results locally
+
+                    var result = await TestExecutor.Run();
                     await NavigateToView(GetResultsView(result));
+
                     resultsShown = true;
                 }
 
                 await Task.Delay(2000);
             }
         }
-    }
-
-    private Task<string> QuitAppTask(string command)
-    {
-        QuitApp();
-        return Task.FromResult(Constants.QUIT_APP);
     }
 }

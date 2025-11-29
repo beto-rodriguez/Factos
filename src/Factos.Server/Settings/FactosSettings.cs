@@ -8,9 +8,9 @@ internal class FactosSettings
 {
     public string Version { get; set; } = "1.0";
     public int ConnectionTimeout { get; set; } = 300;
-    public int Port { get; set; } = Constants.DEFAULT_TCP_PORT;
+    public int TcpPort { get; set; } = Constants.DEFAULT_TCP_PORT;
+    public string HttpUri { get; set; } = Constants.DEFAULT_HTTP_URI;
     public TestRunnerAppSettings[] TestedApps { get; set; } = [];
-
     public static JsonSerializerOptions JsonOptions { get; } =
         new() { PropertyNameCaseInsensitive = true };
 

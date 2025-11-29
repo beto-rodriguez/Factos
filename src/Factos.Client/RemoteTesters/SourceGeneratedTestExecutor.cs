@@ -15,10 +15,10 @@ public class SourceGeneratedTestExecutor
         return instance;
     }
 
-    public override Task<string> Discover(string command) =>
+    public override Task<string> Discover() =>
         Task.FromResult(JsonSerializer.Serialize(GetDiscoverNodes()));
 
-    public override async Task<string> Run(string command)
+    public override async Task<string> Run()
     {
         var nodes = await GetRunNodes();
         return JsonSerializer.Serialize(nodes);
@@ -67,9 +67,7 @@ public class SourceGeneratedTestExecutor
 
             try
             {
-                var app = AppController.Current;
-
-                await app.InvokeOnUIThread(test.Invoker());
+                await AppController.Current.InvokeOnUIThread(test.Invoker());
 
                 properties = [new PassedTestNodeStatePropertyDto()];
                 passed = true;

@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/.github/" />
   <Folder Name="/.github/workflows/">
+    <File Path=".github/workflows/blazor.yml" />
     <File Path=".github/workflows/maui-android.yml" />
     <File Path=".github/workflows/maui-windows.yml" />
     <File Path=".github/workflows/wait-for-process.json" />
@@ -12,7 +13,7 @@
     <Project Path="samples/basic/AppTester/AppTester.csproj" />
   </Folder>
   <Folder Name="/samples/basic/testedApps/">
-    <Project Path="samples/basic/BlazorTests/BlazorTests.csproj" Id="0a6682cc-de8a-4d56-a25e-5b9414f3d5f1" />
+    <Project Path="samples/basic/BlazorTests/BlazorTests.csproj" />
     <Project Path="samples/basic/MAUITests/MAUITests.csproj">
       <Deploy Solution="Debug|*" />
     </Project>

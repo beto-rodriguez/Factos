@@ -8,10 +8,10 @@ namespace Factos.RemoteTesters;
 public class ReflectionTestExecutor(Assembly assembly) 
     : TestExecutor
 {
-    public override Task<string> Discover(string command) =>
+    public override Task<string> Discover() =>
         Task.FromResult(JsonSerializer.Serialize(GetDiscoverNodes()));
 
-    public override async Task<string> Run(string command)
+    public override async Task<string> Run()
     {
         var nodes = await GetRunNodes();
         return JsonSerializer.Serialize(nodes);
@@ -75,8 +75,6 @@ public class ReflectionTestExecutor(Assembly assembly)
 
             try
             {
-                var app = AppController.Current;
-
                 async Task InvokeMethodInfo()
                 {
                     var result = test.Invoke(instance, null);
@@ -85,7 +83,7 @@ public class ReflectionTestExecutor(Assembly assembly)
                         await task;
                 }
 
-                await app.InvokeOnUIThread(InvokeMethodInfo());
+                await AppController.Current.InvokeOnUIThread(InvokeMethodInfo());
 
                 properties = [new PassedTestNodeStatePropertyDto()];
                 passed = true;

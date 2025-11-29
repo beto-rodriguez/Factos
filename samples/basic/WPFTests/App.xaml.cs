@@ -1,4 +1,5 @@
-﻿using Factos.WPF;
+﻿using Factos;
+using Factos.WPF;
 using System.Windows;
 
 namespace WPFTests;

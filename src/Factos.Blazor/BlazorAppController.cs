@@ -1,7 +1,7 @@
 namespace Factos.Blazor;
 
-public class BlazorAppController(int port) 
-    : AppController(port)
+public class BlazorAppController(ControllerSettings settings) 
+    : AppController(settings)
 {
     public static ContentControl Content { get; internal set; } = null!;
 
@@ -63,7 +63,7 @@ public class BlazorAppController(int port)
 
     internal override object GetResultsView(string message)
     {
-        Results.data = message;
+        _ = Results.SetResults(message);
         return typeof(Results);
     }
 }

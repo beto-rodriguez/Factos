@@ -1,6 +1,4 @@
-using Factos.Abstractions;
 using Microsoft.AspNetCore.Components;
-using System.Reflection;
 
 namespace Factos.Blazor;
 
@@ -10,6 +8,9 @@ public partial class ContentControl
     public DynamicComponent DynamicComponent { get; private set; } = null!;
     public Type CurrentType { get; set; } = typeof(Welcome);
     public Dictionary<string, object>? CurrentParameters { get; set; }
+
+    [Parameter]
+    public ControllerSettings Settings { get; set; } = ControllerSettings.Default with { Protocol = ProtocolType.Http };
 
     internal TaskCompletionSource SetContent(Type type, Dictionary<string, object>? parameters = null)
     {
@@ -37,8 +38,7 @@ public partial class ContentControl
         await base.OnAfterRenderAsync(firstRender);
         if (!firstRender) return;
 
-        var assembly = Assembly.GetExecutingAssembly() ?? throw new Exception("ASssembly not found");
-        var controller = new BlazorAppController(Constants.DEFAULT_TCP_PORT);
-        await AppController.InitializeController(controller, false);
+        var controller = new BlazorAppController(Settings);
+        await AppController.InitializeController(controller);
     }
 }

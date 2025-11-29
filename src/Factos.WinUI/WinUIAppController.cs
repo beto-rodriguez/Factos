@@ -2,13 +2,12 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Factos.WinUI;
 
-public class WinUIAppController(Window window, int port) 
-    : AppController(port)
+public class WinUIAppController(Window window, ControllerSettings settings)
+    : AppController(settings)
 {
     public Window Window { get; } = window;
 
