@@ -7,7 +7,7 @@
     {
       "name": "Test runner app",
       "startCommands": [
-        "start chrome http://localhost:5162"
+        "dotnet run --project samples/basic/BlazorTests/BlazorTests.csproj"
       ]
     }
   ]

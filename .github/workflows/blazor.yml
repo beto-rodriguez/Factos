@@ -30,6 +30,19 @@ jobs:
           # ToDo: add logs if app fails to start?
           dotnet run --project samples\basic\BlazorTests\BlazorTests.csproj &
 
+      - name: Wait for ASP.NET app
+        run: |
+          for ($i=0; $i -lt 10; $i++) {
+            try {
+              Write-Host "App is starting..."
+              Invoke-WebRequest http://localhost:5162/ -UseBasicParsing
+              break
+            } catch {
+              Write-Host "Waiting for app..."
+              Start-Sleep -Seconds 5
+            }
+          }
+
       - name: Start test server and run tests
         run:
           # start the test server, in charge or controlling the client app and reporting the test results
