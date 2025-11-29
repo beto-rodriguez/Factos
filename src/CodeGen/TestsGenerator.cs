@@ -55,8 +55,8 @@ public class TestsGenerator : IIncrementalGenerator
             }}";
 
                     var t = test.IsStatic ? group.Key : sanitizedClassName;
-                    var invoker = test.IsStatic
-                        ? $@"async () => {{ {t}.{test.Name}(); }}"
+                    var invoker = test.IsAsync
+                        ? $@"async () => {{ await {t}.{test.Name}(); }}"
                         : $@"() => {{ {t}.{test.Name}(); return System.Threading.Tasks.Task.CompletedTask; }}";
 
                     sb.AppendLine($@"        new(
