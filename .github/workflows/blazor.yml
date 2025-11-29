@@ -29,7 +29,7 @@ jobs:
         run: |
           # ToDo: add logs if app fails to start?
           dotnet run --project samples\basic\BlazorTests\BlazorTests.csproj &
-          google-chrome http://localhost:5162/
+          google-chrome --headless --disable-gpu --no-sandbox http://localhost:5162/
 
       - name: Start test server and run tests
         run:
