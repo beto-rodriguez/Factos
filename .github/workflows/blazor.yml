@@ -29,7 +29,10 @@ jobs:
         run: |
           # ToDo: add logs if app fails to start?
           dotnet run --project samples\basic\BlazorTests\BlazorTests.csproj &
-          start chrome http://localhost:5162
+
+      - name: Start browser
+        run: |
+          start chrome http://localhost:5162 &
 
       - name: Start test server and run tests
         run:
