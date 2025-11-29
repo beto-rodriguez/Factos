@@ -40,21 +40,13 @@ jobs:
           for ($i=0; $i -lt 20; $i++) {
             try {
               $response = Invoke-WebRequest http://localhost:5080/ -UseBasicParsing
-              Write-Host "Status Code: $($response.StatusCode)"
-              Write-Host "Headers:"
-              $response.Headers.GetEnumerator() | ForEach-Object { Write-Host "$($_.Name): $($_.Value)" }
-              Write-Host "Content:"
-              Write-Host $response.Content
+              Write-Host "App responded with code: $($response.StatusCode)"
               break
             } catch {
               Write-Host "Waiting for app... Error: $($_.Exception.Message)"
               Start-Sleep -Seconds 5
             }
           }
-
-      - name: Show ASP.NET logs
-        shell: pwsh
-        run: Get-Content app.log -Tail 50
 
       - name: Start test server and run tests
         run:
