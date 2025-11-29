@@ -12,6 +12,7 @@
     <Project Path="samples/basic/AppTester/AppTester.csproj" />
   </Folder>
   <Folder Name="/samples/basic/testedApps/">
+    <Project Path="samples/basic/BlazorTests/BlazorTests.csproj" Id="0a6682cc-de8a-4d56-a25e-5b9414f3d5f1" />
     <Project Path="samples/basic/MAUITests/MAUITests.csproj">
       <Deploy Solution="Debug|*" />
     </Project>
@@ -27,7 +28,9 @@
     <File Path="nuget.config" />
     <File Path="nuget.props" />
   </Folder>
+  <Project Path="src/CodeGen/CodeGen.csproj" Id="810399e1-61c4-4e3b-83f7-a40fa09a187c" />
   <Project Path="src/Factos.Abstractions/Factos.Abstractions.csproj" />
+  <Project Path="src/Factos.Blazor/Factos.Blazor.csproj" Id="676e4030-810b-4473-bbe2-f0e2d69d1003" />
   <Project Path="src/Factos.Client/Factos.Client.csproj" />
   <Project Path="src/Factos.MAUI/Factos.MAUI.csproj" />
   <Project Path="src/Factos.Server/Factos.Server.csproj" />

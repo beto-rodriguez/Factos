@@ -2,12 +2,12 @@
   "version": "1.0",
   "descrition": "config used when running tests locally or using the test explorer",
   "port": 6215,
-  "connectionTimeout": 600,
+  "connectionTimeout": 300,
   "testedApps": [
     {
       "name": "Test runner app",
       "commands": [
-        "{wait-for-process}"
+        "dotnet run --project ../../WPFTests/WPFTests.csproj"
       ]
     }
   ]
