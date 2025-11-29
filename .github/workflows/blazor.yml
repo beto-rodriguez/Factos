@@ -34,8 +34,15 @@ jobs:
         run: |
           for ($i=0; $i -lt 10; $i++) {
             try {
-              Write-Host "App is starting..."
-              Invoke-WebRequest http://localhost:5162/ -UseBasicParsing
+              $response = Invoke-WebRequest http://localhost:5162/ -UseBasicParsing
+
+              Write-Host "Status Code: $($response.StatusCode)"
+              Write-Host "Headers:"
+              $response.Headers.GetEnumerator() | ForEach-Object { Write-Host "$($_.Name): $($_.Value)" }
+
+              Write-Host "Content:"
+              Write-Host $response.Content
+
               break
             } catch {
               Write-Host "Waiting for app..."
