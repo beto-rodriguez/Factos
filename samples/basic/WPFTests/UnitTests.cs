@@ -1,5 +1,4 @@
 ﻿using Factos;
-using System.Runtime.CompilerServices;
 using System.Windows.Controls;
 using Xunit;
 

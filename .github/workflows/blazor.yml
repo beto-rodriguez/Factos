@@ -1,0 +1,44 @@
+name: Blazor
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  run-test:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        shell: pwsh
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5.0.1
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Start client app in background
+        run: |
+          # ToDo: add logs if app fails to start?
+          dotnet run --project samples\basic\BlazorTests\BlazorTests.csproj &
+          google-chrome http://localhost:5162/
+
+      - name: Start test server and run tests
+        run:
+          # start the test server, in charge or controlling the client app and reporting the test results
+          dotnet run --project samples/basic/AppTester --run-settings ./.github/workflows/wait-for-process.json --report-trx
+
+      - name: Publish results
+        uses: dorny/test-reporter@v2.2.0
+        with:
+          name: test-results
+          path: ./samples/basic/AppTester/out/TestResults/*.trx
+          reporter: dotnet-trx

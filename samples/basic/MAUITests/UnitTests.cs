@@ -26,4 +26,11 @@ public class SomeTests
         // when marked as ExpectedToFail, this test will be reported as passed only if it fails
         Assert.Equal(1 + 1, 3);
     }
+
+    [TestMethod]
+    [Skip("this test was skipped because...")]
+    public void SkippedTest()
+    {
+        // this will not execute
+    }
 }
