@@ -25,6 +25,10 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Start ASP.NET app (TEST)
+        run: |
+          dotnet run --project samples\basic\BlazorTests\BlazorTests.csproj --urls "http://localhost:5162"
+
       - name: Start ASP.NET app
         run: |
           dotnet run --project samples\basic\BlazorTests\BlazorTests.csproj --urls "http://localhost:5162" *> app.log &
