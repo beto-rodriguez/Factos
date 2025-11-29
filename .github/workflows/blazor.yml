@@ -25,15 +25,19 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Start client app in background
+      - name: Start ASP.NET app
+        shell: pwsh
         run: |
-          # ToDo: add logs if app fails to start?
-          dotnet run --project samples\basic\BlazorTests\BlazorTests.csproj &
+          # Launch the app in background and redirect logs
+          Start-Process "dotnet" `
+            -ArgumentList "run --project samples\basic\BlazorTests\BlazorTests.csproj --urls http://localhost:5162" `
+            -RedirectStandardOutput app.log `
+            -RedirectStandardError app.log
 
       - name: Wait for ASP.NET app
         shell: pwsh
         run: |
-          for ($i=0; $i -lt 10; $i++) {
+          for ($i=0; $i -lt 20; $i++) {
             try {
               $response = Invoke-WebRequest http://localhost:5162/ -UseBasicParsing
               Write-Host "Status Code: $($response.StatusCode)"
@@ -43,10 +47,14 @@ jobs:
               Write-Host $response.Content
               break
             } catch {
-              Write-Host "Waiting for app..."
+              Write-Host "Waiting for app... Error: $($_.Exception.Message)"
               Start-Sleep -Seconds 5
             }
           }
+
+      - name: Show ASP.NET logs
+        shell: pwsh
+        run: Get-Content app.log -Tail 50
 
       - name: Start test server and run tests
         run:
