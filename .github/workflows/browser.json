@@ -1,13 +1,13 @@
 ﻿{
   "version": "1.0",
-  "description": "waits for the client to connect, if no connection in 360 secs, then it fails.",
+  "description": "config for the browser.",
   "tcpPort": 6215,
   "connectionTimeout": 360,
   "testedApps": [
     {
       "name": "Test runner app",
       "startCommands": [
-        "{wait-for-process}"
+        "start chrome http://localhost:5162"
       ]
     }
   ]

@@ -30,14 +30,10 @@ jobs:
           # ToDo: add logs if app fails to start?
           dotnet run --project samples\basic\BlazorTests\BlazorTests.csproj &
 
-      - name: Start browser
-        run: |
-          Start-Process "chrome.exe" -ArgumentList "http://localhost:5162", "--headless", "--disable-gpu", "--remote-debugging-port=9222"
-
       - name: Start test server and run tests
         run:
           # start the test server, in charge or controlling the client app and reporting the test results
-          dotnet run --project samples/basic/AppTester --run-settings ./.github/workflows/wait-for-process.json --report-trx
+          dotnet run --project samples/basic/AppTester --run-settings ./.github/workflows/browser.json --report-trx
 
       - name: Publish results
         uses: dorny/test-reporter@v2.2.0

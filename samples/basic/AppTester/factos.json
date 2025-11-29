@@ -10,7 +10,10 @@
         "dotnet run --project ../../BlazorTests/BlazorTests.csproj",
         "start chrome http://localhost:5162"
       ],
-      "endCommands": [ ]
+      "endCommands": [],
+      "commands": [
+        "{wait-for-process}"
+      ]
     }
   ]
 }

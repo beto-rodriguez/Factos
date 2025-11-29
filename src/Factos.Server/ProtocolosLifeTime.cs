@@ -35,8 +35,6 @@ internal sealed class ProtocolosLifeTime
             ? throw new InvalidOperationException("No active protocols available.")
             : protocols;
 
-    public event Action<TestNodeDto[]>? NodesReceived;
-
     protected override string Id =>
         nameof(ProtocolosLifeTime);
 
