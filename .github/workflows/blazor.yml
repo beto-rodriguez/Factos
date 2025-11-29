@@ -26,13 +26,8 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Start ASP.NET app
-        shell: pwsh
         run: |
-          # Launch the app in background and redirect logs
-          Start-Process "dotnet" `
-            -ArgumentList "run --project samples\basic\BlazorTests\BlazorTests.csproj --urls http://localhost:5162" `
-            -RedirectStandardOutput app.log `
-            -RedirectStandardError app.log
+          dotnet run --project samples\basic\BlazorTests\BlazorTests.csproj --urls "http://localhost:5162" *> app.log &
 
       - name: Wait for ASP.NET app
         shell: pwsh
