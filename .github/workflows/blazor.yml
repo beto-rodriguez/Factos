@@ -32,7 +32,7 @@ jobs:
       - name: Serve the app
         run: |
           dotnet tool install --global dotnet-serve
-          dotnet serve -d samples/basic/BlazorTests/bin/Release/net10.0/publish/wwwroot -p 5080 
+          Start-Process dotnet -ArgumentList "serve -d samples/basic/BlazorTests/bin/Release/net10.0/publish/wwwroot -p 5080"
 
       - name: Wait for ASP.NET app
         shell: pwsh
