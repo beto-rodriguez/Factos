@@ -25,20 +25,21 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Start ASP.NET app (TEST)
+      - name: Pulish app
         run: |
-          dotnet run --project samples\basic\BlazorTests\BlazorTests.csproj --urls "http://localhost:5162"
+          dotnet publish samples/basic/BlazorTests/BlazorTests.csproj -c Release
 
-      - name: Start ASP.NET app
+      - name: Serve the app
         run: |
-          dotnet run --project samples\basic\BlazorTests\BlazorTests.csproj --urls "http://localhost:5162" *> app.log &
+          dotnet tool install --global dotnet-serve
+          dotnet serve -d samples/basic/BlazorTests/bin/Release/net10.0/publish/wwwroot -p 5080
 
       - name: Wait for ASP.NET app
         shell: pwsh
         run: |
           for ($i=0; $i -lt 20; $i++) {
             try {
-              $response = Invoke-WebRequest http://localhost:5162/ -UseBasicParsing
+              $response = Invoke-WebRequest http://localhost:5080/ -UseBasicParsing
               Write-Host "Status Code: $($response.StatusCode)"
               Write-Host "Headers:"
               $response.Headers.GetEnumerator() | ForEach-Object { Write-Host "$($_.Name): $($_.Value)" }
