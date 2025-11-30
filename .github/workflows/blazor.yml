@@ -51,21 +51,38 @@ jobs:
               }
             }
 
-            # $argsBrowser = "--headless=new --disable-gpu --no-sandbox --enable-logging=stderr --v=1 http://localhost:5080/"
-            # $browserProc = Start-Process -FilePath "chrome" -ArgumentList $argsBrowser -NoNewWindow -PassThru
-            # Start-Sleep -Seconds 8
-            start chrome "http://localhost:5080/"
-            Start-Sleep -Seconds 8
+            # We enable logging to capture internal browser errors if it fails
+            $chromeArgs = @(
+              "--headless=new",           # Run without UI (Vital for CI)
+              "--disable-gpu",            # Prevent rendering issues
+              "--no-sandbox",             # Required for some containerized environments
+              "--enable-logging",         # Enable internal chrome logging
+              "--v=1",                    # Verbosity level
+              "http://localhost:5080/"    # Your URL
+            )
+      
+            Write-Host "Launching Chrome headless..."
+            $browser = Start-Process chrome -ArgumentList $chromeArgs -PassThru
+
+            Start-Sleep -Seconds 10
 
             # Run your test server and tests
             dotnet run --project samples/basic/AppTester --run-settings ./.github/workflows/browser.json --report-trx --no-tcp
           }
           finally {
-            # Clean up the server
+            # Clean up Server
             if ($server -and !$server.HasExited) {
               Stop-Process -Id $server.Id -Force
-              Write-Host "Stopped dotnet serve (PID $($server.Id))."
             }
+            # Clean up Browser
+            if ($browser -and !$browser.HasExited) {
+              Stop-Process -Id $browser.Id -Force
+              Write-Host "Stopped Chrome (PID $($browser.Id))."
+            }
+      
+            # OPTIONAL: Read Chrome internal logs if things fail
+            $chromeLog = "$env:LOCALAPPDATA\Google\Chrome\User Data\chrome_debug.log"
+            if (Test-Path $chromeLog) { Get-Content $chromeLog -Tail 50 }
           }
 
       - name: Publish results
