@@ -25,64 +25,82 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Publish, serve, wait, run tests
+      - name: Build and Install Tools
         shell: pwsh
         run: |
-          # Publish
           dotnet publish samples/basic/BlazorTests/BlazorTests.csproj -c Release
-
-          # Install the tool (and use tool-run to avoid PATH issues)
           dotnet tool install --global dotnet-serve
 
-          # Start server and hold a handle to the process
+      - name: Start Blazor Server (Background)
+        shell: pwsh
+        run: |
           $args = "serve -d samples/basic/BlazorTests/bin/Release/net10.0/publish/wwwroot -p 5080"
           $server = Start-Process dotnet -ArgumentList $args -NoNewWindow -PassThru
 
-          try {
-            # Wait for the server to respond (up to ~60s)
-            for ($i=0; $i -lt 12; $i++) {
-              try {
-                $response = Invoke-WebRequest http://localhost:5080/ -UseBasicParsing -TimeoutSec 5
-                Write-Host "App responded with: $($response.StatusCode)"
-                break
-              } catch {
-                Write-Host "Waiting for app... $($_.Exception.Message)"
-                Start-Sleep -Seconds 5
+          # SAVE THE PID TO GITHUB ENV SO WE CAN KILL IT LATER
+          "BLAZOR_PID=$($server.Id)" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+          # Health Check: Wait for server to be ready
+          for ($i=0; $i -lt 12; $i++) {
+            try {
+              $response = Invoke-WebRequest http://localhost:5080/ -UseBasicParsing -TimeoutSec 5
+              if ($response.StatusCode -eq 200) { 
+                Write-Host "Server is up!" 
+                return 
               }
+            } catch {
+              Write-Host "Waiting for app... $($_.Exception.Message)"
+              Start-Sleep -Seconds 5
             }
-
-            # We enable logging to capture internal browser errors if it fails
-            $chromeArgs = @(
-              "--headless=new",           # Run without UI (Vital for CI)
-              "--disable-gpu",            # Prevent rendering issues
-              "--no-sandbox",             # Required for some containerized environments
-              "--enable-logging",         # Enable internal chrome logging
-              "--v=1",                    # Verbosity level
-              "http://localhost:5080/"    # Your URL
-            )
-      
-            Write-Host "Launching Chrome headless..."
-            $browser = Start-Process chrome -ArgumentList $chromeArgs -PassThru
-
-            Start-Sleep -Seconds 10
-
-            # Run your test server and tests
-            dotnet run --project samples/basic/AppTester --run-settings ./.github/workflows/browser.json --report-trx --no-tcp
           }
-          finally {
-            # Clean up Server
-            if ($server -and !$server.HasExited) {
-              Stop-Process -Id $server.Id -Force
-            }
-            # Clean up Browser
-            if ($browser -and !$browser.HasExited) {
-              Stop-Process -Id $browser.Id -Force
-              Write-Host "Stopped Chrome (PID $($browser.Id))."
-            }
+          Write-Error "Server failed to start within timeout."
+
+      - name: Start Chrome Headless (Background)
+        shell: pwsh
+        run: |
+          $chromeArgs = @(
+            "--headless=new",
+            "--disable-gpu",
+            "--no-sandbox",
+            "--enable-logging",
+            "--v=1",
+            "http://localhost:5080/"
+          )
+
+          Write-Host "Launching Chrome..."
+          $browser = Start-Process chrome -ArgumentList $chromeArgs -PassThru
       
-            # OPTIONAL: Read Chrome internal logs if things fail
-            $chromeLog = "$env:LOCALAPPDATA\Google\Chrome\User Data\chrome_debug.log"
-            if (Test-Path $chromeLog) { Get-Content $chromeLog -Tail 50 }
+          # SAVE THE PID TO GITHUB ENV
+          "CHROME_PID=$($browser.Id)" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Run AppTester
+        shell: pwsh
+        run: |
+          dotnet run --project samples/basic/AppTester --run-settings ./.github/workflows/browser.json --report-trx --no-tcp
+
+      - name: Teardown Processes
+        if: always() # IMPORTANT: This runs even if previous steps failed
+        shell: pwsh
+        run: |
+          # Retrieve PIDs from Environment
+          $serverPid = $env:BLAZOR_PID
+          $chromePid = $env:CHROME_PID
+
+          if ($chromePid) {
+            Write-Host "Killing Chrome (PID $chromePid)..."
+            Stop-Process -Id $chromePid -Force -ErrorAction SilentlyContinue
+          }
+
+          if ($serverPid) {
+            Write-Host "Killing Server (PID $serverPid)..."
+            Stop-Process -Id $serverPid -Force -ErrorAction SilentlyContinue
+          }
+
+          # Optional: Dump Chrome logs if present
+          $chromeLog = "$env:LOCALAPPDATA\Google\Chrome\User Data\chrome_debug.log"
+          if (Test-Path $chromeLog) { 
+            Write-Host "--- Chrome Debug Log ---"
+            Get-Content $chromeLog -Tail 50 
           }
 
       - name: Publish results
