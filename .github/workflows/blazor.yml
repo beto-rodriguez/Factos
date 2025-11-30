@@ -31,13 +31,13 @@ jobs:
           dotnet publish samples/basic/BlazorTests/BlazorTests.csproj -c Release
           dotnet tool install --global dotnet-serve
 
-      - name: serve, wait, run tests
+      - name: Start test server and run tests
         run: |
-          # serve the client app
+          # run the client app
           $args = "serve -d samples/basic/BlazorTests/bin/Release/net10.0/publish/wwwroot -p 5080"
           Start-Process dotnet -ArgumentList $args -NoNewWindow -PassThru
 
-          # launch chrome headless
+          # launch the client app in a chrome headless instance
           Write-Host "Launching Chrome headless..."
           $chromeArgs = @(
             "--headless=new",           # Run without UI (Vital for CI)

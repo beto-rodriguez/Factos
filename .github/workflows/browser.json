@@ -5,7 +5,7 @@
   "connectionTimeout": 360,
   "testedApps": [
     {
-      "name": "Test runner app",
+      "name": "Browser",
       "startCommands": [ ]
     }
   ]
