@@ -6,9 +6,7 @@
   "testedApps": [
     {
       "name": "Test runner app",
-      "startCommands": [
-        "start chrome http://localhost:5080"
-      ]
+      "startCommands": [ ]
     }
   ]
 }
