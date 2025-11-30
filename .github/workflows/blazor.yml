@@ -25,33 +25,42 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Pulish app
-        run: |
-          dotnet publish samples/basic/BlazorTests/BlazorTests.csproj -c Release
-
-      - name: Serve the app
-        run: |
-          dotnet tool install --global dotnet-serve
-          dotnet serve -d samples/basic/BlazorTests/bin/Release/net10.0/publish/wwwroot -p 5080 &
-
-      - name: Wait for ASP.NET app
+      - name: Publish, serve, wait, run tests
         shell: pwsh
         run: |
-          for ($i=0; $i -lt 20; $i++) {
-            try {
-              $response = Invoke-WebRequest http://localhost:5080/ -UseBasicParsing
-              Write-Host "App responded with code: $($response.StatusCode)"
-              break
-            } catch {
-              Write-Host "Waiting for app... Error: $($_.Exception.Message)"
-              Start-Sleep -Seconds 5
+          # Publish
+          dotnet publish samples/basic/BlazorTests/BlazorTests.csproj -c Release
+
+          # Install the tool (and use tool-run to avoid PATH issues)
+          dotnet tool install --global dotnet-serve
+
+          # Start server and hold a handle to the process
+          $args = "serve -d samples/basic/BlazorTests/bin/Release/net10.0/publish/wwwroot -p 5080"
+          $server = Start-Process dotnet -ArgumentList $args -NoNewWindow -PassThru
+
+          try {
+            # Wait for the server to respond (up to ~60s)
+            for ($i=0; $i -lt 12; $i++) {
+              try {
+                $response = Invoke-WebRequest http://localhost:5080/ -UseBasicParsing -TimeoutSec 5
+                Write-Host "App responded with: $($response.StatusCode)"
+                break
+              } catch {
+                Write-Host "Waiting for app... $($_.Exception.Message)"
+                Start-Sleep -Seconds 5
+              }
+            }
+
+            # Run your test server and tests
+            dotnet run --project samples/basic/AppTester --run-settings ./.github/workflows/browser.json --report-trx --no-tcp
+          }
+          finally {
+            # Clean up the server
+            if ($server -and !$server.HasExited) {
+              Stop-Process -Id $server.Id -Force
+              Write-Host "Stopped dotnet serve (PID $($server.Id))."
             }
           }
-
-      - name: Start test server and run tests
-        run:
-          # start the test server, in charge or controlling the client app and reporting the test results
-          dotnet run --project samples/basic/AppTester --run-settings ./.github/workflows/browser.json --report-trx --no-tcp
 
       - name: Publish results
         uses: dorny/test-reporter@v2.2.0
