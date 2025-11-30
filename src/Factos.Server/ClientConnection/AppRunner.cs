@@ -1,15 +1,15 @@
-﻿using Factos.Abstractions;
-using Factos.Server.Settings;
+﻿using Factos.Server.Settings;
 using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.OutputDevice;
 
 namespace Factos.Server.ClientConnection;
 
-internal class AppRunner : BaseExtension, IOutputDeviceDataProducer
+internal class AppRunner
+    : BaseExtension, IOutputDeviceDataProducer
 {
-    readonly Dictionary<string, ProcessHandler> _activeProcesses = [];
     readonly FactosSettings settings;
     readonly DeviceWritter deviceWritter;
+    List<ProcessHandler> _activeProcesses = [];
 
     public AppRunner(IOutputDevice outputDevice, FactosSettings factosSettings)
     {
@@ -20,68 +20,52 @@ internal class AppRunner : BaseExtension, IOutputDeviceDataProducer
     protected override string Id =>
         nameof(AppRunner);
 
-    public virtual async Task EnsureProcessIsRunning(
-        string command, string appName, CancellationToken cancellationToken)
+    public virtual async Task StartApp(string[] startCommands, string appName, CancellationToken cancellationToken)
     {
-        if (command == "{wait-for-process}")
-        {
-            await deviceWritter.Banner(
-                "The special command '{wait-for-process}' was detected. " +
-                "The test runner will wait for an external process to be started manually.", cancellationToken);
-
-            return;
-        }
-
         await deviceWritter.Dimmed(
             $"{appName} app is starting...", cancellationToken);
 
-        await deviceWritter.Dimmed(
-            $"Executing '{command}'...", cancellationToken);
-
-        if (_activeProcesses.TryGetValue(command, out var process) && process.IsRunning)
+        for (int i = 0; i < startCommands.Length; i++)
         {
-            await deviceWritter.Dimmed(
-                $"Process for command '{command}' is already running.", cancellationToken);
+            string? command = startCommands[i];
 
-            return;
+            if (command == "{wait-for-process}")
+            {
+                await deviceWritter.Banner(
+                    "The special command '{wait-for-process}' was detected. " +
+                    "The test runner will wait for an external process to be started manually.", cancellationToken);
+
+                return;
+            }
+
+            await deviceWritter.Normal($"Executing '{command}'...", cancellationToken);
+            await deviceWritter.Dimmed($"Creating new process for command '{command}'.", cancellationToken);
+
+            _activeProcesses.Add(new ProcessHandler(command, deviceWritter, cancellationToken));
         }
-
-        await deviceWritter.Dimmed(
-            $"Creating new process for command '{command}'.", cancellationToken);
-
-        var newProcess = new ProcessHandler(command, deviceWritter, cancellationToken);
-        _activeProcesses[command] = newProcess;
     }
 
-    public virtual async Task DisposeProcess(
-        TcpServerTestSession session, string command, string appName, CancellationToken cancellationToken)
+    public virtual async Task EndApp(
+        IServerSessionProtocol session, string[] endCommands, string appName, CancellationToken cancellationToken)
     {
-        // request the client to quit the app.
+        await deviceWritter.Normal($"{appName} is quitting...", cancellationToken);
 
-        await deviceWritter.Dimmed(
-            $"{appName} app is quitting...", cancellationToken);
+        // request the test session to close the client application (if supported)
+        await session.CloseClient(appName, cancellationToken);
 
-        var quitRequest = await TcpServerTestSession.Current.ReadStream(
-            Constants.QUIT_APP, appName, settings.Timeout, cancellationToken);
-
-        if (quitRequest == Constants.QUIT_APP)
-            // at this point the client answers to the quit request
-            await deviceWritter.Dimmed(
-                $"Client for command '{command}' has acknowledged the quit request.", cancellationToken);
-
-        // Dispose the process as it is no longer needed
-        if (!_activeProcesses.TryGetValue(command, out var process))
+        // dispose handled processes
+        foreach (var process in _activeProcesses)
         {
+            process.Dispose();
             await deviceWritter.Dimmed(
-                $"No active process found for command '{command}', closing was skipped.", cancellationToken);
-
-            return;
+                $"Process for command '{process.Command}' has been disposed.", cancellationToken);
         }
 
-        process.Dispose();
-        _activeProcesses.Remove(command);
-
-        await deviceWritter.Dimmed(
-            $"Process for command '{command}' has been disposed.", cancellationToken);
+        foreach (var command in endCommands)
+        {
+            await deviceWritter.Normal($"Executing '{command}'...", cancellationToken);
+            var p = new ProcessHandler(command, deviceWritter, cancellationToken);
+            p.Dispose();
+        }
     }
 }

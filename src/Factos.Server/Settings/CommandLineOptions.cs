@@ -4,13 +4,11 @@ using Microsoft.Testing.Platform.Extensions.CommandLine;
 
 namespace Factos.Server.Settings;
 
-// based on:
-// https://github.com/microsoft/testfx/blob/af845eaad06d7534a03f040377fa2b776b59425f/samples/public/TestingPlatformExamples/TestingPlatformExplorer/TestingFramework/TestingFramework.CommandLineOptions.cs
 internal sealed class CommandLineOptions : ICommandLineOptionsProvider
 {
     public const string CONFIG_FILE_PATH = "run-settings";
-
-    public static CommandLineOptions Create() => new();
+    public const string DISABLE_HTTP = "no-http";
+    public const string DISABLE_TCP = "no-tcp";
 
     public string Uid => nameof(CommandLineOptions);
 
@@ -18,10 +16,12 @@ internal sealed class CommandLineOptions : ICommandLineOptionsProvider
 
     public string DisplayName => Uid;
 
-    public string Description => $"Command line options for {nameof(TestingFramework)}";
+    public string Description => $"Command line options for {nameof(FactosFramework)}";
 
     public IReadOnlyCollection<CommandLineOption> GetCommandLineOptions() => [
-            new(CONFIG_FILE_PATH, "Indicates the path of the config file to use.", ArgumentArity.ExactlyOne, false)
+            new(CONFIG_FILE_PATH, "Indicates the path of the config file to use.", ArgumentArity.ExactlyOne, false),
+            new(DISABLE_HTTP, "Disables the http listener.", ArgumentArity.Zero, false),
+            new(DISABLE_TCP, "Disables the tcp listener.", ArgumentArity.Zero, false)
         ];
 
     public Task<bool> IsEnabledAsync() => 

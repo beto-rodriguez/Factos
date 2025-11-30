@@ -1,7 +1,6 @@
-﻿using Factos.Server.ClientConnection;
-using Factos.Server.Settings;
+﻿using Factos.Server.Settings;
+using Microsoft.Testing.Extensions;
 using Microsoft.Testing.Platform.Builder;
-using Microsoft.Testing.Platform.Services;
 
 namespace Factos.Server;
 
@@ -11,13 +10,17 @@ public class Entry
     {
         var builder = await TestApplication.CreateBuilderAsync(args);
 
-        builder.CommandLine.AddProvider(CommandLineOptions.Create);
-        builder.TestHost.AddTestHostApplicationLifetime(TcpServerTestSession.Create);
+        builder.CommandLine.AddProvider(
+            ()                              => new CommandLineOptions());
+
+        builder.TestHost.AddTestHostApplicationLifetime(
+            serviceProvider                 => new ProtocolosLifeTime(serviceProvider));
 
         builder.RegisterTestFramework(
-            TestingFrameworkCapabilities.Create,
-            (capabilities, serviceProvider) =>
-                new TestingFramework(serviceProvider.GetOutputDevice()));
+            (serviceProvider)               => new FactosCapabilities(),
+            (capabilities, serviceProvider) => new FactosFramework(serviceProvider));
+
+        builder.AddTrxReportProvider();
 
         using ITestApplication testApp = await builder.BuildAsync();
 

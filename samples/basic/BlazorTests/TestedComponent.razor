@@ -1,0 +1,19 @@
+﻿@using Factos.Blazor
+
+<h3>My component</h3>
+
+<button>click me</button>
+
+@code {
+    // experiment idea... we could inject the js runtime into the
+    // blazorappcontroller, then intereact with the UI,
+    // the idea is to expose some js interop methods that can be used
+    // to query the DOM, just like the QueryInnerHTML function below.
+    [Inject] private ExampleJsInterop JS { get; set; } = null!;
+
+    public async Task<string> GetButtonText()
+    {
+        var matches = await JS.QueryInnerHTML("button");
+        return matches[0];
+    }
+}

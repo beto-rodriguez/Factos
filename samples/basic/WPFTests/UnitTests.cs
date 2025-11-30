@@ -1,6 +1,6 @@
-﻿using Xunit;
+﻿using Factos;
 using System.Windows.Controls;
-using Factos;
+using Xunit;
 
 namespace WPFTests;
 
@@ -21,8 +21,17 @@ public class SomeTests
     }
 
     [TestMethod]
+    [ExpectedToFail]
     public void FailedTest()
     {
-        Assert.Equal(8 + 2, 11);
+        // when marked as ExpectedToFail, this test will be reported as passed only if it fails
+        Assert.Equal(1 + 1, 3);
+    }
+
+    [TestMethod]
+    [Skip("this test was skipped because...")]
+    public void SkippedTest()
+    {
+        // this will not execute
     }
 }

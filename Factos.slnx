@@ -1,15 +1,41 @@
 <Solution>
+  <Folder Name="/.github/" />
+  <Folder Name="/.github/workflows/">
+    <File Path=".github/workflows/blazor.yml" />
+    <File Path=".github/workflows/browser.json" />
+    <File Path=".github/workflows/maui-android.yml" />
+    <File Path=".github/workflows/maui-windows.yml" />
+    <File Path=".github/workflows/wait-for-process.json" />
+    <File Path=".github/workflows/winui.yml" />
+    <File Path=".github/workflows/wpf.yml" />
+  </Folder>
   <Folder Name="/samples/" />
   <Folder Name="/samples/basic/">
     <Project Path="samples/basic/AppTester/AppTester.csproj" />
   </Folder>
   <Folder Name="/samples/basic/testedApps/">
-    <Project Path="samples/basic/MAUITests/MAUITests.csproj" />
+    <Project Path="samples/basic/BlazorTests/BlazorTests.csproj" />
+    <Project Path="samples/basic/MAUITests/MAUITests.csproj">
+      <Deploy Solution="Debug|*" />
+    </Project>
+    <Project Path="samples/basic/WinUITests/WinUITests.csproj" Id="135c70dd-c6f1-4629-8d59-a23ea8e866f5">
+      <Platform Project="x64" />
+      <Deploy />
+    </Project>
     <Project Path="samples/basic/WPFTests/WPFTests.csproj" />
   </Folder>
+  <Folder Name="/solution/">
+    <File Path=".gitignore" />
+    <File Path="directory.build.props" />
+    <File Path="nuget.config" />
+    <File Path="nuget.props" />
+  </Folder>
+  <Project Path="src/CodeGen/CodeGen.csproj" Id="810399e1-61c4-4e3b-83f7-a40fa09a187c" />
   <Project Path="src/Factos.Abstractions/Factos.Abstractions.csproj" />
+  <Project Path="src/Factos.Blazor/Factos.Blazor.csproj" Id="676e4030-810b-4473-bbe2-f0e2d69d1003" />
   <Project Path="src/Factos.Client/Factos.Client.csproj" />
   <Project Path="src/Factos.MAUI/Factos.MAUI.csproj" />
   <Project Path="src/Factos.Server/Factos.Server.csproj" />
+  <Project Path="src/Factos.WinUI/Factos.WinUI.csproj" Id="0bb669fb-0fe3-41e5-a050-6c311bb82251" />
   <Project Path="src/Factos.WPF/Factos.WPF.csproj" />
 </Solution>

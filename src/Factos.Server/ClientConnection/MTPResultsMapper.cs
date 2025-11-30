@@ -64,7 +64,7 @@ internal static class MTPResultsMapper
         var p = passed;
         var f = failed;
 
-        await deviceWritter.Normal($"Results for {appName}", cancellationToken);
+        await deviceWritter.Normal($"Tests results for {appName}", cancellationToken);
         await deviceWritter.Dimmed($"Skipped   {s}", cancellationToken);
         await deviceWritter.Green($" Passed   {p}", cancellationToken);
         await deviceWritter.Red(  $" Failed   {f}", cancellationToken);

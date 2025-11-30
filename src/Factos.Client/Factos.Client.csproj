@@ -1,11 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net10.0;net10.0-android</TargetFrameworks>
+		<TargetFrameworks>net10.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<RootNamespace>Factos</RootNamespace>
 	</PropertyGroup>
+
+	<PropertyGroup>
+		<PackageId>Factos.Client</PackageId>
+		<Description>Factos client package</Description>
+	</PropertyGroup>
+
+	<Import Project="../../nuget.props" />
 
 	<ItemGroup>
 		<PackageReference Include="xunit.v3.assert" Version="3.2.0" />

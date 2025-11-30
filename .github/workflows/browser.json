@@ -1,0 +1,12 @@
+﻿{
+  "version": "1.0",
+  "description": "config for the browser.",
+  "tcpPort": 6215,
+  "connectionTimeout": 360,
+  "testedApps": [
+    {
+      "name": "Browser",
+      "startCommands": [ ]
+    }
+  ]
+}

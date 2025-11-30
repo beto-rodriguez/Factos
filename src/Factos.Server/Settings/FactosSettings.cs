@@ -7,12 +7,10 @@ namespace Factos.Server.Settings;
 internal class FactosSettings
 {
     public string Version { get; set; } = "1.0";
-    public int Timeout { get; set; } = 300;
-    public int Port { get; set; } = Constants.DEFAULT_TCP_PORT;
-    public TestRunnerAppSettings[] Windows { get; set; } = [];
-    public TestRunnerAppSettings[] Linux { get; set; } = [];
-    public TestRunnerAppSettings[] MacOS { get; set; } = [];
-
+    public int ConnectionTimeout { get; set; } = 300;
+    public int TcpPort { get; set; } = Constants.DEFAULT_TCP_PORT;
+    public string HttpUri { get; set; } = Constants.DEFAULT_HTTP_URI;
+    public TestRunnerAppSettings[] TestedApps { get; set; } = [];
     public static JsonSerializerOptions JsonOptions { get; } =
         new() { PropertyNameCaseInsensitive = true };
 

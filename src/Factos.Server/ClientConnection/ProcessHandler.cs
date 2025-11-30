@@ -9,10 +9,18 @@ internal class ProcessHandler
 
     public ProcessHandler(string command, DeviceWritter deviceWritter, CancellationToken cancellationToken)
     {
+        Command = command;
         var elements = command.Split(' ');
 
         var fileName = elements[0];
         var rawArgs = command[fileName.Length..].Trim();
+
+        if (fileName == "start")
+        {
+            // special case for Windows 'start' command
+            fileName = "cmd.exe";
+            rawArgs = $"/c start {rawArgs}";
+        }
 
         _process = new Process
         {
@@ -67,16 +75,19 @@ internal class ProcessHandler
             else
             {
                 await deviceWritter.Dimmed(
-                    $"The process for command '{command}' has exited successfully with exit code {_process.ExitCode}.", cancellationToken);
+                    $"The process finished successfully for command '{command}'", cancellationToken);
             }
         };
 
         _process.Start();
         _process.BeginOutputReadLine();
         _process.BeginErrorReadLine();
+
+        cancellationToken.Register(Dispose);
     }
 
     public bool IsRunning => !_process?.HasExited == true;
+    public string Command { get; }
 
     public void Dispose()
     {
@@ -84,7 +95,7 @@ internal class ProcessHandler
 
         if (!_process.HasExited)
         {
-            _process.Kill();
+            _process.Kill(true);
             _process.WaitForExit();
         }
 

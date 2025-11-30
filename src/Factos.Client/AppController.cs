@@ -1,22 +1,20 @@
-﻿using Factos.Abstractions;
+﻿using Factos.Protocols;
 using Factos.RemoteTesters;
-using System.Net.Sockets;
-using System.Reflection;
 
 namespace Factos;
 
-public abstract class AppController(Assembly assembly, int port)
+public abstract class AppController
 {
-    TestExecutor _testExecutor = new ReflectionTestExecutor(assembly);
+    public AppController(ControllerSettings settings)
+    {
+        Settings = settings;
+        TestExecutor = new SourceGeneratedTestExecutor();
+        //TestExecutor = new ReflectionTestExecutor();
+    }
 
     public static AppController Current { get; internal set; } = null!;
-    internal string Name { get; set; } = "?";
-    private static Dictionary<string, Func<string, Task<string>>> Commands => new()
-    {
-        [Constants.START_DISCOVER_STREAM] = Current._testExecutor.Discover,
-        [Constants.START_RUN_STREAM] = Current._testExecutor.Run,
-        [Constants.QUIT_APP] = Current.QuitAppTask,
-    };
+    public TestExecutor TestExecutor { get; }
+    public ControllerSettings Settings { get; set; }
 
     public static async Task InitializeController(AppController controller)
     {
@@ -41,57 +39,37 @@ public abstract class AppController(Assembly assembly, int port)
 
     internal virtual async Task Listen()
     {
-        var addess = string.Empty;
+        IProtocolHandler protocolHandler = Settings.Protocol == ProtocolType.Http
+            ? new HTTPProtocolHandler()
+            : new TcpProtocolHandler();
 
-#if ANDROID
-        addess = "10.0.2.2";
-#else
-        addess = "localhost";
-#endif
-        try
+        var resultsShown = false;
+        var finished = false;
+
+        while (!finished)
         {
-            while (true)
+            try
             {
-                // ToDo, reuse the client connection instead of creating a new one each time
-                using var client = new TcpClient();
-                await client.ConnectAsync(addess, port);
+                finished = await protocolHandler.Execute(this);
+            }
+            catch
+            {
+                // if there was an error connecting to the server (TCP/HTTP)
+                // we wait a bit before trying again
 
-                using var stream = client.GetStream();
-                using var reader = new StreamReader(stream);
-                using var writter = new StreamWriter(stream) { AutoFlush = true };
+                if (!resultsShown)
+                {
+                    // if the server is not reachable, most likely this is 
+                    // a local test run, so we run and show the results locally
 
-                var commandAndParams = await reader.ReadLineAsync() ?? string.Empty;
-                var command = commandAndParams;
+                    var result = await TestExecutor.Run();
+                    await NavigateToView(GetResultsView(result));
 
-                if (command.Contains(':'))
-                    command = commandAndParams.Split(':')[0];
+                    resultsShown = true;
+                }
 
-                if (!Commands.TryGetValue(command, out var commandTask))
-                    continue;
-
-                var content = await commandTask(commandAndParams);
-
-                await writter.WriteLineAsync(content);
-                await writter.WriteLineAsync(Constants.END_STREAM);
-
-                // special case to break the loop and end the app
-                if (content == Constants.QUIT_APP)
-                    break;
+                await Task.Delay(2000);
             }
         }
-        catch
-        {
-            // most likely occurs when the tcp client connection failed
-            // because the server is not running, in this case we assume
-            // this is a debug session, lets just run tests
-            var result = await Current._testExecutor.Run(string.Empty);
-            await NavigateToView(GetResultsView(result));
-        }
-    }
-
-    private Task<string> QuitAppTask(string command)
-    {
-        QuitApp();
-        return Task.FromResult(Constants.QUIT_APP);
     }
 }

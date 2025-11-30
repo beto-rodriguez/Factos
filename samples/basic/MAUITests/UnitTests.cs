@@ -20,14 +20,17 @@ public class SomeTests
     }
 
     [TestMethod]
+    [ExpectedToFail]
     public void FailedTest()
     {
-        // this test will throw only on Android
-
-//#if ANDROID
+        // when marked as ExpectedToFail, this test will be reported as passed only if it fails
         Assert.Equal(1 + 1, 3);
-//#else
-//        Assert.Equal(1 + 1, 2);
-//#endif
+    }
+
+    [TestMethod]
+    [Skip("this test was skipped because...")]
+    public void SkippedTest()
+    {
+        // this will not execute
     }
 }

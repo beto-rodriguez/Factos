@@ -4,13 +4,14 @@ using System.Text.Json;
 
 namespace Factos.RemoteTesters;
 
+[Obsolete("Use SourceGeneratedTestExecutor instead.")]
 public class ReflectionTestExecutor(Assembly assembly) 
     : TestExecutor
 {
-    public override Task<string> Discover(string command) =>
+    public override Task<string> Discover() =>
         Task.FromResult(JsonSerializer.Serialize(GetDiscoverNodes()));
 
-    public override async Task<string> Run(string command)
+    public override async Task<string> Run()
     {
         var nodes = await GetRunNodes();
         return JsonSerializer.Serialize(nodes);
@@ -68,15 +69,12 @@ public class ReflectionTestExecutor(Assembly assembly)
                 continue;
             }
 
-            // === OUTPUT HELPER IS NOT IMPLEMENTED YET
+            var passed = false;
             object? instance = Activator.CreateInstance(test.DeclaringType!);
-
             PropertyDto[]? properties = null;
 
             try
             {
-                var app = AppController.Current;
-
                 async Task InvokeMethodInfo()
                 {
                     var result = test.Invoke(instance, null);
@@ -85,9 +83,10 @@ public class ReflectionTestExecutor(Assembly assembly)
                         await task;
                 }
 
-                await app.InvokeOnUIThread(InvokeMethodInfo());
+                await AppController.Current.InvokeOnUIThread(InvokeMethodInfo());
 
                 properties = [new PassedTestNodeStatePropertyDto()];
+                passed = true;
             }
             catch (TargetInvocationException ex)
             {
@@ -100,6 +99,14 @@ public class ReflectionTestExecutor(Assembly assembly)
                 { 
                     Explanation = ex.Message + n + "Stack Trace:" + n + ex.StackTrace
                 }];
+            }
+
+            var expectedToFail = test.GetCustomAttribute<ExpectedToFailAttribute>() is not null;
+            if (expectedToFail)
+            {
+                properties = passed
+                    ? [new FailedTestNodeStatePropertyDto { Explanation = "Test was expected to fail but passed." }]
+                    : [new PassedTestNodeStatePropertyDto()];
             }
 
             nodes.Add(new TestNodeDto

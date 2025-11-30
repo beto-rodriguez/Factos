@@ -3,5 +3,6 @@
 internal class TestRunnerAppSettings
 {
     public string? Name { get; set; }
-    public string Command { get; set; } = string.Empty;
+    public string[] StartCommands { get; set; } = [];
+    public string[] EndCommands { get; set; } = [];
 }

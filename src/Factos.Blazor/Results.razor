@@ -1,0 +1,23 @@
+﻿@using Factos.Abstractions
+<h3>Test results</h3>
+
+<pre>@OutputTransform.SummarizeResults(data)</pre>
+
+@code {
+    [Inject] HttpClient Http { get; set; } = null!;
+    private string data = string.Empty;
+    private static Results Instance = null!;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        if (!firstRender) return;
+        Instance = this;
+    }
+
+    public static async Task SetResults(string results)
+    {
+        Instance.data = results;
+        // await Instance.Http.PostAsync("/api/results", results);
+    }
+}
