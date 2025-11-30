@@ -67,9 +67,21 @@ jobs:
             "http://localhost:5080/"
           )
 
-          Write-Host "Launching Chrome..."
-          $browser = Start-Process chrome -ArgumentList $chromeArgs -PassThru
+          # We enable logging to capture internal browser errors if it fails
+          $chromeArgs = @(
+            "--headless=new",           # Run without UI (Vital for CI)
+            "--disable-gpu",            # Prevent rendering issues
+            "--no-sandbox",             # Required for some containerized environments
+            "--enable-logging",         # Enable internal chrome logging
+            "--v=1",                    # Verbosity level
+            "http://localhost:5080/"    # Your URL
+          )
       
+          Write-Host "Launching Chrome headless..."
+          $browser = Start-Process chrome -ArgumentList $chromeArgs -PassThru
+
+          Start-Sleep -Seconds 10
+
           # SAVE THE PID TO GITHUB ENV
           "CHROME_PID=$($browser.Id)" | Out-File -FilePath $env:GITHUB_ENV -Append
 
