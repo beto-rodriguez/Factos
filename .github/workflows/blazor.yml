@@ -51,8 +51,10 @@ jobs:
               }
             }
 
-            $argsBrowser = "--headless=new --disable-gpu --no-sandbox --enable-logging=stderr --v=1 http://localhost:5080/"
-            $browserProc = Start-Process -FilePath "chrome" -ArgumentList $argsBrowser -NoNewWindow -PassThru
+            # $argsBrowser = "--headless=new --disable-gpu --no-sandbox --enable-logging=stderr --v=1 http://localhost:5080/"
+            # $browserProc = Start-Process -FilePath "chrome" -ArgumentList $argsBrowser -NoNewWindow -PassThru
+            # Start-Sleep -Seconds 8
+            start chrome "http://localhost:5080/"
             Start-Sleep -Seconds 8
 
             # Run your test server and tests
