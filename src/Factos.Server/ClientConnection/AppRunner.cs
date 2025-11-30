@@ -9,7 +9,7 @@ internal class AppRunner
 {
     readonly FactosSettings settings;
     readonly DeviceWritter deviceWritter;
-    ProcessHandler[] _activeProcesses = [];
+    List<ProcessHandler> _activeProcesses = [];
 
     public AppRunner(IOutputDevice outputDevice, FactosSettings factosSettings)
     {
@@ -24,8 +24,6 @@ internal class AppRunner
     {
         await deviceWritter.Dimmed(
             $"{appName} app is starting...", cancellationToken);
-
-        _activeProcesses = new ProcessHandler[startCommands.Length];
 
         for (int i = 0; i < startCommands.Length; i++)
         {
@@ -43,7 +41,7 @@ internal class AppRunner
             await deviceWritter.Normal($"Executing '{command}'...", cancellationToken);
             await deviceWritter.Dimmed($"Creating new process for command '{command}'.", cancellationToken);
 
-            _activeProcesses[i] = new ProcessHandler(command, deviceWritter, cancellationToken);
+            _activeProcesses.Add(new ProcessHandler(command, deviceWritter, cancellationToken));
         }
     }
 
