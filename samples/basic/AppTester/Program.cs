@@ -28,7 +28,7 @@ var settings = new FactosSettings
             ProjectPath = $"{root}MAUITests",
             ExecutableName = "MAUITests.exe",
             PublishArgs = "-f net10.0-windows10.0.19041.0",
-            TestGroups = ["windows", "maui", "maui-windows" ]
+            TestGroups = ["windows", "maui", "maui-windows"]
         },
         new WindowsApp
         {
@@ -43,15 +43,21 @@ var settings = new FactosSettings
         //{
         //    ProjectPath = $"{root}BlazorTests"
         //},
-        //new AndroidApp
-        //{
-        //    ProjectPath = $"{root}MAUITests",
-        //    AppName = "com.companyname.mauitests",
-        //    PublishArgs = "-f net10.0-android"
-        //}
+        new AndroidApp
+        {
+            ProjectPath = $"{root}MAUITests",
+            AppName = "com.companyname.mauitests",
+            PublishArgs = "-f net10.0-android",
+            TestGroups = ["android", "maui", "maui-android"]
+        },
+        new ReactiveCircusActionApp
+        {
+            ProjectPath = $"{root}ReactiveCircus.ActionApp",
+            AppName = "com.companyname.mauitests",
+            TestGroups = ["maui-android-ci"]
+        }
     ]
 };
-
 
 testsBuilder
     .AddFactos(settings)

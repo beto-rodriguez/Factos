@@ -4,7 +4,7 @@ public class WindowsApp : TestApp
 {
     public required string ExecutableName { get; set; }
 
-    protected override string[]? GetDefaultStartCommands() => [
+    protected override string[]? GetDefaultCommands() => [
             $"dotnet restore {ProjectPath}",
             $"dotnet publish {ProjectPath} -o {ProjectPath}/{OutputPath} {PublishArgs}",
             $"{ProjectPath}/{OutputPath}/{ExecutableName} &"

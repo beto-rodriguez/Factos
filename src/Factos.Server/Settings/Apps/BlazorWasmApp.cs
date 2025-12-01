@@ -4,7 +4,7 @@ public class BlazorWasmApp : TestApp
 {
     public int Port { get; set; } = 5080;
 
-    protected override string[]? GetDefaultStartCommands()
+    protected override string[]? GetDefaultCommands()
     {
         var commands = new List<string>
         {

@@ -9,9 +9,8 @@ public abstract class TestApp
     public string? DisplayName { get; set; }
     public string? PublishArgs { get; set; }
     public string[]? TestGroups { get; set; }
-    public string[]? Commands { get => field ?? GetDefaultStartCommands(); set; }
+    public string[]? Commands { get => field ?? GetDefaultCommands(); set; }
     public Dictionary<string, Func<Task>> Tasks { get; set; } = [];
 
-    protected virtual string[]? GetDefaultStartCommands() => null;
-    protected virtual string[]? GetDefaultEndCommands() => null;
+    protected virtual string[]? GetDefaultCommands() => null;
 }

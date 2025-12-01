@@ -14,7 +14,7 @@ public class AndroidApp : TestApp
     public string? AdbPath { get; set; }
     public string? EmulatorPath { get; set; }
 
-    protected override string[]? GetDefaultStartCommands()
+    protected override string[]? GetDefaultCommands()
     {
         var commands = new List<string>
         {
