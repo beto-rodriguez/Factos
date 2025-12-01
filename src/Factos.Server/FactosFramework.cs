@@ -21,9 +21,12 @@ internal sealed class FactosFramework
     public FactosFramework(IServiceProvider serviceProvider, FactosSettings factosSettings)
     {
         var outputDevice = serviceProvider.GetOutputDevice();
-        settings = factosSettings;
         deviceWriter = new(this, outputDevice);
         appRunner = new(outputDevice);
+        settings = factosSettings;
+
+        var cliOptions = serviceProvider.GetCommandLineOptions();
+        settings.TestedApps = [.. settings.TestedApps.Where(app => app.RunWhen is null || cliOptions.IsOptionSet(app.RunWhen))];
     }
 
     protected override string Id =>

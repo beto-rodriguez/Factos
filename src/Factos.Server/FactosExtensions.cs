@@ -23,6 +23,16 @@ public static class FactosExtensions
         var settings = settingsFactory();
         settingsBuilder(settings);
 
+        builder.CommandLine.AddProvider(() => 
+        {
+            var flags = settings.TestedApps
+                .Select(x => x.RunWhen ?? throw new Exception("run on can not be null"))
+                .Distinct()
+                .ToArray();
+
+            return new CLOP(flags);
+        });
+
         builder.TestHost.AddTestHostApplicationLifetime(
             serviceProvider => new ProtocolosLifeTime(serviceProvider, settings));
 
@@ -50,17 +60,16 @@ public static class FactosExtensions
         return settings;
     }
 
-    public static FactosSettings TestApp(this FactosSettings settings, bool enabled, TestApp app)
+    public static FactosSettings TestApp(this FactosSettings settings, string? when, TestApp app)
     {
-        if (enabled)
-            settings.TestedApps.Add(app);
-
+        app.RunWhen = when;
+        settings.TestedApps.Add(app);
         return settings;
     }
 
     public static FactosSettings TestWindowsApp(
-        this FactosSettings settings, string path, string fileName, string? displayName = null, string publishArgs = "", bool enabled = true, string outPath = DEFAULT_OUT_PATH) =>
-            TestApp(settings, enabled, new TestApp
+        this FactosSettings settings, string path, string fileName, string? displayName = null, string publishArgs = "", string? when = null, string outPath = DEFAULT_OUT_PATH) =>
+            TestApp(settings, when, new TestApp
             {
                 Name = displayName ?? path + "/" + fileName,
                 StartCommands = [
@@ -71,8 +80,8 @@ public static class FactosExtensions
             });
 
     public static FactosSettings TestAndroidApp(
-        this FactosSettings settings, string path, string appName, string? displayName = null, string publishArgs = "", bool enabled = true, string outPath = DEFAULT_OUT_PATH) =>
-            TestApp(settings, enabled, new TestApp
+        this FactosSettings settings, string path, string appName, string? displayName = null, string publishArgs = "", string? when = null, string outPath = DEFAULT_OUT_PATH) =>
+            TestApp(settings, when, new TestApp
             {
                 Name = displayName ?? appName,
                 StartCommands = [
@@ -88,8 +97,8 @@ public static class FactosExtensions
             });
 
     public static FactosSettings TestBlazorApp(
-        this FactosSettings settings, string path, string displayName = "Blazor app", string outPath = DEFAULT_OUT_PATH, bool enabled = true, int port = 5080) =>
-            TestApp(settings, enabled, new TestApp
+        this FactosSettings settings, string path, string displayName = "Blazor app", string outPath = DEFAULT_OUT_PATH, string? when = null, int port = 5080) =>
+            TestApp(settings, when, new TestApp
             {
                 Name = displayName,
                 StartCommands = [
