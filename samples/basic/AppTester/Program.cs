@@ -1,34 +1,76 @@
 ﻿using Factos.Server;
+using Factos.Server.Settings;
+using Factos.Server.Settings.Apps;
 using Microsoft.Testing.Extensions;
 using Microsoft.Testing.Platform.Builder;
 
 var testsBuilder = await TestApplication.CreateBuilderAsync(args);
 
-testsBuilder
-    .AddFactos(settings => settings
-        // lets sets a root path for the tested apps
-        // this is the relative path from the AppTester output folder
-        // to the tested apps folders, any chained TestApp after this
-        // will use this root path.
-        .SetRoot("../../../../")
+var root = "../../../../";
 
-#if DEBUG
-        // when in debug this is an example to test multiple apps
-        .TestAndroidApp("MAUITests", "com.companyname.mauitests", publishArgs: "-f net10.0-android")
-        .TestBlazorApp("BlazorTests", port: 5080)
-        .TestWindowsApp("WPFTests", "WPFTests.exe")
-        .TestWindowsApp("MAUITests", "MAUITests.exe", publishArgs: "-f net10.0-windows10.0.19041.0")
-        .TestWindowsApp("WinUITests", "WinUITests.exe", publishArgs:
-            "-r win-x64 -p:WindowsPackageType=None -p:WindowsAppSDKSelfContained=true " +
-            "-p:PublishTrimmed=false -p:PublishSingleFile=false -p:UseSrc=false")
+#if !DEBUG
+// we are using the release mode in CI/CD pipelines
+// we adjust the path, in this case, the relative path to the samples
+root = "samples/basic/";
 #endif
 
-        .TestWindowsApp("WPFTests", "WPFTests.exe", enabled: args.Contains("--wpf"))
-        )
+var settings = new FactosSettings
+{
+    TestedApps = [
+        new WindowsApp
+        {
+            ProjectPath = $"{root}WPFTests",
+            ExecutableName = "WPFTests.exe",
+            TestGroups = ["windows", "wpf"]
+        },
+        new WindowsApp
+        {
+            ProjectPath = $"{root}MAUITests",
+            ExecutableName = "MAUITests.exe",
+            PublishArgs = "-c Release -f net10.0-windows10.0.19041.0",
+            TestGroups = ["windows", "maui", "maui-windows"]
+        },
+        new WindowsApp
+        {
+            ProjectPath = $"{root}WinUITests",
+            ExecutableName = "WinUITests.exe",
+            PublishArgs =
+                "-c Release -r win-x64 -p:WindowsPackageType=None -p:WindowsAppSDKSelfContained=true " +
+                "-p:PublishTrimmed=false -p:PublishSingleFile=false -p:UseSrc=false",
+            TestGroups = ["windows", "winui"]
+        },
+        new BlazorWasmApp
+        {
+            ProjectPath = $"{root}BlazorTests",
+            TestGroups = ["browser", "blazor-wasm"]
+        },
+        new BlazorWasmApp
+        {
+            ProjectPath = $"{root}BlazorTests",
+            HeadlessChrome = true,
+            TestGroups = ["blazor-wasm-ci"]
+        },
+        new AndroidApp
+        {
+            ProjectPath = $"{root}MAUITests",
+            AppName = "com.companyname.mauitests",
+            PublishArgs = "-c Release -f net10.0-android",
+            TestGroups = ["android", "maui", "maui-android"]
+        },
+        new ReactiveCircusActionApp
+        {
+            ProjectPath = $"{root}MAUITests",
+            AppName = "com.companyname.mauitests",
+            PublishArgs = "-c Release -f net10.0-android",
+            TestGroups = ["maui-android-ci"]
+        }
+    ]
+};
 
-    // optional, add TRX if needed
-    .AddTrxReportProvider();
-
+testsBuilder
+    .AddFactos(settings)
+    .AddTrxReportProvider(); // optional, add TRX if needed
 
 using ITestApplication testApp = await testsBuilder.BuildAsync();
+
 return await testApp.RunAsync();

@@ -21,9 +21,25 @@ internal sealed class FactosFramework
     public FactosFramework(IServiceProvider serviceProvider, FactosSettings factosSettings)
     {
         var outputDevice = serviceProvider.GetOutputDevice();
-        settings = factosSettings;
         deviceWriter = new(this, outputDevice);
         appRunner = new(outputDevice);
+        settings = factosSettings;
+
+        var cliOptions = serviceProvider.GetCommandLineOptions();
+
+        if (cliOptions.TryGetOptionArgumentList(CommandLineOptionsProvider.OPTION_TEST_GROUP, out var group))
+        {
+            var groupSet = new HashSet<string>(group);
+
+            settings.TestedApps = [..
+                settings.TestedApps
+                    .Where(app =>
+                    {
+                        if (app.TestGroups is null) return true;
+                        return app.TestGroups.Any(g => groupSet.Contains(g));
+                    })
+            ];
+        }
     }
 
     protected override string Id =>
@@ -45,7 +61,7 @@ internal sealed class FactosFramework
 
             foreach (var testedApp in settings.TestedApps)
             {
-                var appName = testedApp.Name ?? "test runner";
+                var appName = testedApp.DisplayName ?? "test runner";
                 // sanitize name to be file system friendly
                 foreach (var c in Path.GetInvalidFileNameChars())
                     appName = appName.Replace(c, '_');
@@ -53,7 +69,7 @@ internal sealed class FactosFramework
                 // prevent repeated names
                 var i = 1;
                 while (!appNames.Add(appName))
-                    appName = $"{testedApp.Name} ({i++})";
+                    appName = $"{testedApp.DisplayName} ({i++})";
                 var cacheFile = $"{appName}_cache.json";
 
                 // lets try to cache results on discovery to prevent
@@ -76,7 +92,7 @@ internal sealed class FactosFramework
                 else
                 {
                     await deviceWriter.Title($"Starting {appName}...", cancellationToken);
-                    await appRunner.StartApp(testedApp.StartCommands, appName, cancellationToken);
+                    await appRunner.StartApp(testedApp, appName, cancellationToken);
 
                     clientResponse = await GetActiveProtocolsClientResponse(
                        appName, context, cancellationToken);
@@ -98,7 +114,7 @@ internal sealed class FactosFramework
                     await context.MessageBus.PublishAsync(
                         this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, node));
 
-                await appRunner.EndApp(clientResponse.Protocol, testedApp.EndCommands, appName, cancellationToken);
+                await appRunner.EndApp(clientResponse.Protocol, appName, cancellationToken);
                 await MTPResultsMapper.LogCount(appName, deviceWriter, cancellationToken);
                 await deviceWriter.Title($"{appName} Finished!", cancellationToken);
             }

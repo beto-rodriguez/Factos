@@ -1,4 +1,5 @@
-﻿using Microsoft.Testing.Platform.Extensions.OutputDevice;
+﻿using Factos.Server.Settings;
+using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.OutputDevice;
 
 namespace Factos.Server.ClientConnection;
@@ -7,7 +8,8 @@ internal class AppRunner
     : BaseExtension, IOutputDeviceDataProducer
 {
     readonly DeviceWritter deviceWritter;
-    List<ProcessHandler> _activeProcesses = [];
+    readonly List<ProcessHandler> _activeProcesses = [];
+    public const string TASK_COMMAND = "app-runner-task";
 
     public AppRunner(IOutputDevice outputDevice)
     {
@@ -17,10 +19,12 @@ internal class AppRunner
     protected override string Id =>
         nameof(AppRunner);
 
-    public virtual async Task StartApp(string[] startCommands, string appName, CancellationToken cancellationToken)
+    public virtual async Task StartApp(TestApp app, string appName, CancellationToken cancellationToken)
     {
         await deviceWritter.Dimmed(
             $"{appName} app is starting...", cancellationToken);
+
+        var startCommands = app.Commands ?? [];
 
         for (int i = 0; i < startCommands.Length; i++)
         {
@@ -38,12 +42,26 @@ internal class AppRunner
             await deviceWritter.Normal($"Executing '{command}'...", cancellationToken);
             await deviceWritter.Dimmed($"Creating new process for command '{command}'.", cancellationToken);
 
-            _activeProcesses.Add(new ProcessHandler(command, deviceWritter, cancellationToken));
+            if (command.StartsWith(TASK_COMMAND))
+            {
+                // then it is a task registered in the app
+                var taskKey = command[TASK_COMMAND.Length..].Trim();
+
+                if (!app.Tasks.TryGetValue(taskKey, out var taskToRun))
+                    throw new InvalidOperationException(
+                        $"The task '{taskKey}' was not found in the registered tasks for app '{appName}'.");
+
+                await taskToRun();
+            }
+            else
+            {
+                _activeProcesses.Add(new ProcessHandler(command, deviceWritter, cancellationToken));
+            }
         }
     }
 
     public virtual async Task EndApp(
-        IServerSessionProtocol? session, string[] endCommands, string appName, CancellationToken cancellationToken)
+        IServerSessionProtocol? session, string appName, CancellationToken cancellationToken)
     {
         await deviceWritter.Normal($"{appName} is quitting...", cancellationToken);
 
@@ -60,12 +78,5 @@ internal class AppRunner
         }
 
         _activeProcesses.Clear();
-
-        foreach (var command in endCommands)
-        {
-            await deviceWritter.Normal($"Executing '{command}'...", cancellationToken);
-            var p = new ProcessHandler(command, deviceWritter, cancellationToken);
-            p.Dispose();
-        }
     }
 }

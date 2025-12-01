@@ -1,58 +1,48 @@
-# name: MAUI
+name: MAUI
 
-# on:
-#   push:
-#     branches: [ main ]
-#   pull_request:
+on:
+  push:
+    branches: [ main ]
+  pull_request:
 
-# jobs:
-#   run-android-test:
-#     runs-on: ubuntu-24.04
-#     permissions:
-#       contents: read
-#       actions: read
-#       checks: write
+jobs:
+  run-android-test:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+      checks: write
 
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-#       - name: Setup .NET
-#         uses: actions/setup-dotnet@v4
-#         with:
-#           dotnet-version: '10.0.x'
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
 
-#       - name: Setup .NET MAUI
-#         run: dotnet workload install maui-android
+      - name: Setup .NET MAUI
+        run: dotnet workload install maui-android
 
-#       - name: Publish client app
-#         run: |
-#           dotnet restore samples/basic/MAUITests/MAUITests.csproj
-#           dotnet publish samples/basic/MAUITests/MAUITests.csproj -f net10.0-android -r android-x64 -c Release
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
 
-#       - name: Enable KVM
-#         run: |
-#           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-#           sudo udevadm control --reload-rules
-#           sudo udevadm trigger --name-match=kvm
+      - name: Start Android emulator and run tests
+        uses: reactivecircus/android-emulator-runner@v2.35.0
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          script:
+            dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --test-groups maui-android-ci
 
-#       - name: Start Android emulator and run tests
-#         uses: reactivecircus/android-emulator-runner@v2.35.0
-#         with:
-#           api-level: 35
-#           target: google_apis
-#           arch: x86_64
-#           script: |
-#             # Install the app on the emulator
-#             adb install -r samples/basic/MAUITests/bin/Release/net10.0-android/android-x64/publish/com.companyname.mauitests-Signed.apk
-#             # Launch the app
-#             adb shell monkey -p com.companyname.mauitests -c android.intent.category.LAUNCHER 1
-#             # start the test server, in charge or controlling the client app and reporting the test results
-#             dotnet run --project samples/basic/AppTester --run-settings ./.github/workflows/wait-for-process.json --report-trx
-
-#       - name: Publish test results to GitHub UI
-#         uses: dorny/test-reporter@v2.2.0
-#         with:
-#           name: test-results
-#           path: ./samples/basic/AppTester/out/TestResults/*.trx
-#           reporter: dotnet-trx
+      - name: Publish test results to GitHub UI
+        uses: dorny/test-reporter@v2.2.0
+        with:
+          name: test-results
+          path: samples/basic/AppTester/bin/Release/net10.0/TestResults/*.trx
+          reporter: dotnet-trx

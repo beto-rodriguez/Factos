@@ -1,7 +1,5 @@
-﻿using Factos.Abstractions.Dto;
-using Factos.RemoteTesters;
+﻿using Factos.RemoteTesters;
 using Factos.Server.Settings;
-using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 
 namespace Factos.Server.ClientConnection;
@@ -49,8 +47,7 @@ internal sealed class HTTPServerTestSession(
         }, cancellationToken);
 
         await deviceWritter.Dimmed(
-            $"Http session started. Listening for requests on {settings.HttpUri}{endPoint}'.",
-            cancellationToken);
+            $"Http server listening on {settings.HttpUri}{endPoint}'.", cancellationToken);
     }
 
     public async Task Finish(CancellationToken cancellationToken)
