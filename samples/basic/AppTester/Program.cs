@@ -52,7 +52,7 @@ var settings = new FactosSettings
         },
         new ReactiveCircusActionApp
         {
-            ProjectPath = $"{root}ReactiveCircus.ActionApp",
+            ProjectPath = $"{root}MAUITests",
             AppName = "com.companyname.mauitests",
             PublishArgs = "-f net10.0-android",
             TestGroups = ["maui-android-ci"]
