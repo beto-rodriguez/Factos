@@ -35,9 +35,16 @@ internal sealed class FactosFramework
                 settings.TestedApps
                     .Where(app =>
                     {
-                        if (app.TestGroups is null) return true;
+                        if (app.TestGroups is null) return false;
                         return app.TestGroups.Any(g => groupSet.Contains(g));
                     })
+            ];
+        }
+        else
+        {
+            settings.TestedApps = [..
+                settings.TestedApps
+                    .Where(app => app.TestGroups is null)
             ];
         }
     }
