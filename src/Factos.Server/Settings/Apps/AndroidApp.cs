@@ -14,6 +14,8 @@ public class AndroidApp : TestApp
     public string? AdbPath { get; set; }
     public string? EmulatorPath { get; set; }
 
+    protected override string GetDefaultDisplayName() => nameof(AndroidApp);
+
     protected override string[]? GetDefaultCommands() => [
         $"dotnet restore {ProjectPath}",
         $"dotnet publish {ProjectPath} -o {ProjectPath}/{OutputPath} {PublishArgs}",

@@ -5,6 +5,8 @@ public class BlazorWasmApp : TestApp
     public int Port { get; set; } = 5080;
     public bool HeadlessChrome { get; set; } = false;
 
+    protected override string GetDefaultDisplayName() => nameof(BlazorWasmApp);
+
     protected override string[]? GetDefaultCommands()
     {
         var commands = new List<string>

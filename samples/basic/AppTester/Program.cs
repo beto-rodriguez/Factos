@@ -72,4 +72,5 @@ testsBuilder
     .AddTrxReportProvider(); // optional, add TRX if needed
 
 using ITestApplication testApp = await testsBuilder.BuildAsync();
+
 return await testApp.RunAsync();
