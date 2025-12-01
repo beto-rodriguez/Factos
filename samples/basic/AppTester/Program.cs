@@ -27,7 +27,7 @@ var settings = new FactosSettings
         {
             ProjectPath = $"{root}MAUITests",
             ExecutableName = "MAUITests.exe",
-            PublishArgs = "-f net10.0-windows10.0.19041.0",
+            PublishArgs = "-c Release -f net10.0-windows10.0.19041.0",
             TestGroups = ["windows", "maui", "maui-windows"]
         },
         new WindowsApp
@@ -35,26 +35,33 @@ var settings = new FactosSettings
             ProjectPath = $"{root}WinUITests",
             ExecutableName = "WinUITests.exe",
             PublishArgs =
-                "-r win-x64 -p:WindowsPackageType=None -p:WindowsAppSDKSelfContained=true " +
+                "-c Release -r win-x64 -p:WindowsPackageType=None -p:WindowsAppSDKSelfContained=true " +
                 "-p:PublishTrimmed=false -p:PublishSingleFile=false -p:UseSrc=false",
             TestGroups = ["windows", "winui"]
         },
-        //new BlazorWasmApp
-        //{
-        //    ProjectPath = $"{root}BlazorTests"
-        //},
+        new BlazorWasmApp
+        {
+            ProjectPath = $"{root}BlazorTests",
+            TestGroups = ["browser", "blazor-wasm"]
+        },
+        new BlazorWasmApp
+        {
+            ProjectPath = $"{root}BlazorTests",
+            HeadlessChrome = true,
+            TestGroups = ["blazor-wasm-ci"]
+        },
         new AndroidApp
         {
             ProjectPath = $"{root}MAUITests",
             AppName = "com.companyname.mauitests",
-            PublishArgs = "-f net10.0-android",
+            PublishArgs = "-c Release -f net10.0-android",
             TestGroups = ["android", "maui", "maui-android"]
         },
         new ReactiveCircusActionApp
         {
             ProjectPath = $"{root}MAUITests",
             AppName = "com.companyname.mauitests",
-            PublishArgs = "-f net10.0-android",
+            PublishArgs = "-c Release -f net10.0-android",
             TestGroups = ["maui-android-ci"]
         }
     ]
