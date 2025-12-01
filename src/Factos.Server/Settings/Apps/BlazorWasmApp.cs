@@ -34,7 +34,7 @@ public class BlazorWasmApp : TestApp
             commands.Add($"xdg-open http://localhost:{Port} {chromeArgs} &");
 
         if (OperatingSystem.IsMacOS())
-            commands.Add($"open http://localhost:{Port}  {chromeArgs} &");
+            commands.Add($"open http://localhost:{Port} {chromeArgs}");
 
         return [.. commands];
     }

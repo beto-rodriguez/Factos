@@ -1,11 +1,10 @@
 <Solution>
   <Folder Name="/.github/" />
   <Folder Name="/.github/workflows/">
+    <File Path=".github/workflows/blazor-ubuntu.yml" />
     <File Path=".github/workflows/blazor.yml" />
-    <File Path=".github/workflows/browser.json" />
     <File Path=".github/workflows/maui-android.yml" />
     <File Path=".github/workflows/maui-windows.yml" />
-    <File Path=".github/workflows/wait-for-process.json" />
     <File Path=".github/workflows/winui.yml" />
     <File Path=".github/workflows/wpf.yml" />
   </Folder>
@@ -16,7 +15,7 @@
   <Folder Name="/samples/basic/testedApps/">
     <Project Path="samples/basic/BlazorTests/BlazorTests.csproj" />
     <Project Path="samples/basic/MAUITests/MAUITests.csproj">
-      <Deploy Solution="Debug|*" />
+      <Deploy />
     </Project>
     <Project Path="samples/basic/WinUITests/WinUITests.csproj" Id="135c70dd-c6f1-4629-8d59-a23ea8e866f5">
       <Platform Project="x64" />
