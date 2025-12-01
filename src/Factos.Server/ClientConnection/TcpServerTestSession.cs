@@ -1,9 +1,7 @@
 ﻿using Factos.Abstractions;
-using Factos.Abstractions.Dto;
+using Factos.RemoteTesters;
 using Factos.Server.Settings;
-using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
-using Microsoft.Testing.Platform.Requests;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -39,16 +37,9 @@ internal sealed class TcpServerTestSession(
         await deviceWritter.Title("TCP server stopped", cancellationToken, true);
     }
 
-    public Task<NodesResponse> RequestClient(string clientName, ExecuteRequestContext context)
-    {
-        if (context.Request is DiscoverTestExecutionRequest)
-            return GetTestNodesStream(this, Constants.START_DISCOVER_STREAM, clientName, context.CancellationToken);
-
-        if (context.Request is RunTestExecutionRequest)
-            return GetTestNodesStream(this, Constants.START_RUN_STREAM, clientName, context.CancellationToken);
-
-        throw new NotImplementedException("Only discover and run requests are supported.");
-    }
+    public Task<ExecutionResponse> RequestClient(string clientName, ExecuteRequestContext context) =>
+        GetTestNodesStream(
+            this, Constants.EXECUTE_TESTS, clientName, context);
 
     public async Task CloseClient(string clientName, CancellationToken cancellationToken)
     {
@@ -96,41 +87,15 @@ internal sealed class TcpServerTestSession(
         return sb.ToString();
     }
 
-    private async Task<NodesResponse> GetTestNodesStream(
-        TcpServerTestSession session, string streamName, string clientName, CancellationToken cancellationToken)
+    private static async Task<ExecutionResponse> GetTestNodesStream(
+        TcpServerTestSession session, string streamName, string clientName, ExecuteRequestContext request)
     {
-        var testNodesJson = await session.ReadStream(
-            streamName, clientName, cancellationToken);
+        var executionResponseJson = await session.ReadStream(
+            streamName, clientName, request.CancellationToken);
 
-        var testNodes = JsonSerializer.Deserialize<TestNodeDto[]>(testNodesJson);
-        var results = new List<TestNode>();
+        var executionResponse = JsonSerializer.Deserialize<ExecutionResponse>(executionResponseJson);
 
-        foreach (var nodeDto in testNodes ?? [])
-        {
-            var methodId = nodeDto.Properties
-                .FirstOrDefault(x => x is TestMethodIdentifierPropertyDto);
-
-            if (methodId is not null)
-            {
-                var tmip = (TestMethodIdentifierPropertyDto)methodId;
-
-                // hack to display properly tests in the VS UI
-                // specially when running the same project for different targets.
-                tmip.Namespace = $"[{clientName}] {tmip.Namespace}";
-            }
-
-            var testNode = new TestNode
-            {
-                DisplayName = $"[{clientName}]{nodeDto.DisplayName}",
-                Uid = $"[{clientName}]{nodeDto.Uid}",
-                Properties = nodeDto.Properties.AsPropertyBagResult()
-            };
-
-            testNode.FillTrxProperties(nodeDto);
-
-            results.Add(testNode);
-        }
-
-        return new() { Nodes = results, Sender = this };
+        return executionResponse 
+            ?? throw new InvalidOperationException("Could not deserialize the execution response.");
     }
 }

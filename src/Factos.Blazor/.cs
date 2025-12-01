@@ -10,7 +10,7 @@ namespace Factos.Blazor
     // This class can be registered as scoped DI service and then injected into Blazor
     // components for use.
 
-    public class ExampleJsInterop(IJSRuntime jsRuntime) : IAsyncDisposable
+    public class BlazorInterop(IJSRuntime jsRuntime) : IAsyncDisposable
     {
         private readonly Lazy<Task<IJSObjectReference>> moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>(
                 "import", "./_content/Factos.Blazor/exampleJsInterop.js").AsTask());

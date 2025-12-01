@@ -1,4 +1,5 @@
-﻿using Microsoft.Testing.Platform.Extensions.TestFramework;
+﻿using Factos.RemoteTesters;
+using Microsoft.Testing.Platform.Extensions.TestFramework;
 
 namespace Factos.Server.ClientConnection;
 
@@ -10,7 +11,7 @@ internal interface IServerSessionProtocol
 
     Task Finish(CancellationToken cancellationToken);
 
-    Task<NodesResponse> RequestClient(string clientName, ExecuteRequestContext context);
+    Task<ExecutionResponse> RequestClient(string clientName, ExecuteRequestContext context);
 
     Task CloseClient(string clientName, CancellationToken cancellationToken);
 }

@@ -73,4 +73,37 @@ internal static class MTPResultsMapper
         passed = 0;
         failed = 0;
     }
+
+    public static List<TestNode> ReadNodes(string clientName, IEnumerable<TestNodeDto> dtos)
+    {
+        var results = new List<TestNode>();
+
+        foreach (var nodeDto in dtos ?? [])
+        {
+            var methodId = nodeDto.Properties
+                .FirstOrDefault(x => x is TestMethodIdentifierPropertyDto);
+
+            if (methodId is not null)
+            {
+                var tmip = (TestMethodIdentifierPropertyDto)methodId;
+
+                // hack to display properly tests in the VS UI
+                // specially when running the same project for different targets.
+                tmip.Namespace = $"[{clientName}] {tmip.Namespace}";
+            }
+
+            var testNode = new TestNode
+            {
+                DisplayName = $"[{clientName}]{nodeDto.DisplayName}",
+                Uid = $"[{clientName}]{nodeDto.Uid}",
+                Properties = nodeDto.Properties.AsPropertyBagResult()
+            };
+
+            testNode.FillTrxProperties(nodeDto);
+
+            results.Add(testNode);
+        }
+
+        return results;
+    }
 }

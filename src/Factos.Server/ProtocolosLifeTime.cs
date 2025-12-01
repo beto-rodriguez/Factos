@@ -1,5 +1,4 @@
-﻿using Factos.Abstractions.Dto;
-using Factos.Server.ClientConnection;
+﻿using Factos.Server.ClientConnection;
 using Factos.Server.Settings;
 using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Extensions.TestHost;
@@ -13,18 +12,18 @@ internal sealed class ProtocolosLifeTime
     readonly DeviceWritter deviceWritter;
     static IEnumerable<IServerSessionProtocol>? protocols;
 
-    public ProtocolosLifeTime(IServiceProvider serviceProvider)
+    public ProtocolosLifeTime(IServiceProvider serviceProvider, FactosSettings factosSettings)
     {
         deviceWritter = new(this, serviceProvider.GetOutputDevice());
-        var settings = FactosSettings.ReadFrom(serviceProvider);
+        var settings = factosSettings;
         var cliOptions = serviceProvider.GetCommandLineOptions();
 
         var activeProtocols = new List<IServerSessionProtocol>();
 
-        if (!cliOptions.IsOptionSet(CommandLineOptions.DISABLE_HTTP))
+        if (settings.Protocols.HasFlag(ProtocolType.Http))
             activeProtocols.Add(new HTTPServerTestSession(deviceWritter, settings));
 
-        if (!cliOptions.IsOptionSet(CommandLineOptions.DISABLE_TCP))
+        if (settings.Protocols.HasFlag(ProtocolType.Tcp))
             activeProtocols.Add(new TcpServerTestSession(deviceWritter, settings));
 
         protocols = activeProtocols;

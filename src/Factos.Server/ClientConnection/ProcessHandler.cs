@@ -4,7 +4,8 @@ namespace Factos.Server.ClientConnection;
 
 internal class ProcessHandler
 {
-    Process _process;
+    readonly Process _process;
+    readonly List<int> _alsoKill = [];
     bool isIntentionalDispose;
 
     public ProcessHandler(string command, DeviceWritter deviceWritter, CancellationToken cancellationToken)
@@ -15,11 +16,11 @@ internal class ProcessHandler
         var fileName = elements[0];
         var rawArgs = command[fileName.Length..].Trim();
 
-        if (fileName == "start")
+        var isBackground = false;
+        if (rawArgs.EndsWith('&'))
         {
-            // special case for Windows 'start' command
-            fileName = "cmd.exe";
-            rawArgs = $"/c start {rawArgs}";
+            rawArgs = rawArgs[..^1].Trim();
+            isBackground = true;
         }
 
         _process = new Process
@@ -40,6 +41,18 @@ internal class ProcessHandler
         {
             if (string.IsNullOrEmpty(e.Data)) 
                 return;
+
+            if (e.Data.StartsWith("FactosKillOnFinish "))
+            {
+                var pidText = e.Data["FactosKillOnFinish ".Length..].Trim();
+                if (int.TryParse(pidText, out var pid))
+                {
+                    await deviceWritter.Dimmed(
+                        $"The process with PID {pid} will be killed with this process.", cancellationToken);
+                    
+                    _alsoKill.Add(pid);
+                }
+            }
 
             await deviceWritter.Dimmed(e.Data, cancellationToken);
         };
@@ -84,10 +97,14 @@ internal class ProcessHandler
         _process.BeginErrorReadLine();
 
         cancellationToken.Register(Dispose);
+
+        if (!isBackground)
+            _process.WaitForExit();
     }
 
     public bool IsRunning => !_process?.HasExited == true;
     public string Command { get; }
+    public Process Process => _process;
 
     public void Dispose()
     {
@@ -99,7 +116,20 @@ internal class ProcessHandler
             _process.WaitForExit();
         }
 
+        foreach (var pid in _alsoKill)
+        {
+            try
+            {
+                var proc = Process.GetProcessById(pid);
+                if (!proc.HasExited)
+                {
+                    proc.Kill(true);
+                    proc.WaitForExit();
+                }
+            }
+            catch { }
+        }
+
         _process.Dispose();
-        _process = null!;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Factos.Abstractions.Dto;
+using Factos.RemoteTesters;
 using Factos.Server.Settings;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
@@ -15,7 +16,7 @@ internal sealed class HTTPServerTestSession(
     WebApplication? app;
 
     public string Id => nameof(HTTPServerTestSession);
-    public event Action<TestNodeDto[]>? NodesReceived;
+    public event Action<ExecutionResponse>? NodesReceived;
 
     public async Task Start(CancellationToken cancellationToken)
     {
@@ -37,7 +38,7 @@ internal sealed class HTTPServerTestSession(
             app = builder.Build();
 
             app.UseCors("AllowAll");
-            app.MapPost(endPoint, (TestNodeDto[] nodes) =>
+            app.MapPost(endPoint, (ExecutionResponse nodes) =>
             {
                 Console.WriteLine("Signal received from WASM!");
                 NodesReceived?.Invoke(nodes);
@@ -60,26 +61,9 @@ internal sealed class HTTPServerTestSession(
         await deviceWritter.Dimmed("HTTP server stopped", cancellationToken);
     }
 
-    public async Task<NodesResponse> RequestClient(string clientName, ExecuteRequestContext context)
-    {
-        var nodes = await NodesListener();
-        var results = new List<TestNode>();
-
-        foreach (var nodeDto in nodes)
-        {
-            var testNode = new TestNode
-            {
-                DisplayName = nodeDto.DisplayName,
-                Uid = nodeDto.Uid,
-                Properties = nodeDto.Properties.AsPropertyBagResult()
-            };
-
-            testNode.FillTrxProperties(nodeDto);
-            results.Add(testNode);
-        }
-
-        return new() { Nodes = results, Sender = this };
-    }
+    public async Task<ExecutionResponse> RequestClient
+        (string clientName, ExecuteRequestContext context) =>
+            await NodesListener();
 
     public Task CloseClient(string clientName, CancellationToken cancellationToken)
     {
@@ -87,11 +71,11 @@ internal sealed class HTTPServerTestSession(
         return Task.CompletedTask;
     }
 
-    private Task<TestNodeDto[]> NodesListener()
+    private Task<ExecutionResponse> NodesListener()
     {
-        var tcs = new TaskCompletionSource<TestNodeDto[]>();
+        var tcs = new TaskCompletionSource<ExecutionResponse>();
 
-        void OnNodesReceived(TestNodeDto[] nodes)
+        void OnNodesReceived(ExecutionResponse nodes)
         {
             NodesReceived -= OnNodesReceived;
 

@@ -1,6 +1,6 @@
 ﻿namespace Factos.Server.Settings;
 
-internal class TestRunnerAppSettings
+public class TestApp
 {
     public string? Name { get; set; }
     public string[] StartCommands { get; set; } = [];

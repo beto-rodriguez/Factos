@@ -2,6 +2,5 @@
 
 public abstract class TestExecutor
 {
-    public abstract Task<string> Discover();
-    public abstract Task<string> Run();
+    public abstract Task<ExecutionResponse> Execute();
 }

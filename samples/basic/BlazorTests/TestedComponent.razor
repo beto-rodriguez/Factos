@@ -9,7 +9,7 @@
     // blazorappcontroller, then intereact with the UI,
     // the idea is to expose some js interop methods that can be used
     // to query the DOM, just like the QueryInnerHTML function below.
-    [Inject] private ExampleJsInterop JS { get; set; } = null!;
+    [Inject] private BlazorInterop JS { get; set; } = null!;
 
     public async Task<string> GetButtonText()
     {

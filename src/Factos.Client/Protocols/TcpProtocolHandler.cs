@@ -1,5 +1,7 @@
 ﻿using Factos.Abstractions;
+using Factos.RemoteTesters;
 using System.Net.Sockets;
+using System.Text.Json;
 
 namespace Factos.Protocols;
 
@@ -9,9 +11,8 @@ public class TcpProtocolHandler : IProtocolHandler
     {
         var commands = new Dictionary<string, Func<Task<string>>>()
         {
-            [Constants.START_DISCOVER_STREAM] = controller.TestExecutor.Discover,
-            [Constants.START_RUN_STREAM] = controller.TestExecutor.Run,
-            [Constants.QUIT_APP] = () => { controller.QuitApp(); return Task.FromResult(Constants.QUIT_APP); },
+            [Constants.EXECUTE_TESTS] = ExecuteCommand(controller),
+            [Constants.QUIT_APP] = QuitAppCommand(controller),
         };
 
         var address = controller.Settings.IsAndroid
@@ -19,14 +20,13 @@ public class TcpProtocolHandler : IProtocolHandler
             : "localhost";
 
         using var client = new TcpClient();
-        var ct = new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token;
-        await client.ConnectAsync(address, controller.Settings.TcpPort, ct);
+        await client.ConnectAsync(address, controller.Settings.TcpPort, DefaultCT());
 
         using var stream = client.GetStream();
         using var reader = new StreamReader(stream);
         using var writter = new StreamWriter(stream) { AutoFlush = true };
 
-        var command = await reader.ReadLineAsync() ?? string.Empty;
+        var command = await reader.ReadLineAsync(DefaultCT()) ?? string.Empty;
 
         if (!commands.TryGetValue(command, out var commandTask))
             return false;
@@ -41,4 +41,16 @@ public class TcpProtocolHandler : IProtocolHandler
         // then the app can be closed only by the QUIT_APP command.
         return false;
     }
+
+    private static Func<Task<string>> ExecuteCommand(AppController controller) =>
+        async () => JsonSerializer.Serialize(await controller.TestExecutor.Execute());
+
+    private static Func<Task<string>> QuitAppCommand(AppController controller) =>
+        () => {
+            controller.QuitApp();
+            return Task.FromResult(Constants.QUIT_APP); 
+        };
+
+    private static CancellationToken DefaultCT() =>
+        new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token;
 }

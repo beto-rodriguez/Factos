@@ -1,5 +1,4 @@
-﻿using Factos.Server.Settings;
-using Microsoft.Testing.Platform.Extensions.OutputDevice;
+﻿using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.OutputDevice;
 
 namespace Factos.Server.ClientConnection;
@@ -7,13 +6,11 @@ namespace Factos.Server.ClientConnection;
 internal class AppRunner
     : BaseExtension, IOutputDeviceDataProducer
 {
-    readonly FactosSettings settings;
     readonly DeviceWritter deviceWritter;
     List<ProcessHandler> _activeProcesses = [];
 
-    public AppRunner(IOutputDevice outputDevice, FactosSettings factosSettings)
+    public AppRunner(IOutputDevice outputDevice)
     {
-        settings = factosSettings;
         deviceWritter = new(this, outputDevice);
     }
 
@@ -35,7 +32,7 @@ internal class AppRunner
                     "The special command '{wait-for-process}' was detected. " +
                     "The test runner will wait for an external process to be started manually.", cancellationToken);
 
-                return;
+                continue;
             }
 
             await deviceWritter.Normal($"Executing '{command}'...", cancellationToken);
@@ -46,12 +43,13 @@ internal class AppRunner
     }
 
     public virtual async Task EndApp(
-        IServerSessionProtocol session, string[] endCommands, string appName, CancellationToken cancellationToken)
+        IServerSessionProtocol? session, string[] endCommands, string appName, CancellationToken cancellationToken)
     {
         await deviceWritter.Normal($"{appName} is quitting...", cancellationToken);
 
         // request the test session to close the client application (if supported)
-        await session.CloseClient(appName, cancellationToken);
+        if (session is not null)
+            await session.CloseClient(appName, cancellationToken);
 
         // dispose handled processes
         foreach (var process in _activeProcesses)
@@ -60,6 +58,8 @@ internal class AppRunner
             await deviceWritter.Dimmed(
                 $"Process for command '{process.Command}' has been disposed.", cancellationToken);
         }
+
+        _activeProcesses.Clear();
 
         foreach (var command in endCommands)
         {

@@ -1,4 +1,34 @@
-﻿
-// initializes tests and returns the result.
+﻿using Factos.Server;
+using Microsoft.Testing.Extensions;
+using Microsoft.Testing.Platform.Builder;
 
-return await Factos.Server.Entry.RunTests(args);
+var testsBuilder = await TestApplication.CreateBuilderAsync(args);
+
+testsBuilder
+    .AddFactos(settings => settings
+        // lets sets a root path for the tested apps
+        // this is the relative path from the AppTester output folder
+        // to the tested apps folders, any chained TestApp after this
+        // will use this root path.
+        .SetRoot("../../../../")
+
+#if DEBUG
+        // when in debug this is an example to test multiple apps
+        .TestAndroidApp("MAUITests", "com.companyname.mauitests", publishArgs: "-f net10.0-android")
+        .TestBlazorApp("BlazorTests", port: 5080)
+        .TestWindowsApp("WPFTests", "WPFTests.exe")
+        .TestWindowsApp("MAUITests", "MAUITests.exe", publishArgs: "-f net10.0-windows10.0.19041.0")
+        .TestWindowsApp("WinUITests", "WinUITests.exe", publishArgs:
+            "-r win-x64 -p:WindowsPackageType=None -p:WindowsAppSDKSelfContained=true " +
+            "-p:PublishTrimmed=false -p:PublishSingleFile=false -p:UseSrc=false")
+#endif
+
+        .TestWindowsApp("WPFTests", "WPFTests.exe", enabled: args.Contains("-wpf"))
+        )
+
+    // optional, add TRX if needed
+    .AddTrxReportProvider();
+
+
+using ITestApplication testApp = await testsBuilder.BuildAsync();
+return await testApp.RunAsync();

@@ -15,14 +15,12 @@ public class SourceGeneratedTestExecutor
         return instance;
     }
 
-    public override Task<string> Discover() =>
-        Task.FromResult(JsonSerializer.Serialize(GetDiscoverNodes()));
-
-    public override async Task<string> Run()
-    {
-        var nodes = await GetRunNodes();
-        return JsonSerializer.Serialize(nodes);
-    }
+    public override async Task<ExecutionResponse> Execute() =>
+        new()
+        {
+            Discovered = GetDiscoverNodes(),
+            Results = await GetResultsNodes()
+        };
 
     private static IEnumerable<TestNodeDto> GetDiscoverNodes()
     {
@@ -39,7 +37,7 @@ public class SourceGeneratedTestExecutor
         }
     }
 
-    public async Task<List<TestNodeDto>> GetRunNodes()
+    public static async Task<List<TestNodeDto>> GetResultsNodes()
     {
         var nodes = new List<TestNodeDto>();
 

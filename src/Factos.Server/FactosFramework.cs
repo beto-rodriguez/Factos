@@ -1,9 +1,13 @@
-﻿using Factos.Server.ClientConnection;
+﻿using Factos.RemoteTesters;
+using Factos.Server.ClientConnection;
 using Factos.Server.Settings;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
+using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.Services;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Factos.Server;
 
@@ -11,15 +15,15 @@ internal sealed class FactosFramework
     : BaseExtension, ITestFramework, IDataProducer, IOutputDeviceDataProducer
 {
     readonly FactosSettings settings;
-    readonly DeviceWritter deviceWritter;
+    readonly DeviceWritter deviceWriter;
     readonly AppRunner appRunner;
 
-    public FactosFramework(IServiceProvider serviceProvider)
+    public FactosFramework(IServiceProvider serviceProvider, FactosSettings factosSettings)
     {
         var outputDevice = serviceProvider.GetOutputDevice();
-        settings = FactosSettings.ReadFrom(serviceProvider);
-        deviceWritter = new(this, outputDevice);
-        appRunner = new(outputDevice, settings);
+        settings = factosSettings;
+        deviceWriter = new(this, outputDevice);
+        appRunner = new(outputDevice);
     }
 
     protected override string Id =>
@@ -37,46 +41,69 @@ internal sealed class FactosFramework
 
         try
         {
+            var appNames = new HashSet<string?>();
+
             foreach (var testedApp in settings.TestedApps)
             {
                 var appName = testedApp.Name ?? "test runner";
+                // sanitize name to be file system friendly
+                foreach (var c in Path.GetInvalidFileNameChars())
+                    appName = appName.Replace(c, '_');
 
-                await deviceWritter.Title($"Starting {appName}...", cancellationToken);
-                await appRunner.StartApp(testedApp.StartCommands, appName, cancellationToken);
+                // prevent repeated names
+                var i = 1;
+                while (!appNames.Add(appName))
+                    appName = $"{testedApp.Name} ({i++})";
+                var cacheFile = $"{appName}_cache.json";
 
-                var requests = new List<Task<NodesResponse>>();
+                // lets try to cache results on discovery to prevent
+                // re-running the app multiple times during test exploration
+                TestSessionResponse? clientResponse;
 
-                // listen for test nodes from all protocols
-                foreach (var protocol in ProtocolosLifeTime.ActiveProtocols)
-                    requests.Add(protocol.RequestClient(appName, context));
-
-                var timeoutTask = GetTimeOutTask();
-                requests.Add(GetTimeOutTask());
-
-                // wait for the first protocol to return test nodes
-                var response = await Task.WhenAny(requests);
-
-                if (response == timeoutTask)
+                if (context.Request is RunTestExecutionRequest && File.Exists(cacheFile))
                 {
-                    await deviceWritter.Red(
-                        $"Connection Error.\n" +
-                        $"No test nodes received from any client within the timeout period of " +
-                        $"{settings.ConnectionTimeout} seconds.", cancellationToken);
+                    using (var stream = File.OpenRead(cacheFile))
+                    {
+                        var cachedResponse = await JsonSerializer.DeserializeAsync<ExecutionResponse>(stream) ??
+                            throw new Exception("an error occurred while reading tests cache.");
+                        clientResponse = new TestSessionResponse(null, cachedResponse);
+                    }
+                    
+                    File.Delete(cacheFile);
+                    
+                    await deviceWriter.Dimmed($"Using cached results for {appName}...", cancellationToken);
+                }
+                else
+                {
+                    await deviceWriter.Title($"Starting {appName}...", cancellationToken);
+                    await appRunner.StartApp(testedApp.StartCommands, appName, cancellationToken);
 
-                    throw new TimeoutException("No test nodes received from any client.");
+                    clientResponse = await GetActiveProtocolsClientResponse(
+                       appName, context, cancellationToken);
+
+                    if (context.Request is DiscoverTestExecutionRequest)
+                    {
+                        File.WriteAllText(
+                            $"{appName}_cache.json",
+                            JsonSerializer.Serialize(clientResponse.Response));
+                        await deviceWriter.Dimmed($"Cached discovered tests for {appName}.", cancellationToken);
+                    }
                 }
 
-                foreach (var node in response.Result.Nodes)
-                    await context.MessageBus.PublishAsync(
-                        this,
-                        new TestNodeUpdateMessage(context.Request.Session.SessionUid, node));
+                var requestedNodes = context.Request is DiscoverTestExecutionRequest
+                    ? MTPResultsMapper.ReadNodes(appName, clientResponse.Response.Discovered)
+                    : MTPResultsMapper.ReadNodes(appName, clientResponse.Response.Results);
 
-                await appRunner.EndApp(response.Result.Sender, testedApp.EndCommands, appName, cancellationToken);
-                await MTPResultsMapper.LogCount(appName, deviceWritter, cancellationToken);
-                await deviceWritter.Title($"{appName} Finished!", cancellationToken);
+                foreach (var node in requestedNodes)
+                    await context.MessageBus.PublishAsync(
+                        this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, node));
+
+                await appRunner.EndApp(clientResponse.Protocol, testedApp.EndCommands, appName, cancellationToken);
+                await MTPResultsMapper.LogCount(appName, deviceWriter, cancellationToken);
+                await deviceWriter.Title($"{appName} Finished!", cancellationToken);
             }
 
-            await deviceWritter.Dimmed(
+            await deviceWriter.Dimmed(
                 "The result of all the apps is displayed below, " +
                 "each app logged its own results (see log above).", cancellationToken);
         }
@@ -92,9 +119,49 @@ internal sealed class FactosFramework
     Task<bool> Microsoft.Testing.Platform.Extensions.IExtension.IsEnabledAsync() =>
         Task.FromResult(true);
 
-    private async Task<NodesResponse> GetTimeOutTask()
+    private async Task<TestSessionResponse> GetActiveProtocolsClientResponse(
+        string appName, ExecuteRequestContext context, CancellationToken cancellationToken)
+    {
+        var requests = new List<Task<TestSessionResponse>>();
+
+        // listen for test nodes from all protocols
+        foreach (var protocol in ProtocolosLifeTime.ActiveProtocols)
+            requests.Add(protocol
+                .RequestClient(appName, context)
+                .ContinueWith(r => r.IsFaulted || r.Result == null 
+                    ? new TestSessionResponse(null, new())
+                    : new TestSessionResponse(protocol, r.Result)));
+
+        var timeoutTask = GetTimeOutTask();
+        requests.Add(GetTimeOutTask());
+
+        // wait for the first protocol to return test nodes
+        var response = await Task.WhenAny(requests);
+
+        if (response == timeoutTask)
+        {
+            await deviceWriter.Red(
+                $"Connection Error.\n" +
+                $"No test nodes received from any client within the timeout period of " +
+                $"{settings.ConnectionTimeout} seconds.", cancellationToken);
+
+            throw new TimeoutException("No test nodes received from any client.");
+        }
+
+        return response.Result;
+    }
+
+    private async Task<TestSessionResponse> GetTimeOutTask()
     {
         await  Task.Delay(TimeSpan.FromSeconds(settings.ConnectionTimeout));
-        return new NodesResponse { Nodes = [], Sender = null! };
+        return new(null, new());
+    }
+
+    private class TestSessionResponse(
+        IServerSessionProtocol? protocol, ExecutionResponse response)
+    {
+        [JsonIgnore]
+        public IServerSessionProtocol? Protocol { get; } = protocol;
+        public ExecutionResponse Response { get; } = response;
     }
 }

@@ -1,5 +1,7 @@
 ﻿using Factos.Protocols;
 using Factos.RemoteTesters;
+using System.Diagnostics;
+using System.Text.Json;
 
 namespace Factos;
 
@@ -9,7 +11,6 @@ public abstract class AppController
     {
         Settings = settings;
         TestExecutor = new SourceGeneratedTestExecutor();
-        //TestExecutor = new ReflectionTestExecutor();
     }
 
     public static AppController Current { get; internal set; } = null!;
@@ -39,6 +40,9 @@ public abstract class AppController
 
     internal virtual async Task Listen()
     {
+        if (!HasSingleFlag(Settings.Protocol))
+            throw new InvalidOperationException("The client can only implement one protocol.");
+
         IProtocolHandler protocolHandler = Settings.Protocol == ProtocolType.Http
             ? new HTTPProtocolHandler()
             : new TcpProtocolHandler();
@@ -62,8 +66,9 @@ public abstract class AppController
                     // if the server is not reachable, most likely this is 
                     // a local test run, so we run and show the results locally
 
-                    var result = await TestExecutor.Run();
-                    await NavigateToView(GetResultsView(result));
+                    var result = await TestExecutor.Execute();
+                    var serialized = JsonSerializer.Serialize(result.Results);
+                    await NavigateToView(GetResultsView(serialized));
 
                     resultsShown = true;
                 }
@@ -71,5 +76,14 @@ public abstract class AppController
                 await Task.Delay(2000);
             }
         }
+    }
+
+    public static bool HasSingleFlag(ProtocolType value)
+    {
+        if (value == ProtocolType.None) 
+            return false;
+
+        var intValue = (int)value;
+        return (intValue & (intValue - 1)) == 0;
     }
 }
