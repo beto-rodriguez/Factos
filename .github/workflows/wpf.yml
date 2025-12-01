@@ -33,5 +33,5 @@ jobs:
         uses: dorny/test-reporter@v2.2.0
         with:
           name: test-results
-          path: samples/basic/AppTesterbin/Release/net10.0/TestResults/*.trx
+          path: samples/basic/AppTester/bin/Release/net10.0/TestResults/*.trx
           reporter: dotnet-trx
