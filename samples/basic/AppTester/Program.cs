@@ -23,7 +23,7 @@ testsBuilder
             "-p:PublishTrimmed=false -p:PublishSingleFile=false -p:UseSrc=false")
 #endif
 
-        .TestWindowsApp("WPFTests", "WPFTests.exe", enabled: args.Contains("-wpf"))
+        .TestWindowsApp("WPFTests", "WPFTests.exe", enabled: args.Contains("--wpf"))
         )
 
     // optional, add TRX if needed
