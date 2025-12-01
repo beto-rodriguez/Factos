@@ -1,7 +1,6 @@
 <Solution>
   <Folder Name="/.github/" />
   <Folder Name="/.github/workflows/">
-    <File Path=".github/workflows/blazor-ubuntu.yml" />
     <File Path=".github/workflows/blazor.yml" />
     <File Path=".github/workflows/maui-android.yml" />
     <File Path=".github/workflows/maui-windows.yml" />
