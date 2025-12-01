@@ -6,10 +6,7 @@ var testsBuilder = await TestApplication.CreateBuilderAsync(args);
 
 testsBuilder
     .AddFactos(settings => settings
-        // lets sets a root path for the tested apps
-        // this is the relative path from the AppTester output folder
-        // to the tested apps folders, any chained TestApp after this
-        // will use this root path.
+        // the root path for the next added test apps
         .SetRoot("../../../../")
 
 #if DEBUG
