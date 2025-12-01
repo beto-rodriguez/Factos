@@ -26,15 +26,13 @@ public class BlazorWasmApp : TestApp
                 "--v=1";                // verbosity level
 
         if (OperatingSystem.IsWindows())
-        {
             commands.Add($"cmd.exe /c start http://localhost:{Port} {chromeArgs}");
-        }
 
         if (OperatingSystem.IsLinux())
-            commands.Add($"xdg-open http://localhost:{Port} {chromeArgs} &");
+            commands.Add($"google-chrome http://localhost:{Port} {chromeArgs} &");
 
         if (OperatingSystem.IsMacOS())
-            commands.Add($"open http://localhost:{Port} {chromeArgs}");
+            commands.Add($"\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" http://localhost:{Port} {chromeArgs}");
 
         return [.. commands];
     }
