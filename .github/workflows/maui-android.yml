@@ -38,7 +38,7 @@ jobs:
           target: google_apis
           arch: x86_64
           script:
-            dotnet run --project samples/basic/AppTester --report-trx --no-progress --test-groups maui-android-ci
+            dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --test-groups maui-android-ci
 
       - name: Publish test results to GitHub UI
         uses: dorny/test-reporter@v2.2.0
