@@ -32,7 +32,7 @@ testsBuilder
         // we are using the "when" condition, the next test will only run
         // when the --wpf argument is provided to the test runner
         .TestWindowsApp("WPFTests", "WPFTests.exe", when: "wpf")
-        .TestWindowsApp("MAUITests", "MAUITests.exe", when: "maui-windows", publishArgs: "-f net10.0-windows10.0.19041.0 -p:NoAndroid=true")
+        .TestWindowsApp("MAUITests", "MAUITests.exe", when: "maui-windows", publishArgs: "-f net10.0-windows10.0.19041.0")
         .TestWindowsApp("WinUITests", "WinUITests.exe",when: "winui", publishArgs:
             "-r win-x64 -p:WindowsPackageType=None -p:WindowsAppSDKSelfContained=true " +
             "-p:PublishTrimmed=false -p:PublishSingleFile=false -p:UseSrc=false")
