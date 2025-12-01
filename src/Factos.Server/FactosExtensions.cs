@@ -21,20 +21,4 @@ public static class FactosExtensions
 
         return builder;
     }
-
-
-    public static ITestApplicationBuilder AddFactos(
-        this ITestApplicationBuilder builder,
-        Action<FactosSettings> settingsBuilder,
-        Func<FactosSettings>? settingsFactory = null)
-    {
-        var factory = settingsFactory ?? (() => new FactosSettings());
-        var settings = factory();
-        settingsBuilder(settings);
-        return AddFactos(builder, settings);
-    }
-
-    public static ITestApplicationBuilder AddFactos(
-        this ITestApplicationBuilder builder, Action<FactosSettings> settingsBuilder) =>
-            AddFactos(builder, settingsBuilder, null);
 }
