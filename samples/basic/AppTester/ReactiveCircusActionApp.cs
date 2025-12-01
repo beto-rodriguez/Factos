@@ -1,11 +1,10 @@
-﻿using Factos.Server.Settings;
+﻿using Factos.Server.Settings.Apps;
 
-public class ReactiveCircusActionApp : TestApp
+public class ReactiveCircusActionApp : AndroidApp
 {
-    public required string AppName { get; set; }
-
-    protected override string[]? GetDefaultCommands() => [
-        $"adb install -r {ProjectPath}/{OutputPath}/{AppName}-Signed.apk",
-        $"adb shell monkey -p {AppName} -c android.intent.category.LAUNCHER 1"
-    ];
+    protected override Task StartEmulator()
+    {
+        // do nothing, the emulator is started externally by Reactive Circus
+        return Task.CompletedTask;
+    }
 }

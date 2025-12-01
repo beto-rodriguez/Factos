@@ -14,20 +14,15 @@ public class AndroidApp : TestApp
     public string? AdbPath { get; set; }
     public string? EmulatorPath { get; set; }
 
-    protected override string[]? GetDefaultCommands()
-    {
-        var commands = new List<string>
-        {
-            $"dotnet restore {ProjectPath}",
-            $"dotnet publish {ProjectPath} -o {ProjectPath}/{OutputPath} {PublishArgs}",
-            $"{AppRunner.TASK_COMMAND} start-emulator",
-            $"adb install -r {ProjectPath}/{OutputPath}/{AppName}-Signed.apk",
-            $"adb shell monkey -p {AppName} -c android.intent.category.LAUNCHER 1"
-        };
-        return [.. commands];
-    }
+    protected override string[]? GetDefaultCommands() => [
+        $"dotnet restore {ProjectPath}",
+        $"dotnet publish {ProjectPath} -o {ProjectPath}/{OutputPath} {PublishArgs}",
+        $"{AppRunner.TASK_COMMAND} start-emulator",
+        $"adb install -r {ProjectPath}/{OutputPath}/{AppName}-Signed.apk",
+        $"adb shell monkey -p {AppName} -c android.intent.category.LAUNCHER 1"
+    ];
 
-    private async Task StartEmulator()
+    protected virtual async Task StartEmulator()
     {
         if (AdbPath is null && !OperatingSystem.IsWindows())
             throw new InvalidOperationException(
