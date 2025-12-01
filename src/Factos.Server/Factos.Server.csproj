@@ -14,11 +14,4 @@
 		<ProjectReference Include="..\Factos.Abstractions\Factos.Abstractions.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<Compile Remove="Scripts\*.cs" />
-		<Content Include="Scripts\*.cs" Pack="true">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
-
 </Project>

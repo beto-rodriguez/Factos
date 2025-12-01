@@ -30,7 +30,7 @@ jobs:
 
       - name: Run tests
         run:
-          dotnet run --project samples/basic/AppTester -c Release --maui-windows --report-trx --no-progress
+          dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --test-groups maui-windows
 
       - name: Publish results
         uses: dorny/test-reporter@v2.2.0

@@ -5,7 +5,6 @@ namespace Factos.Server.ClientConnection;
 internal class ProcessHandler
 {
     readonly Process _process;
-    readonly List<int> _alsoKill = [];
     bool isIntentionalDispose;
 
     public ProcessHandler(string command, DeviceWritter deviceWritter, CancellationToken cancellationToken)
@@ -41,18 +40,6 @@ internal class ProcessHandler
         {
             if (string.IsNullOrEmpty(e.Data)) 
                 return;
-
-            if (e.Data.StartsWith("FactosKillOnFinish "))
-            {
-                var pidText = e.Data["FactosKillOnFinish ".Length..].Trim();
-                if (int.TryParse(pidText, out var pid))
-                {
-                    await deviceWritter.Dimmed(
-                        $"The process with PID {pid} will be killed with this process.", cancellationToken);
-                    
-                    _alsoKill.Add(pid);
-                }
-            }
 
             await deviceWritter.Dimmed(e.Data, cancellationToken);
         };
@@ -114,20 +101,6 @@ internal class ProcessHandler
         {
             _process.Kill(true);
             _process.WaitForExit();
-        }
-
-        foreach (var pid in _alsoKill)
-        {
-            try
-            {
-                var proc = Process.GetProcessById(pid);
-                if (!proc.HasExited)
-                {
-                    proc.Kill(true);
-                    proc.WaitForExit();
-                }
-            }
-            catch { }
         }
 
         _process.Dispose();

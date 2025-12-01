@@ -27,7 +27,7 @@ jobs:
 
       - name: Run tests
         run:
-          dotnet run --project samples/basic/AppTester -c Release --wpf --report-trx --no-progress
+          dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --test-groups wpf
 
       - name: Publish results
         uses: dorny/test-reporter@v2.2.0

@@ -27,7 +27,7 @@ jobs:
 
       - name: Run tests
         run:
-          dotnet run --project samples/basic/AppTester -c Release --winui --report-trx --no-progress
+          dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --test-groups winui
 
       - name: Publish results
         uses: dorny/test-reporter@v2.2.0

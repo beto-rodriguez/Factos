@@ -24,8 +24,7 @@ internal sealed class TcpServerTestSession(
     {
         listener.Start();
 
-        await deviceWritter.Dimmed(
-            $"TCP server listening on {listener.LocalEndpoint}", cancellationToken);
+        await deviceWritter.Dimmed($"TCP server listening on {listener.LocalEndpoint}", cancellationToken);
     }
 
     public async Task Finish(CancellationToken cancellationToken)
@@ -34,7 +33,7 @@ internal sealed class TcpServerTestSession(
         listener.Server.Dispose();
         listener = null!;
 
-        await deviceWritter.Title("TCP server stopped", cancellationToken, true);
+        await deviceWritter.Dimmed("TCP server stopped", cancellationToken);
     }
 
     public Task<ExecutionResponse> RequestClient(string clientName, ExecuteRequestContext context) =>
