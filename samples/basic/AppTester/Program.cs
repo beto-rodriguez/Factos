@@ -54,6 +54,7 @@ var settings = new FactosSettings
         {
             ProjectPath = $"{root}ReactiveCircus.ActionApp",
             AppName = "com.companyname.mauitests",
+            PublishArgs = "-f net10.0-android",
             TestGroups = ["maui-android-ci"]
         }
     ]
