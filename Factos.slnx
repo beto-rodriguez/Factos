@@ -17,6 +17,15 @@
     <Project Path="samples/basic/AppTester/AppTester.csproj" />
   </Folder>
   <Folder Name="/samples/basic/testedApps/">
+    <Project Path="samples/basic/AvaloniaTests.Android/AvaloniaTests.Android.csproj">
+      <Deploy />
+    </Project>
+    <Project Path="samples/basic/AvaloniaTests.Browser/AvaloniaTests.Browser.csproj" />
+    <Project Path="samples/basic/AvaloniaTests.Desktop/AvaloniaTests.Desktop.csproj" />
+    <Project Path="samples/basic/AvaloniaTests.iOS/AvaloniaTests.iOS.csproj">
+      <Deploy />
+    </Project>
+    <Project Path="samples/basic/AvaloniaTests/AvaloniaTests.csproj" />
     <Project Path="samples/basic/BlazorTests/BlazorTests.csproj" />
     <Project Path="samples/basic/MAUITests/MAUITests.csproj">
       <Deploy Solution="Debug|*" />
@@ -35,6 +44,7 @@
   </Folder>
   <Project Path="src/CodeGen/CodeGen.csproj" Id="810399e1-61c4-4e3b-83f7-a40fa09a187c" />
   <Project Path="src/Factos.Abstractions/Factos.Abstractions.csproj" />
+  <Project Path="src/Factos.Avalonia/Factos.Avalonia.csproj" />
   <Project Path="src/Factos.Blazor/Factos.Blazor.csproj" Id="676e4030-810b-4473-bbe2-f0e2d69d1003" />
   <Project Path="src/Factos.Client/Factos.Client.csproj" />
   <Project Path="src/Factos.MAUI/Factos.MAUI.csproj" />
