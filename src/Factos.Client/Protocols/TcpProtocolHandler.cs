@@ -15,7 +15,7 @@ public class TcpProtocolHandler : IProtocolHandler
             [Constants.QUIT_APP] = QuitAppCommand(controller),
         };
 
-        var address = controller.Settings.IsAndroid
+        var address = OperatingSystem.IsAndroid()
             ? "10.0.2.2"
             : "localhost";
 

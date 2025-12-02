@@ -56,7 +56,7 @@ public abstract class AppController
             {
                 finished = await protocolHandler.Execute(this);
             }
-            catch
+            catch(Exception ex)
             {
                 // if there was an error connecting to the server (TCP/HTTP)
                 // we wait a bit before trying again
@@ -67,7 +67,7 @@ public abstract class AppController
                     // a local test run, so we run and show the results locally
 
                     var result = await TestExecutor.Execute();
-                    var serialized = JsonSerializer.Serialize(result.Results);
+                    var serialized = JsonSerializer.Serialize(result.Results, HTTPProtocolHandler.SerializerOptions);
                     await NavigateToView(GetResultsView(serialized));
 
                     resultsShown = true;

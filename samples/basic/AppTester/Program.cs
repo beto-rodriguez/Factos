@@ -19,29 +19,25 @@ var settings = new FactosSettings
     TestedApps = [
 
         // example app without test groups (runs always)
-        new WindowsApp
-        {
-            ProjectPath = $"{root}WPFTests",
-            ExecutableName = "WPFTests.exe"
-        },
+        //new WindowsApp
+        //{
+        //    ProjectPath = $"{root}WPFTests",
+        //    ExecutableName = "WPFTests.exe"
+        //},
 
         // when test group are defined, the app will only run if the group is specified in the CLI
         // the next command will run tests for browser and windows apps:
         // dotnet test --test-groups browser windows
 
+        // == wpf example ==
         new WindowsApp
         {
             ProjectPath = $"{root}WPFTests",
             ExecutableName = "WPFTests.exe",
             TestGroups = ["windows", "wpf"]
         },
-        new WindowsApp
-        {
-            ProjectPath = $"{root}MAUITests",
-            ExecutableName = "MAUITests.exe",
-            PublishArgs = "-c Release -f net10.0-windows10.0.19041.0",
-            TestGroups = ["windows", "maui", "maui-windows"]
-        },
+
+        // == winui example ==
         new WindowsApp
         {
             ProjectPath = $"{root}WinUITests",
@@ -51,16 +47,58 @@ var settings = new FactosSettings
                 "-p:PublishTrimmed=false -p:PublishSingleFile=false -p:UseSrc=false",
             TestGroups = ["windows", "winui"]
         },
-        new BlazorWasmApp
+
+        // == avalonia example ==
+        new WindowsApp
+        {
+            ProjectPath = $"{root}AvaloniaTests.Desktop",
+            ExecutableName = "AvaloniaTests.Desktop.exe",
+            TestGroups = ["windows", "avalonia", "avalonia-windows"]
+        },
+        new AndroidApp
+        {
+            ProjectPath = $"{root}AvaloniaTests.Android",
+            AppName = "com.CompanyName.AvaloniaTest",
+            TestGroups = ["android", "avalonia", "avalonia-android"]
+        },
+        new ReactiveCircusActionApp // uses Reactive Circus Action runner for Android CI
+        {
+            ProjectPath = $"{root}AvaloniaTests.Android",
+            AppName = "com.CompanyName.AvaloniaTest",
+            TestGroups = ["avalonia-android-ci"]
+        },
+        new BrowserApp
+        {
+            ProjectPath = $"{root}AvaloniaTests.Browser",
+            TestGroups = ["browser", "avalonia-wasm"]
+        },
+        new BrowserApp
+        {
+            ProjectPath = $"{root}AvaloniaTests.Browser",
+            HeadlessChrome = true, // use headless Chrome for CI
+            TestGroups = ["browser", "avalonia-wasm-ci"]
+        },
+
+        // == blazor wasm example ==
+        new BrowserApp
         {
             ProjectPath = $"{root}BlazorTests",
             TestGroups = ["browser", "blazor-wasm"]
         },
-        new BlazorWasmApp
+        new BrowserApp
         {
             ProjectPath = $"{root}BlazorTests",
-            HeadlessChrome = true,
+            HeadlessChrome = true, // use headless Chrome for CI
             TestGroups = ["blazor-wasm-ci"]
+        },
+
+        // == maui example ==
+        new WindowsApp
+        {
+            ProjectPath = $"{root}MAUITests",
+            ExecutableName = "MAUITests.exe",
+            PublishArgs = "-c Release -f net10.0-windows10.0.19041.0",
+            TestGroups = ["windows", "maui", "maui-windows"]
         },
         new AndroidApp
         {
@@ -69,7 +107,7 @@ var settings = new FactosSettings
             PublishArgs = "-c Release -f net10.0-android",
             TestGroups = ["android", "maui", "maui-android"]
         },
-        new ReactiveCircusActionApp
+        new ReactiveCircusActionApp // uses Reactive Circus Action runner for Android CI
         {
             ProjectPath = $"{root}MAUITests",
             AppName = "com.companyname.mauitests",
