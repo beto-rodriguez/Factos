@@ -3,7 +3,7 @@ namespace Factos.MAUI;
 public static class SetupExtensions
 {
     public static MauiAppBuilder UseFactosApp(this MauiAppBuilder app) =>
-        app.UseFactosApp(ControllerSettings.Default with { IsAndroid = DeviceInfo.Platform == DevicePlatform.Android });
+        app.UseFactosApp(ControllerSettings.Default);
 
     public static MauiAppBuilder UseFactosApp(this MauiAppBuilder app, ControllerSettings settings)
     {

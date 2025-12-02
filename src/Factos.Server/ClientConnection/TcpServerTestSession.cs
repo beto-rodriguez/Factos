@@ -92,7 +92,7 @@ internal sealed class TcpServerTestSession(
         var executionResponseJson = await session.ReadStream(
             streamName, clientName, request.CancellationToken);
 
-        var executionResponse = JsonSerializer.Deserialize<ExecutionResponse>(executionResponseJson);
+        var executionResponse = JsonSerializer.Deserialize(executionResponseJson, JsonGenerationContext.Default.ExecutionResponse);
 
         return executionResponse 
             ?? throw new InvalidOperationException("Could not deserialize the execution response.");

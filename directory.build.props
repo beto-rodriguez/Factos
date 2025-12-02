@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-	  <NuGetVersion>0.1.3</NuGetVersion>
+	  <NuGetVersion>0.1.4</NuGetVersion>
 	  <NuGetAutors>BetoRodriguez</NuGetAutors>
   </PropertyGroup>
 </Project>

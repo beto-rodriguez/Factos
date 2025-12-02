@@ -1,0 +1,48 @@
+name: Avalonia Android
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  run-android-test:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup Android
+        run: dotnet workload install android
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Start Android emulator and run tests
+        uses: reactivecircus/android-emulator-runner@v2.35.0
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          script:
+            dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --test-groups avalonia-android-ci
+
+      - name: Publish test results to GitHub UI
+        uses: dorny/test-reporter@v2.2.0
+        with:
+          name: test-results
+          path: samples/basic/AppTester/bin/Release/net10.0/TestResults/*.trx
+          reporter: dotnet-trx

@@ -1,5 +1,4 @@
 ﻿using Factos.Abstractions;
-using Factos.RemoteTesters;
 using System.Net.Sockets;
 using System.Text.Json;
 
@@ -15,7 +14,7 @@ public class TcpProtocolHandler : IProtocolHandler
             [Constants.QUIT_APP] = QuitAppCommand(controller),
         };
 
-        var address = controller.Settings.IsAndroid
+        var address = OperatingSystem.IsAndroid()
             ? "10.0.2.2"
             : "localhost";
 
@@ -43,7 +42,14 @@ public class TcpProtocolHandler : IProtocolHandler
     }
 
     private static Func<Task<string>> ExecuteCommand(AppController controller) =>
-        async () => JsonSerializer.Serialize(await controller.TestExecutor.Execute());
+        async () =>
+        {
+            var result = await controller.TestExecutor.Execute();
+            var serializedResult = JsonSerializer.Serialize(
+                result,
+                JsonGenerationContext.Default.ExecutionResponse);
+            return serializedResult;
+        };
 
     private static Func<Task<string>> QuitAppCommand(AppController controller) =>
         () => {

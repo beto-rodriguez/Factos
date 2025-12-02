@@ -1,6 +1,6 @@
-﻿using Factos.Protocols;
+﻿using Factos.Abstractions;
+using Factos.Protocols;
 using Factos.RemoteTesters;
-using System.Diagnostics;
 using System.Text.Json;
 
 namespace Factos;
@@ -67,7 +67,11 @@ public abstract class AppController
                     // a local test run, so we run and show the results locally
 
                     var result = await TestExecutor.Execute();
-                    var serialized = JsonSerializer.Serialize(result.Results);
+
+                    var serialized = JsonSerializer.Serialize(
+                        result.Results,
+                        JsonGenerationContext.Default.IEnumerableTestNodeDto);
+
                     await NavigateToView(GetResultsView(serialized));
 
                     resultsShown = true;

@@ -5,6 +5,9 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<RootNamespace>Factos</RootNamespace>
+
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<EnableJsonSourceGeneration>true</EnableJsonSourceGeneration>
 	</PropertyGroup>
 
 	<PropertyGroup>

@@ -25,6 +25,8 @@ public class TestsGenerator : IIncrementalGenerator
         // Generate source for each match
         context.RegisterSourceOutput(testMethods, (spc, groups) =>
         {
+            var hasOne = false;
+
             foreach (var group in groups)
             {
                 if (group is null || group.Key is null) continue;
@@ -77,9 +79,11 @@ public partial class SGTests : Factos.RemoteTesters.SourceGeneratedTestExecutor
     ]);
 }}
 ";
-
+                hasOne = true;
                 spc.AddSource($"SGTests.{sanitizedClassName}.g.cs", SourceText.From(source, Encoding.UTF8));
             }
+
+            if (!hasOne) return;
 
             var init =
 @$"namespace Factos;

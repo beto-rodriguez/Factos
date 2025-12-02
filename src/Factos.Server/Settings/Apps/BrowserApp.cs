@@ -1,11 +1,11 @@
 ﻿namespace Factos.Server.Settings.Apps;
 
-public class BlazorWasmApp : TestApp
+public class BrowserApp : TestApp
 {
     public int Port { get; set; } = 5080;
     public bool HeadlessChrome { get; set; } = false;
 
-    protected override string GetDefaultDisplayName() => nameof(BlazorWasmApp);
+    protected override string GetDefaultDisplayName() => nameof(BrowserApp);
 
     protected override string[]? GetDefaultCommands()
     {
