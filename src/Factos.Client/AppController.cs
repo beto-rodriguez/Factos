@@ -1,6 +1,6 @@
-﻿using Factos.Protocols;
+﻿using Factos.Abstractions;
+using Factos.Protocols;
 using Factos.RemoteTesters;
-using System.Diagnostics;
 using System.Text.Json;
 
 namespace Factos;
@@ -56,7 +56,7 @@ public abstract class AppController
             {
                 finished = await protocolHandler.Execute(this);
             }
-            catch(Exception ex)
+            catch
             {
                 // if there was an error connecting to the server (TCP/HTTP)
                 // we wait a bit before trying again
@@ -70,7 +70,7 @@ public abstract class AppController
 
                     var serialized = JsonSerializer.Serialize(
                         result.Results,
-                        ExecutionResponseSourceGenerationContext.Default.ExecutionResponse);
+                        JsonGenerationContext.Default.IEnumerableTestNodeDto);
 
                     await NavigateToView(GetResultsView(serialized));
 

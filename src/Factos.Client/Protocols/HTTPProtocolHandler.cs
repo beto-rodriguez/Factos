@@ -1,6 +1,6 @@
-﻿using Factos.RemoteTesters;
+﻿using Factos.Abstractions;
+using Factos.RemoteTesters;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Factos.Protocols;
 
@@ -12,7 +12,7 @@ public class HTTPProtocolHandler : IProtocolHandler
         ExecutionResponse testResults = await controller.TestExecutor.Execute();
         var serialized = JsonSerializer.Serialize(
             testResults,
-            ExecutionResponseSourceGenerationContext.Default.ExecutionResponse);
+            JsonGenerationContext.Default.ExecutionResponse);
 
         // now send them to the server at the /nodes endpoint
         var httpClient = new HttpClient();
@@ -22,10 +22,4 @@ public class HTTPProtocolHandler : IProtocolHandler
 
         return response.IsSuccessStatusCode;
     }
-
 }
-
-[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
-[JsonSerializable(typeof(ExecutionResponse))]
-internal partial class ExecutionResponseSourceGenerationContext : JsonSerializerContext
-{ }

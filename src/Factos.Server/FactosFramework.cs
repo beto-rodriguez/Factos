@@ -1,4 +1,5 @@
-﻿using Factos.RemoteTesters;
+﻿using Factos.Abstractions;
+using Factos.RemoteTesters;
 using Factos.Server.ClientConnection;
 using Factos.Server.Settings;
 using Microsoft.Testing.Platform.Extensions.Messages;
@@ -87,8 +88,9 @@ internal sealed class FactosFramework
                 {
                     using (var stream = File.OpenRead(cacheFile))
                     {
-                        var cachedResponse = await JsonSerializer.DeserializeAsync<ExecutionResponse>(stream) ??
-                            throw new Exception("an error occurred while reading tests cache.");
+                        var cachedResponse = await JsonSerializer.DeserializeAsync(
+                            stream, JsonGenerationContext.Default.ExecutionResponse) 
+                                ?? throw new Exception("an error occurred while reading tests cache.");
                         clientResponse = new TestSessionResponse(null, cachedResponse);
                     }
                     
@@ -108,7 +110,7 @@ internal sealed class FactosFramework
                     {
                         File.WriteAllText(
                             $"{appName}_cache.json",
-                            JsonSerializer.Serialize(clientResponse.Response));
+                            JsonSerializer.Serialize(clientResponse.Response, JsonGenerationContext.Default.ExecutionResponse));
                         await deviceWriter.Dimmed($"Cached discovered tests for {appName}.", cancellationToken);
                     }
                 }
