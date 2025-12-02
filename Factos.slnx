@@ -5,8 +5,10 @@
     <File Path=".github/workflows/avalonia-browser.yml" />
     <File Path=".github/workflows/avalonia-windows.yml" />
     <File Path=".github/workflows/blazor.yml" />
+    <File Path=".github/workflows/browser.json" />
     <File Path=".github/workflows/maui-android.yml" />
     <File Path=".github/workflows/maui-windows.yml" />
+    <File Path=".github/workflows/wait-for-process.json" />
     <File Path=".github/workflows/winui.yml" />
     <File Path=".github/workflows/wpf.yml" />
   </Folder>
@@ -15,16 +17,9 @@
     <Project Path="samples/basic/AppTester/AppTester.csproj" />
   </Folder>
   <Folder Name="/samples/basic/testedApps/">
-    <Project Path="samples/basic/AvaloniaTests.Android/AvaloniaTests.Android.csproj">
-      <Deploy Solution="Debug|*" />
-    </Project>
-    <Project Path="samples/basic/AvaloniaTests.Browser/AvaloniaTests.Browser.csproj" />
-    <Project Path="samples/basic/AvaloniaTests.Desktop/AvaloniaTests.Desktop.csproj" />
-    <Project Path="samples/basic/AvaloniaTests.iOS/AvaloniaTests.iOS.csproj" />
-    <Project Path="samples/basic/AvaloniaTests/AvaloniaTests.csproj" />
     <Project Path="samples/basic/BlazorTests/BlazorTests.csproj" />
     <Project Path="samples/basic/MAUITests/MAUITests.csproj">
-      <Deploy />
+      <Deploy Solution="Debug|*" />
     </Project>
     <Project Path="samples/basic/WinUITests/WinUITests.csproj" Id="135c70dd-c6f1-4629-8d59-a23ea8e866f5">
       <Platform Project="x64" />
@@ -40,7 +35,6 @@
   </Folder>
   <Project Path="src/CodeGen/CodeGen.csproj" Id="810399e1-61c4-4e3b-83f7-a40fa09a187c" />
   <Project Path="src/Factos.Abstractions/Factos.Abstractions.csproj" />
-  <Project Path="src/Factos.Avalonia/Factos.Avalonia.csproj" Id="939a1c76-0b62-4c28-b442-b906d4be6783" />
   <Project Path="src/Factos.Blazor/Factos.Blazor.csproj" Id="676e4030-810b-4473-bbe2-f0e2d69d1003" />
   <Project Path="src/Factos.Client/Factos.Client.csproj" />
   <Project Path="src/Factos.MAUI/Factos.MAUI.csproj" />
