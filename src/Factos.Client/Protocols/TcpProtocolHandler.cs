@@ -43,7 +43,9 @@ public class TcpProtocolHandler : IProtocolHandler
     }
 
     private static Func<Task<string>> ExecuteCommand(AppController controller) =>
-        async () => JsonSerializer.Serialize(await controller.TestExecutor.Execute());
+        async () => JsonSerializer.Serialize(
+            await controller.TestExecutor.Execute(),
+            ExecutionResponseSourceGenerationContext.Default.ExecutionResponse);
 
     private static Func<Task<string>> QuitAppCommand(AppController controller) =>
         () => {

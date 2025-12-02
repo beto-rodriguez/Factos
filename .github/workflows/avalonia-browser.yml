@@ -25,6 +25,9 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Setup WASM tools
+        run: dotnet workload install wasm-tools
+
       - name: Run tests
         run:
           dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --test-groups avalonia-wasm-ci
