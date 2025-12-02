@@ -6,16 +6,13 @@ namespace Factos.Protocols;
 
 public class HTTPProtocolHandler : IProtocolHandler
 {
-    public static JsonSerializerOptions SerializerOptions { get; } = new()
-    {
-        TypeInfoResolver = ExecutionResponseSourceGenerationContext.Default
-    };
-
     public async Task<bool> Execute(AppController controller)
     {
         // get the results
         ExecutionResponse testResults = await controller.TestExecutor.Execute();
-        var serialized = JsonSerializer.Serialize(testResults, SerializerOptions);
+        var serialized = JsonSerializer.Serialize(
+            testResults,
+            ExecutionResponseSourceGenerationContext.Default.ExecutionResponse);
 
         // now send them to the server at the /nodes endpoint
         var httpClient = new HttpClient();

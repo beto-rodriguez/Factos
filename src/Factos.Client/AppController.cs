@@ -67,7 +67,11 @@ public abstract class AppController
                     // a local test run, so we run and show the results locally
 
                     var result = await TestExecutor.Execute();
-                    var serialized = JsonSerializer.Serialize(result.Results, HTTPProtocolHandler.SerializerOptions);
+
+                    var serialized = JsonSerializer.Serialize(
+                        result.Results,
+                        ExecutionResponseSourceGenerationContext.Default.ExecutionResponse);
+
                     await NavigateToView(GetResultsView(serialized));
 
                     resultsShown = true;
