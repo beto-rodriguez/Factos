@@ -56,7 +56,7 @@ public abstract class AppController
             {
                 finished = await protocolHandler.Execute(this);
             }
-            catch
+            catch(Exception ex)
             {
                 // if there was an error connecting to the server (TCP/HTTP)
                 // we wait a bit before trying again
@@ -74,7 +74,7 @@ public abstract class AppController
 
                     await NavigateToView(GetResultsView(serialized));
 
-                    resultsShown = true;
+                    //resultsShown = true;
                 }
 
                 await Task.Delay(2000);
@@ -90,4 +90,7 @@ public abstract class AppController
         var intValue = (int)value;
         return (intValue & (intValue - 1)) == 0;
     }
+
+    internal virtual bool GetIsAndroid() =>
+        OperatingSystem.IsAndroid();
 }

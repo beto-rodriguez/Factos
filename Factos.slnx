@@ -8,6 +8,9 @@
     <File Path=".github/workflows/browser.json" />
     <File Path=".github/workflows/maui-android.yml" />
     <File Path=".github/workflows/maui-windows.yml" />
+    <File Path=".github/workflows/uno-android.yml" />
+    <File Path=".github/workflows/uno-browser.yml" />
+    <File Path=".github/workflows/uno-windows.yml" />
     <File Path=".github/workflows/wait-for-process.json" />
     <File Path=".github/workflows/winui.yml" />
     <File Path=".github/workflows/wpf.yml" />
@@ -30,6 +33,9 @@
     <Project Path="samples/basic/MAUITests/MAUITests.csproj">
       <Deploy Solution="Debug|*" />
     </Project>
+    <Project Path="samples/basic/UnoTests/UnoTests/UnoTests.csproj">
+      <Deploy Solution="Debug|*" />
+    </Project>
     <Project Path="samples/basic/WinUITests/WinUITests.csproj" Id="135c70dd-c6f1-4629-8d59-a23ea8e866f5">
       <Platform Project="x64" />
       <Deploy />
@@ -49,6 +55,7 @@
   <Project Path="src/Factos.Client/Factos.Client.csproj" />
   <Project Path="src/Factos.MAUI/Factos.MAUI.csproj" />
   <Project Path="src/Factos.Server/Factos.Server.csproj" />
+  <Project Path="src/Factos.Uno/Factos.Uno.csproj" />
   <Project Path="src/Factos.WinUI/Factos.WinUI.csproj" Id="0bb669fb-0fe3-41e5-a050-6c311bb82251" />
   <Project Path="src/Factos.WPF/Factos.WPF.csproj" />
 </Solution>
