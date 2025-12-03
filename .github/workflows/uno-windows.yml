@@ -27,7 +27,8 @@ jobs:
 
       - name: Setup Uno
         run: |
-          dotnet workload install maui-android
+          dotnet workload install android
+          dotnet workload install ios
 
       - name: Run tests
         run:
