@@ -53,7 +53,7 @@ public static class OutputTransform
             }
         }
 
-        var status = failed > 0 ? "Failed!" : "Success!";
+        var status = failed > 0 ? "Failed!" : $"Success!";
 
         var sb = new StringBuilder();
         sb.AppendLine($"Test run summary: {status}");

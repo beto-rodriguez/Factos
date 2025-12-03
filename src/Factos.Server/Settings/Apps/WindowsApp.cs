@@ -7,8 +7,7 @@ public class WindowsApp : TestApp
     protected override string GetDefaultDisplayName() => nameof(WindowsApp);
 
     protected override string[]? GetDefaultCommands() => [
-            $"dotnet restore {ProjectPath}",
-            $"dotnet publish {ProjectPath} -o {ProjectPath}/{OutputPath} {PublishArgs}",
-            $"{ProjectPath}/{OutputPath}/{ExecutableName} &"
-        ];
+        $"dotnet publish {ProjectPath} -o {ProjectPath}/{OutputPath} {PublishArgs}",
+        $"{ProjectPath}/{OutputPath}/{ExecutableName} &"
+    ];
 }

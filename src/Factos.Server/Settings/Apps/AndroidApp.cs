@@ -17,7 +17,6 @@ public class AndroidApp : TestApp
     protected override string GetDefaultDisplayName() => nameof(AndroidApp);
 
     protected override string[]? GetDefaultCommands() => [
-        $"dotnet restore {ProjectPath}",
         $"dotnet publish {ProjectPath} -o {ProjectPath}/{OutputPath} {PublishArgs}",
         $"{AppRunner.TASK_COMMAND} start-emulator",
         $"adb install -r {ProjectPath}/{OutputPath}/{AppName}-Signed.apk",

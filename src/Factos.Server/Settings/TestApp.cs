@@ -9,7 +9,14 @@ public abstract class TestApp
     public string? DisplayName { get => field ?? GetDefaultDisplayName(); set; }
     public string? PublishArgs { get; set; } = "-c Release";
     public string[]? TestGroups { get; set; }
-    public string[]? Commands { get => field ?? GetDefaultCommands(); set; }
+    public bool ManualStart { get; set; } = false;
+    public string[]? Commands 
+    {
+        get => ManualStart
+            ? []
+            : field ?? GetDefaultCommands();
+        set;
+    }
     public Dictionary<string, Func<Task>> Tasks { get; set; } = [];
 
     protected abstract string GetDefaultDisplayName();

@@ -9,7 +9,7 @@ var testsBuilder = await TestApplication.CreateBuilderAsync(args);
 var root = "../../../../";
 
 #if !DEBUG
-// we are using the release mode in CI/CD pipelines
+// we are using the release mode in CI pipelines
 // we adjust the path, in this case, the relative path to the samples
 root = "samples/basic/";
 #endif
@@ -25,7 +25,7 @@ var settings = new FactosSettings
             ExecutableName = "WPFTests.exe"
         },
 
-        // when test group are defined, the app will only run if the group is specified in the CLI
+        // when test groups are defined, the app will only run if the group is specified in the CLI.
         // the next command will run tests for browser and windows apps:
         // dotnet test --test-groups browser windows
 
@@ -77,6 +77,42 @@ var settings = new FactosSettings
             ProjectPath = $"{root}AvaloniaTests.Browser",
             HeadlessChrome = true, // use headless Chrome for CI
             TestGroups = ["browser", "avalonia-wasm-ci"]
+        },
+
+         // == uno example ==
+        new WindowsApp
+        {
+            ProjectPath = $"{root}UnoTests/UnoTests",
+            ExecutableName = "UnoTests.exe",
+            PublishArgs = "-c Release -f net10.0-desktop",
+            TestGroups = ["windows", "uno", "uno-windows"]
+        },
+        new AndroidApp
+        {
+            ProjectPath = $"{root}UnoTests/UnoTests",
+            AppName = "com.companyname.UnoTests",
+            PublishArgs = "-c Release -f net10.0-android",
+            TestGroups = ["android", "uno", "uno-android"]
+        },
+        new ReactiveCircusActionApp // uses Reactive Circus Action runner for Android CI
+        {
+            ProjectPath = $"{root}UnoTests/UnoTests",
+            AppName = "com.companyname.UnoTests",
+            PublishArgs = "-c Release -f net10.0-android",
+            TestGroups = ["uno-android-ci"]
+        },
+        new BrowserApp
+        {
+            ProjectPath = $"{root}UnoTests/UnoTests",
+            PublishArgs = "-c Release -f net10.0-browserwasm",
+            TestGroups = ["browser", "uno-wasm"]
+        },
+        new BrowserApp
+        {
+            ProjectPath = $"{root}UnoTests/UnoTests",
+            HeadlessChrome = true, // use headless Chrome for CI
+            PublishArgs = "-c Release -f net10.0-browserwasm",
+            TestGroups = ["browser", "uno-wasm-ci"]
         },
 
         // == blazor wasm example ==

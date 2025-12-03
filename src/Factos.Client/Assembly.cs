@@ -5,3 +5,4 @@
 [assembly: InternalsVisibleTo("Factos.MAUI")]
 [assembly: InternalsVisibleTo("Factos.Blazor")]
 [assembly: InternalsVisibleTo("Factos.Avalonia")]
+[assembly: InternalsVisibleTo("Factos.Uno")]

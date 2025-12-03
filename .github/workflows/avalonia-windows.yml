@@ -1,4 +1,4 @@
-name: Avalonia Windows
+name: Avalonia
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  run-test:
+  run-windows-test:
     runs-on: windows-2025
     defaults:
       run:
