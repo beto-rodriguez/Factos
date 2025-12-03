@@ -1,4 +1,4 @@
-name: Uno Browser
+name: Uno
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  run-test:
+  run-browser-test:
     runs-on: ubuntu-24.04
     defaults:
       run:
@@ -25,8 +25,10 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Setup WASM tools
-        run: dotnet workload install wasm-tools
+      - name: Setup Uno
+        run: |
+          dotnet tool install -g uno.check
+          uno-check -v --ci --non-interactive --target web
 
       - name: Run tests
         run:

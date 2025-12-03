@@ -1,4 +1,4 @@
-name: Avalonia Android
+name: Avalonia
 
 on:
   push:

@@ -1,4 +1,4 @@
-name: Avalonia Browser
+name: Avalonia
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  run-test:
+  run-browser-test:
     runs-on: ubuntu-24.04
     defaults:
       run:

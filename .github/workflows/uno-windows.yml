@@ -1,4 +1,4 @@
-name: Avalonia Windows
+name: Uno
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  run-test:
+  run-windows-test:
     runs-on: windows-2025
     defaults:
       run:
@@ -24,6 +24,11 @@ jobs:
         uses: actions/setup-dotnet@v5.0.1
         with:
           dotnet-version: '10.0.x'
+
+      - name: Setup Uno
+        run: |
+          dotnet tool install -g uno.check
+          cmd /c "set __COMPAT_LAYER=RUNASINVOKER && uno-check --ci --non-interactive --target windows"
 
       - name: Run tests
         run:
