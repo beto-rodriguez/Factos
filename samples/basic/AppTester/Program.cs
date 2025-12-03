@@ -19,11 +19,11 @@ var settings = new FactosSettings
     TestedApps = [
 
         // example app without test groups (runs always)
-        new WindowsApp
-        {
-            ProjectPath = $"{root}WPFTests",
-            ExecutableName = "WPFTests.exe"
-        },
+        //new WindowsApp
+        //{
+        //    ProjectPath = $"{root}WPFTests",
+        //    ExecutableName = "WPFTests.exe"
+        //},
 
         // when test groups are defined, the app will only run if the group is specified in the CLI.
         // the next command will run tests for browser and windows apps:
@@ -46,6 +46,14 @@ var settings = new FactosSettings
                 "-c Release -r win-x64 -p:WindowsPackageType=None -p:WindowsAppSDKSelfContained=true " +
                 "-p:PublishTrimmed=false -p:PublishSingleFile=false -p:UseSrc=false",
             TestGroups = ["windows", "winui"]
+        },
+
+        // == winforms example ==
+        new WindowsApp
+        {
+            ProjectPath = $"{root}WinFormsTests",
+            ExecutableName = "WinFormsTests.exe",
+            TestGroups = ["windows", "winforms"]
         },
 
         // == avalonia example ==
