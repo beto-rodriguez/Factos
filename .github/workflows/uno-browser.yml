@@ -28,6 +28,7 @@ jobs:
       - name: Setup Uno
         run: |
           dotnet workload install wasm-tools
+          dotnet workload install android
           dotnet tool install -g uno.check
           dotnet new install Uno.Templates
           uno-check -v --ci --non-interactive --target web --skip unosdk
