@@ -7,7 +7,7 @@ namespace AvaloniaTests;
 
 public class SomeTests
 {
-    [TestMethod]
+    [UITestMethod]
     public async Task SuccessfulTest()
     {
         var app = AppController.Current;
@@ -21,7 +21,7 @@ public class SomeTests
         Assert.True(button.Bounds.Size.Width > 0); // ensure layout has occurred
     }
 
-    [TestMethod]
+    [UITestMethod]
     [ExpectedToFail]
     public void FailedTest()
     {
@@ -29,14 +29,14 @@ public class SomeTests
         Assert.Equal(1 + 1, 3);
     }
 
-    [TestMethod]
+    [UITestMethod]
     [Skip("this test was skipped because...")]
     public void SkippedTest()
     {
         // this will not execute
     }
 
-    [TestMethod]
+    [UITestMethod]
     public async Task EnsureTestsResultsAreCorrect()
     {
         // this method is what actually runs test internally in the testing framework

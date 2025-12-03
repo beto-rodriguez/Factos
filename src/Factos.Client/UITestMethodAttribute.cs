@@ -1,5 +1,5 @@
 ﻿namespace Factos;
 
 [AttributeUsage(AttributeTargets.Method)]
-public class TestMethodAttribute : Attribute
+public class UITestMethod : Attribute
 { }
