@@ -26,10 +26,8 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Setup MAUI
-        run: |
-          dotnet workload install maui-windows
-          dotnet workload install maui-android
-          dotnet workload install maui-ios
+        run:
+          dotnet workload install maui
 
       - name: Run tests
         run:
