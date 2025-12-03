@@ -55,6 +55,8 @@ var settings = new FactosSettings
             ExecutableName = "WinFormsTests.exe",
             TestGroups = ["windows", "winforms"]
         },
+
+        // == etoforms example ==
         new WindowsApp
         {
             ProjectPath = $"{root}EtoFormsTests",
