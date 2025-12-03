@@ -27,10 +27,9 @@ jobs:
 
       - name: Setup Uno
         run: |
-          dotnet workload install maui
           dotnet tool install -g uno.check --version 1.32.*
           dotnet new install Uno.Templates
-          cmd /c "set __COMPAT_LAYER=RUNASINVOKER && uno-check --ci --non-interactive --target windows --skip vswin --skip unosdk"
+          cmd /c "set __COMPAT_LAYER=RUNASINVOKER && uno-check --ci --non-interactive --target windows --skip vswin --skip vswinworkloads --skip vsrestart --skip dotnetworkloads-10.0.100"
 
       - name: Run tests
         run:
