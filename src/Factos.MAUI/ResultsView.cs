@@ -20,7 +20,7 @@ public partial class ResultsView : ContentPage
 
         var resultsEditor = new Editor
         {
-            Text = OutputTransform.SummarizeResults(message),
+            Text = message,
             FontSize = 16,
             TextColor = Colors.WhiteSmoke,
             BackgroundColor = Colors.Transparent,

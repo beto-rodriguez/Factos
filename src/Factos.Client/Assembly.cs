@@ -6,3 +6,5 @@
 [assembly: InternalsVisibleTo("Factos.Blazor")]
 [assembly: InternalsVisibleTo("Factos.Avalonia")]
 [assembly: InternalsVisibleTo("Factos.Uno")]
+[assembly: InternalsVisibleTo("Factos.WinForms")]
+[assembly: InternalsVisibleTo("Factos.EtoForms")]

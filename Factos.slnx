@@ -5,11 +5,13 @@
     <File Path=".github/workflows/avalonia-browser.yml" />
     <File Path=".github/workflows/avalonia-windows.yml" />
     <File Path=".github/workflows/blazor.yml" />
+    <File Path=".github/workflows/etoforms.yml" />
     <File Path=".github/workflows/maui-android.yml" />
     <File Path=".github/workflows/maui-windows.yml" />
     <File Path=".github/workflows/uno-android.yml" />
     <File Path=".github/workflows/uno-browser.yml" />
     <File Path=".github/workflows/uno-windows.yml" />
+    <File Path=".github/workflows/winforms.yml" />
     <File Path=".github/workflows/winui.yml" />
     <File Path=".github/workflows/wpf.yml" />
   </Folder>
@@ -28,12 +30,14 @@
     </Project>
     <Project Path="samples/basic/AvaloniaTests/AvaloniaTests.csproj" />
     <Project Path="samples/basic/BlazorTests/BlazorTests.csproj" />
+    <Project Path="samples/basic/EtoFormsTests/EtoFormsTests.csproj" />
     <Project Path="samples/basic/MAUITests/MAUITests.csproj">
       <Deploy Solution="Debug|*" />
     </Project>
     <Project Path="samples/basic/UnoTests/UnoTests/UnoTests.csproj">
       <Deploy Solution="Debug|*" />
     </Project>
+    <Project Path="samples/basic/WinFormsTests/WinFormsTests.csproj" Id="2575e38e-d3a9-426a-bfcd-61eb5548c94d" />
     <Project Path="samples/basic/WinUITests/WinUITests.csproj" Id="135c70dd-c6f1-4629-8d59-a23ea8e866f5">
       <Platform Project="x64" />
       <Deploy />
@@ -51,9 +55,11 @@
   <Project Path="src/Factos.Avalonia/Factos.Avalonia.csproj" />
   <Project Path="src/Factos.Blazor/Factos.Blazor.csproj" Id="676e4030-810b-4473-bbe2-f0e2d69d1003" />
   <Project Path="src/Factos.Client/Factos.Client.csproj" />
+  <Project Path="src/Factos.EtoForms/Factos.EtoForms.csproj" />
   <Project Path="src/Factos.MAUI/Factos.MAUI.csproj" />
   <Project Path="src/Factos.Server/Factos.Server.csproj" />
   <Project Path="src/Factos.Uno/Factos.Uno.csproj" />
+  <Project Path="src/Factos.WinForms/Factos.WinForms.csproj" Id="40dd81c6-576e-4f7f-a6bd-f604d3db4d2a" />
   <Project Path="src/Factos.WinUI/Factos.WinUI.csproj" Id="0bb669fb-0fe3-41e5-a050-6c311bb82251" />
   <Project Path="src/Factos.WPF/Factos.WPF.csproj" />
 </Solution>

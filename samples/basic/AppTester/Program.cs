@@ -48,6 +48,22 @@ var settings = new FactosSettings
             TestGroups = ["windows", "winui"]
         },
 
+        // == winforms example ==
+        new WindowsApp
+        {
+            ProjectPath = $"{root}WinFormsTests",
+            ExecutableName = "WinFormsTests.exe",
+            TestGroups = ["windows", "winforms"]
+        },
+
+        // == etoforms example ==
+        new WindowsApp
+        {
+            ProjectPath = $"{root}EtoFormsTests",
+            ExecutableName = "EtoFormsTests.exe",
+            TestGroups = ["windows", "etoforms"]
+        },
+
         // == avalonia example ==
         new WindowsApp
         {
