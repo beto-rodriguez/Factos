@@ -16,6 +16,7 @@ public abstract class AppController
     public static AppController Current { get; internal set; } = null!;
     public TestExecutor TestExecutor { get; }
     public ControllerSettings Settings { get; set; }
+    public event Action<string>? LogMessageReceived;
 
     public static async Task InitializeController(AppController controller)
     {
@@ -47,6 +48,8 @@ public abstract class AppController
             ? new HTTPProtocolHandler()
             : new TcpProtocolHandler();
 
+        LogMessage($"using {Settings.Protocol} by client settings.");
+
         var resultsShown = false;
         var finished = false;
 
@@ -56,8 +59,17 @@ public abstract class AppController
             {
                 finished = await protocolHandler.Execute(this);
             }
-            catch
+            catch (Exception? ex)
             {
+                LogMessage($"the protocol execution failed.");
+
+                while (ex is not null)
+                {
+                    LogMessage($" - {ex.Message}");
+                    LogMessage(ex.StackTrace ?? string.Empty);
+                    ex = ex.InnerException;
+                }
+
                 // if there was an error connecting to the server (TCP/HTTP)
                 // we wait a bit before trying again
 
@@ -74,7 +86,7 @@ public abstract class AppController
 
                     await NavigateToView(GetResultsView(serialized));
 
-                    //resultsShown = true;
+                    resultsShown = true;
                 }
 
                 await Task.Delay(2000);
@@ -82,15 +94,18 @@ public abstract class AppController
         }
     }
 
-    public static bool HasSingleFlag(ProtocolType value)
+    internal virtual bool GetIsAndroid() =>
+        OperatingSystem.IsAndroid();
+
+    internal void LogMessage(string message) =>
+        LogMessageReceived?.Invoke(message);
+
+    private static bool HasSingleFlag(ProtocolType value)
     {
-        if (value == ProtocolType.None) 
+        if (value == ProtocolType.None)
             return false;
 
         var intValue = (int)value;
         return (intValue & (intValue - 1)) == 0;
     }
-
-    internal virtual bool GetIsAndroid() =>
-        OperatingSystem.IsAndroid();
 }

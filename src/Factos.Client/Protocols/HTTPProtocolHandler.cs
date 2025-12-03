@@ -1,18 +1,30 @@
 ﻿using Factos.Abstractions;
-using Factos.RemoteTesters;
 using System.Text.Json;
 
 namespace Factos.Protocols;
 
 public class HTTPProtocolHandler : IProtocolHandler
 {
+    static string? cachedResults;
+
     public async Task<bool> Execute(AppController controller)
     {
-        // get the results
-        ExecutionResponse testResults = await controller.TestExecutor.Execute();
-        var serialized = JsonSerializer.Serialize(
-            testResults,
-            JsonGenerationContext.Default.ExecutionResponse);
+        string? serialized;
+
+        if (cachedResults is not null)
+        {
+            serialized = cachedResults;
+        }
+        else
+        {
+            var testResults = await controller.TestExecutor.Execute();
+
+            serialized = JsonSerializer.Serialize(
+                testResults,
+                JsonGenerationContext.Default.ExecutionResponse);
+
+            cachedResults = serialized;
+        }
 
         // now send them to the server at the /nodes endpoint
         var httpClient = new HttpClient();

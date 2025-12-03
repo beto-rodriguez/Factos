@@ -6,7 +6,9 @@ namespace Factos.Uno;
 
 public partial class ResultsView : UserControl
 {
-    public ResultsView(string message)
+    private TextBox messageBox;
+
+    public ResultsView(AppController controller, string message)
     {
         var panel = new StackPanel
         {
@@ -25,10 +27,10 @@ public partial class ResultsView : UserControl
 
         var m = OutputTransform.SummarizeResults(message);
 
-        var messageBox = new TextBox
+        messageBox = new TextBox
         {
             FontSize = 16,
-            Text = m,
+            Text = m.Replace(Environment.NewLine, " "),
             BorderBrush = new SolidColorBrush(Colors.Transparent),
             Foreground = new SolidColorBrush(Colors.WhiteSmoke),
             Background = new SolidColorBrush(Colors.Transparent),
@@ -55,5 +57,12 @@ public partial class ResultsView : UserControl
         };
 
         Content = scrollViewer;
+
+        controller.LogMessageReceived += OnMessageReceived;
+    }
+
+    private void OnMessageReceived(string message)
+    {
+        messageBox.Text += Environment.NewLine + message;
     }
 }

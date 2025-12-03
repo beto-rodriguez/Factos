@@ -83,7 +83,7 @@ public class UnoAppController(ControllerSettings settings)
         new WelcomeView();
 
     internal override object GetResultsView(string message) =>
-        new ResultsView(message);
+        new ResultsView(this, message);
 
     // HACK FOR UNO, OperatingSystem.IsAndroid() does not work correctly here
     internal override bool GetIsAndroid()

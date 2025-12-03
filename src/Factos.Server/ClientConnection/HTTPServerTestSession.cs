@@ -36,9 +36,9 @@ internal sealed class HTTPServerTestSession(
             app = builder.Build();
 
             app.UseCors("AllowAll");
-            app.MapPost(endPoint, (ExecutionResponse nodes) =>
+            app.MapPost(endPoint, async (ExecutionResponse nodes) =>
             {
-                Console.WriteLine("Signal received from WASM!");
+                await deviceWritter.Dimmed("HTTP message received", cancellationToken);
                 NodesReceived?.Invoke(nodes);
                 return Results.Ok();
             });

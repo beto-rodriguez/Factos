@@ -80,7 +80,7 @@ var settings = new FactosSettings
         },
 
          // == uno example ==
-         new WindowsApp
+        new WindowsApp
         {
             ProjectPath = $"{root}UnoTests/UnoTests",
             ExecutableName = "UnoTests.exe",
@@ -91,15 +91,15 @@ var settings = new FactosSettings
         {
             ProjectPath = $"{root}UnoTests/UnoTests",
             AppName = "com.companyname.UnoTests",
-            PublishArgs = "-c Debug -f net10.0-android", // idk why release mode does not work here
+            PublishArgs = "-c Release -f net10.0-android",
             TestGroups = ["android", "uno", "uno-android"]
         },
         new ReactiveCircusActionApp // uses Reactive Circus Action runner for Android CI
         {
             ProjectPath = $"{root}UnoTests/UnoTests",
             AppName = "com.companyname.UnoTests",
-            PublishArgs = "-c Debug -f net10.0-android", // idk why release mode does not work here
-            TestGroups = ["uno-android-ci"]
+            PublishArgs = "-c Release -f net10.0-android",
+            //TestGroups = ["uno-android-ci"]
         },
         new BrowserApp
         {
