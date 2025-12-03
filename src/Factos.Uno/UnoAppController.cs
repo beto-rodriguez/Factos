@@ -42,9 +42,8 @@ public class UnoAppController(ControllerSettings settings)
         {
             platformElement.Loaded -= OnLoaded;
 
-            // in the browser, it seems that we need more time?
-            if (OperatingSystem.IsBrowser())
-                await Task.Delay(1000);
+            // in some platforms it seems we need to wait a bit more after Loaded event
+            await Task.Delay(1000);
 
             tcs.SetResult();
         }
