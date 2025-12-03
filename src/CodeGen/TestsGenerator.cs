@@ -8,7 +8,7 @@ namespace CodeGen;
 [Generator]
 public class TestsGenerator : IIncrementalGenerator
 {
-    private readonly string TestMethodAttribute = "Factos.TestMethodAttribute";
+    private readonly string TestMethodAttribute = "Factos.AppTestMethodAttribute";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {

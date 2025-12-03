@@ -6,7 +6,7 @@ namespace BlazorTests;
 
 public class SomeTests
 {
-    [UITestMethod]
+    [AppTestMethod]
     public async Task SuccessfulTest()
     {
         var app = (BlazorAppController)AppController.Current;
@@ -21,7 +21,7 @@ public class SomeTests
         Assert.True("click me" == buttonText);
     }
 
-    [UITestMethod]
+    [AppTestMethod]
     [ExpectedToFail]
     public void FailedTest()
     {
@@ -29,14 +29,14 @@ public class SomeTests
         Assert.Equal(1 + 1, 3);
     }
 
-    [UITestMethod]
+    [AppTestMethod]
     [Skip("this test was skipped because...")]
     public void SkippedTest()
     {
         // this will not execute
     }
 
-    [UITestMethod]
+    [AppTestMethod]
     public async Task EnsureTestsResultsAreCorrect()
     {
         // this method is what actually runs test internally in the testing framework
