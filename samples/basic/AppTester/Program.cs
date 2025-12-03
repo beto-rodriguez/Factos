@@ -98,6 +98,7 @@ var settings = new FactosSettings
         {
             ProjectPath = $"{root}UnoTests/UnoTests",
             AppName = "com.companyname.UnoTests",
+            PublishArgs = "-c Debug -f net10.0-android", // idk why release mode does not work here
             TestGroups = ["uno-android-ci"]
         },
         new BrowserApp
