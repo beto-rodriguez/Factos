@@ -9,7 +9,7 @@ var testsBuilder = await TestApplication.CreateBuilderAsync(args);
 var root = "../../../../";
 
 #if !DEBUG
-// we are using the release mode in CI/CD pipelines
+// we are using the release mode in CI pipelines
 // we adjust the path, in this case, the relative path to the samples
 root = "samples/basic/";
 #endif
@@ -19,11 +19,11 @@ var settings = new FactosSettings
     TestedApps = [
 
         // example app without test groups (runs always)
-        //new WindowsApp
-        //{
-        //    ProjectPath = $"{root}WPFTests",
-        //    ExecutableName = "WPFTests.exe"
-        //},
+        new WindowsApp
+        {
+            ProjectPath = $"{root}WPFTests",
+            ExecutableName = "WPFTests.exe"
+        },
 
         // when test groups are defined, the app will only run if the group is specified in the CLI.
         // the next command will run tests for browser and windows apps:

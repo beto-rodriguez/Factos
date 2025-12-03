@@ -56,7 +56,7 @@ public abstract class AppController
             {
                 finished = await protocolHandler.Execute(this);
             }
-            catch(Exception ex)
+            catch
             {
                 // if there was an error connecting to the server (TCP/HTTP)
                 // we wait a bit before trying again
