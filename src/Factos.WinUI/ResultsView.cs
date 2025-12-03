@@ -29,7 +29,7 @@ public partial class ResultsView : UserControl
         var messageBox = new TextBox
         {
             FontSize = 16,
-            Text = OutputTransform.SummarizeResults(message),
+            Text = message,
             BorderBrush = new SolidColorBrush(Colors.Transparent),
             Foreground = new SolidColorBrush(Colors.WhiteSmoke),
             Background = new SolidColorBrush(Colors.Transparent),

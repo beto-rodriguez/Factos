@@ -25,7 +25,7 @@ public partial class ResultsView : UserControl
             Margin = new Thickness(0, 0, 0, 25)
         };
 
-        var m = OutputTransform.SummarizeResults(message);
+        var m = message;
 
         messageBox = new TextBox
         {

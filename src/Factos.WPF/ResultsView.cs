@@ -27,7 +27,7 @@ public class ResultsView : UserControl
         var messageBox = new TextBox
         {
             FontSize = 16,
-            Text = OutputTransform.SummarizeResults(message),
+            Text = message,
             BorderBrush = Brushes.Transparent,
             Foreground = Brushes.WhiteSmoke,
             Background = Brushes.Transparent,

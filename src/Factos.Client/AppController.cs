@@ -80,11 +80,9 @@ public abstract class AppController
 
                     var result = await TestExecutor.Execute();
 
-                    var serialized = JsonSerializer.Serialize(
-                        result.Results,
-                        JsonGenerationContext.Default.IEnumerableTestNodeDto);
+                    var formatted = OutputTransform.SummarizeResults(result);
 
-                    await NavigateToView(GetResultsView(serialized));
+                    await NavigateToView(GetResultsView(formatted));
 
                     resultsShown = true;
                 }
