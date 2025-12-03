@@ -2,5 +2,5 @@
 
 public abstract class TestExecutor
 {
-    public abstract Task<ExecutionResponse> Execute();
+    internal abstract Task<ExecutionResponse> Execute();
 }

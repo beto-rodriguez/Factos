@@ -14,7 +14,7 @@ public class SourceGeneratedTestExecutor
         return instance;
     }
 
-    public override async Task<ExecutionResponse> Execute() =>
+    internal override async Task<ExecutionResponse> Execute() =>
         new()
         {
             Discovered = GetDiscoverNodes(),
@@ -36,11 +36,11 @@ public class SourceGeneratedTestExecutor
         }
     }
 
-    public static async Task<List<TestNodeDto>> GetResultsNodes()
+    private static async Task<IEnumerable<TestNodeDto>> GetResultsNodes(IEnumerable<TestInfo>? source = null)
     {
         var nodes = new List<TestNodeDto>();
 
-        foreach (var test in _registeredTests)
+        foreach (var test in source ?? _registeredTests)
         {
             // === FILTERS ARE NOT IMPLEMENTED YET
             //if (runTestExecutionRequest.Filter is TestNodeUidListFilter filter)
@@ -99,4 +99,7 @@ public class SourceGeneratedTestExecutor
 
         return nodes;
     }
+
+    public static async Task<IEnumerable<TestNodeDto>> GetResults(Func<TestInfo, bool> filter) =>
+        await GetResultsNodes(_registeredTests.Where(filter));
 }
