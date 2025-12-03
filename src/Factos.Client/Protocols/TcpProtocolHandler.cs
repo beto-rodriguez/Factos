@@ -14,11 +14,9 @@ public class TcpProtocolHandler : IProtocolHandler
             [Constants.QUIT_APP] = QuitAppCommand(controller),
         };
 
-        //var address = controller.GetIsAndroid()
-        //    ? "10.0.2.2"
-        //    : "localhost";
-
-        var address = "10.0.2.2";
+        var address = controller.GetIsAndroid()
+            ? "10.0.2.2"
+            : "localhost";
 
         using var client = new TcpClient();
         await client.ConnectAsync(address, controller.Settings.TcpPort, DefaultCT());

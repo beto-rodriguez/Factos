@@ -90,7 +90,8 @@ public class UnoAppController(ControllerSettings settings)
     {
 #if ANDROID
         return true;
-#endif
+#else
         return false;
+#endif
     }
 }
