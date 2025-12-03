@@ -99,7 +99,7 @@ var settings = new FactosSettings
             ProjectPath = $"{root}UnoTests/UnoTests",
             AppName = "com.companyname.UnoTests",
             PublishArgs = "-c Release -f net10.0-android",
-            //TestGroups = ["uno-android-ci"]
+            TestGroups = ["uno-android-ci"]
         },
         new BrowserApp
         {
