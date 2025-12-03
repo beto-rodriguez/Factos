@@ -35,4 +35,31 @@ public class SomeTests
     {
         // this will not execute
     }
+
+    [TestMethod]
+    public async Task EnsureTestsResultsAreCorrect()
+    {
+        // this method is what actually runs test internally in the testing framework
+        // lets just ensure that the results are as expected
+        var resultNodes = await Factos.RemoteTesters.SourceGeneratedTestExecutor
+            .GetResults(x => x.DisplayName != nameof(EnsureTestsResultsAreCorrect));
+
+        int passed = 0, failed = 0, skipped = 0;
+
+        foreach (var test in resultNodes)
+        {
+            foreach (var property in test.Properties)
+            {
+                if (property is Factos.Abstractions.Dto.SkippedTestNodeStatePropertyDto)
+                    skipped++;
+                else if (property is Factos.Abstractions.Dto.FailedTestNodeStatePropertyDto)
+                    failed++;
+                else if (property is Factos.Abstractions.Dto.PassedTestNodeStatePropertyDto)
+                    passed++;
+            }
+        }
+
+        Assert.Equal(2, passed);
+        Assert.Equal(1, skipped);
+    }
 }
