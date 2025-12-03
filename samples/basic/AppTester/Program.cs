@@ -59,7 +59,7 @@ var settings = new FactosSettings
         {
             ProjectPath = $"{root}EtoFormsTests",
             ExecutableName = "EtoFormsTests.exe",
-            //TestGroups = ["windows", "etoforms"]
+            TestGroups = ["windows", "etoforms"]
         },
 
         // == avalonia example ==
