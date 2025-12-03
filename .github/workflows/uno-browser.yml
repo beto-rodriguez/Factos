@@ -29,6 +29,8 @@ jobs:
         run: |
           dotnet workload install wasm-tools
           dotnet tool install -g uno.check
+          dotnet new install Uno.ProjectTemplates.Dotnet
+          dotnet new install Uno.Sdk@6.4.40
           uno-check -v --ci --non-interactive --target web
 
       - name: Run tests

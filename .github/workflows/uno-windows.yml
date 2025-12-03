@@ -28,6 +28,8 @@ jobs:
       - name: Setup Uno
         run: |
           dotnet tool install -g uno.check --version 1.32.*
+          dotnet new install Uno.ProjectTemplates.Dotnet
+          dotnet new install Uno.Sdk@6.4.40
           cmd /c "set __COMPAT_LAYER=RUNASINVOKER && uno-check --ci --non-interactive --skip vs"
 
       - name: Run tests

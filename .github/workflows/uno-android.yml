@@ -26,6 +26,8 @@ jobs:
         run: |
           dotnet workload install maui-android
           dotnet tool install -g uno.check
+          dotnet new install Uno.ProjectTemplates.Dotnet
+          dotnet new install Uno.Sdk@6.4.40
           uno-check -v --ci --non-interactive --target android --skip vswin
 
       - name: Enable KVM
