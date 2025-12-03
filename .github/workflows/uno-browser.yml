@@ -30,7 +30,7 @@ jobs:
           dotnet workload install wasm-tools
           dotnet tool install -g uno.check
           dotnet new install Uno.Templates
-          uno-check -v --ci --non-interactive --target web
+          uno-check -v --ci --non-interactive --target web --skip unosdk
 
       - name: Run tests
         run:
