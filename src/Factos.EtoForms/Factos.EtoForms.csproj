@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Eto.SkiaDraw" Version="0.2.0" />
+    <PackageReference Include="SkiaSharp" Version="2.88.6" />
+    <ProjectReference Include="..\Factos.Client\Factos.Client.csproj" />
+  </ItemGroup>
+
+</Project>

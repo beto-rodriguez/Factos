@@ -5,6 +5,7 @@
     <File Path=".github/workflows/avalonia-browser.yml" />
     <File Path=".github/workflows/avalonia-windows.yml" />
     <File Path=".github/workflows/blazor.yml" />
+    <File Path=".github/workflows/etoforms.yml" />
     <File Path=".github/workflows/maui-android.yml" />
     <File Path=".github/workflows/maui-windows.yml" />
     <File Path=".github/workflows/uno-android.yml" />
@@ -29,6 +30,7 @@
     </Project>
     <Project Path="samples/basic/AvaloniaTests/AvaloniaTests.csproj" />
     <Project Path="samples/basic/BlazorTests/BlazorTests.csproj" />
+    <Project Path="samples/basic/EtoFormsTests/EtoFormsTests.csproj" />
     <Project Path="samples/basic/MAUITests/MAUITests.csproj">
       <Deploy Solution="Debug|*" />
     </Project>
@@ -53,6 +55,7 @@
   <Project Path="src/Factos.Avalonia/Factos.Avalonia.csproj" />
   <Project Path="src/Factos.Blazor/Factos.Blazor.csproj" Id="676e4030-810b-4473-bbe2-f0e2d69d1003" />
   <Project Path="src/Factos.Client/Factos.Client.csproj" />
+  <Project Path="src/Factos.EtoForms/Factos.EtoForms.csproj" />
   <Project Path="src/Factos.MAUI/Factos.MAUI.csproj" />
   <Project Path="src/Factos.Server/Factos.Server.csproj" />
   <Project Path="src/Factos.Uno/Factos.Uno.csproj" />

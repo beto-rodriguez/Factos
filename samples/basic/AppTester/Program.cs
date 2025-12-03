@@ -19,11 +19,11 @@ var settings = new FactosSettings
     TestedApps = [
 
         // example app without test groups (runs always)
-        //new WindowsApp
-        //{
-        //    ProjectPath = $"{root}WPFTests",
-        //    ExecutableName = "WPFTests.exe"
-        //},
+        new WindowsApp
+        {
+            ProjectPath = $"{root}WPFTests",
+            ExecutableName = "WPFTests.exe"
+        },
 
         // when test groups are defined, the app will only run if the group is specified in the CLI.
         // the next command will run tests for browser and windows apps:
@@ -54,6 +54,12 @@ var settings = new FactosSettings
             ProjectPath = $"{root}WinFormsTests",
             ExecutableName = "WinFormsTests.exe",
             TestGroups = ["windows", "winforms"]
+        },
+        new WindowsApp
+        {
+            ProjectPath = $"{root}EtoFormsTests",
+            ExecutableName = "EtoFormsTests.exe",
+            //TestGroups = ["windows", "etoforms"]
         },
 
         // == avalonia example ==

@@ -1,7 +1,6 @@
 ﻿using Factos.Abstractions;
 using Factos.Protocols;
 using Factos.RemoteTesters;
-using System.Text.Json;
 
 namespace Factos;
 
