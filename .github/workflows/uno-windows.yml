@@ -28,7 +28,7 @@ jobs:
       - name: Setup Uno
         run: |
           dotnet tool install -g uno.check
-          cmd /c "set __COMPAT_LAYER=RUNASINVOKER && uno-check --ci --non-interactive --target windows"
+          cmd /c "set __COMPAT_LAYER=RUNASINVOKER && uno-check --ci --non-interactive --target windows --skip vs"
 
       - name: Run tests
         run:

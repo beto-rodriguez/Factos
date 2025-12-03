@@ -24,8 +24,9 @@ jobs:
 
       - name: Setup Uno
         run: |
+          dotnet workload install maui-android
           dotnet tool install -g uno.check
-          uno-check -v --ci --non-interactive --target android
+          uno-check -v --ci --non-interactive --target android --skip vswin
 
       - name: Enable KVM
         run: |
