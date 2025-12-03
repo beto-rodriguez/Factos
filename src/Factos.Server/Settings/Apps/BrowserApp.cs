@@ -11,7 +11,6 @@ public class BrowserApp : TestApp
     {
         var commands = new List<string>
         {
-            $"dotnet restore {ProjectPath}",
             $"dotnet publish {ProjectPath} -o {ProjectPath}/{OutputPath} {PublishArgs}",
             "dotnet tool install --global dotnet-serve",
             $"dotnet serve -d {ProjectPath}/{OutputPath}/wwwroot -p {Port} &"

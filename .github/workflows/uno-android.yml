@@ -24,10 +24,7 @@ jobs:
 
       - name: Setup Uno
         run: |
-          dotnet workload install maui-android
-          dotnet tool install -g uno.check
-          dotnet new install Uno.Templates
-          uno-check -v --ci --non-interactive --target android --skip unosdk --skip openjdk --skip androidsdk --skip androidemulator --skip dotnetworkloads-10.0.100
+          dotnet workload install android
 
       - name: Enable KVM
         run: |

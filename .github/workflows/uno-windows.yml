@@ -26,9 +26,8 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Setup Uno
-        run: |
+        run:
           dotnet workload install android
-          dotnet workload install ios
 
       - name: Run tests
         run:
