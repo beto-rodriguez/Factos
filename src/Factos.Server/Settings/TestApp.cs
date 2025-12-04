@@ -35,6 +35,7 @@ public abstract class TestApp
                     .Aggregate("", (a, b) => a + " " + b.Trim())
                     .Trim())
             ];
+        app.OutputPath = config.outputPath ?? app.OutputPath;
         app.TestGroups = config.groups;
 
         return app;
