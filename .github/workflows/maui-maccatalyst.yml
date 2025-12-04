@@ -8,9 +8,6 @@ on:
 jobs:
   run-maccatalyst-test:
     runs-on: macos-15-intel
-    defaults:
-      run:
-        shell: pwsh
     permissions:
       contents: read
       actions: read
