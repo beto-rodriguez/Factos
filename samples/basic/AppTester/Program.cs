@@ -19,7 +19,7 @@ var settings = new FactosSettings
     TestedApps = [
 
         // example app without test groups (runs always)
-        new WindowsApp
+        new DesktopApp
         {
             ProjectPath = $"{root}WPFTests",
             ExecutableName = "WPFTests.exe"
@@ -30,7 +30,7 @@ var settings = new FactosSettings
         // dotnet test --test-groups browser windows
 
         // == wpf example ==
-        new WindowsApp
+        new DesktopApp
         {
             ProjectPath = $"{root}WPFTests",
             ExecutableName = "WPFTests.exe",
@@ -38,7 +38,7 @@ var settings = new FactosSettings
         },
 
         // == winui example ==
-        new WindowsApp
+        new DesktopApp
         {
             ProjectPath = $"{root}WinUITests",
             ExecutableName = "WinUITests.exe",
@@ -49,7 +49,7 @@ var settings = new FactosSettings
         },
 
         // == winforms example ==
-        new WindowsApp
+        new DesktopApp
         {
             ProjectPath = $"{root}WinFormsTests",
             ExecutableName = "WinFormsTests.exe",
@@ -57,7 +57,7 @@ var settings = new FactosSettings
         },
 
         // == etoforms example ==
-        new WindowsApp
+        new DesktopApp
         {
             ProjectPath = $"{root}EtoFormsTests",
             ExecutableName = "EtoFormsTests.exe",
@@ -65,7 +65,7 @@ var settings = new FactosSettings
         },
 
         // == avalonia example ==
-        new WindowsApp
+        new DesktopApp
         {
             ProjectPath = $"{root}AvaloniaTests.Desktop",
             ExecutableName = "AvaloniaTests.Desktop.exe",
@@ -96,7 +96,7 @@ var settings = new FactosSettings
         },
 
          // == uno example ==
-        new WindowsApp
+        new DesktopApp
         {
             ProjectPath = $"{root}UnoTests/UnoTests",
             ExecutableName = "UnoTests.exe",
@@ -145,12 +145,22 @@ var settings = new FactosSettings
         },
 
         // == maui example ==
-        new WindowsApp
+        new DesktopApp
         {
             ProjectPath = $"{root}MAUITests",
             ExecutableName = "MAUITests.exe",
             PublishArgs = "-c Release -f net10.0-windows10.0.19041.0",
             TestGroups = ["windows", "maui", "maui-windows"]
+        },
+        new DesktopApp
+        {
+            ProjectPath = $"{root}MAUITests",
+            ExecutableName = "MAUITests.app",
+            PublishArgs = "-c Release -f net10.0-maccatalyst -p:BuildMacCatalystApp=true",
+            // it seems that the default output path is not working for mac catalyst
+            // lets use the explicit path produced by the publish command
+            OutputPath = "bin/Release/net10.0-maccatalyst",
+            TestGroups = ["maccatalyst", "maui", "maui-maccatalyst"]
         },
         new AndroidApp
         {
