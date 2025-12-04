@@ -2,5 +2,6 @@
   <PropertyGroup>
 	  <NuGetVersion>0.1.6</NuGetVersion>
 	  <NuGetAutors>BetoRodriguez</NuGetAutors>
+    <AvaloniaVersion>11.1.0</AvaloniaVersion>
   </PropertyGroup>
 </Project>
