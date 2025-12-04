@@ -179,15 +179,11 @@ var settings = new FactosSettings
                 dotnet build {app.ProjectPath}
                     -c Release
                     -f net10.0-ios
-                    -p:_DeviceName=:v2:udid=[device] &
+                    -r iossimulator-arm64
+                    -p:_DeviceName=:v2:udid=[device]
                 """,
-                $"""
-                dotnet build {app.ProjectPath}
-                    -t:Run
-                    -c Release
-                    -f net10.0-ios
-                    -p:_DeviceName=:v2:udid=[device] &
-                """
+                $"xcrun simctl install [device] {app.ProjectPath}bin/Release/net10.0-ios/iossimulator-arm64/MAUITest.app",
+                "xcrun simctl launch [device] com.companyname.mauitests"
             ]
         ),
         // new DesktopApp
