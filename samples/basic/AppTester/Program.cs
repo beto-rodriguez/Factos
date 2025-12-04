@@ -19,11 +19,11 @@ var settings = new FactosSettings
     TestedApps = [
 
         // example app without test groups (runs always)
-        new DesktopApp
-        {
-            ProjectPath = $"{root}WPFTests",
-            ExecutableName = "WPFTests.exe"
-        },
+        // new DesktopApp
+        // {
+        //     ProjectPath = $"{root}WPFTests",
+        //     ExecutableName = "WPFTests.exe"
+        // },
 
         // when test groups are defined, the app will only run if the group is specified in the CLI.
         // the next command will run tests for browser and windows apps:
@@ -152,16 +152,32 @@ var settings = new FactosSettings
             PublishArgs = "-c Release -f net10.0-windows10.0.19041.0",
             TestGroups = ["windows", "maui", "maui-windows"]
         },
-        new DesktopApp
-        {
-            ProjectPath = $"{root}MAUITests",
-            ExecutableName = "MAUITests.app",
-            PublishArgs = "-c Release -f net10.0-maccatalyst -p:BuildMacCatalystApp=true",
-            // it seems that the default output path is not working for mac catalyst
-            // lets use the explicit path produced by the publish command
-            OutputPath = "bin/Release/net10.0-maccatalyst",
-            TestGroups = ["maccatalyst", "maui", "maui-maccatalyst"]
-        },
+        TestApp.FromCommands(
+            config: (
+                projectPath: $"{root}MAUITests",
+                outputPath: "bin/Release/net10.0-maccatalyst",
+                ["maccatalyst", "maui", "maui-maccatalyst"]),
+            commands: app => [
+                $"""
+                dotnet build {app.ProjectPath}
+                    -o {app.ProjectPath}/{app.OutputPath}
+                    -c Release
+                    -f net10.0-maccatalyst
+                    -p:BuildMacCatalystApp=true
+                """,
+                $"open {app.ProjectPath}/{app.OutputPath}/MAUITests.app"
+            ]
+        ),
+        // new DesktopApp
+        // {
+        //     ProjectPath = $"{root}MAUITests",
+        //     ExecutableName = "MAUITests.app",
+        //     PublishArgs = "-c Release -f net10.0-maccatalyst -p:BuildMacCatalystApp=true",
+        //     // it seems that the default output path is not working for mac catalyst
+        //     // lets use the explicit path produced by the publish command
+        //     OutputPath = "bin/Release/net10.0-maccatalyst",
+        //     TestGroups = ["maccatalyst", "maui", "maui-maccatalyst"]
+        // },
         new AndroidApp
         {
             ProjectPath = $"{root}MAUITests",

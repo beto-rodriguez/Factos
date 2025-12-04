@@ -21,4 +21,27 @@ public abstract class TestApp
 
     protected abstract string GetDefaultDisplayName();
     protected virtual string[]? GetDefaultCommands() => null;
+
+    public static CustomApp FromCommands(
+        (string projectPath, string? outputPath, string[]? groups) config,
+        Func<CustomApp, string[]> commands)
+    {
+        var app = new CustomApp() { ProjectPath = config.projectPath };
+        app.Commands = commands(app);
+        app.Commands = [.. // clean commands multiple lines
+            app.Commands
+                .Select(x => x
+                    .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
+                    .Aggregate("", (a, b) => a + " " + b.Trim())
+                    .Trim())
+            ];
+        app.TestGroups = config.groups;
+
+        return app;
+    }
+
+    public class CustomApp : TestApp
+    {
+        protected override string GetDefaultDisplayName() => nameof(CustomApp);
+    }
 }
