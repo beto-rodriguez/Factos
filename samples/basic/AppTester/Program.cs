@@ -163,6 +163,7 @@ var settings = new FactosSettings
                     -o {app.ProjectPath}/{app.OutputPath}
                     -c Release
                     -f net10.0-maccatalyst
+                    -r maccatalyst-x64
                     -p:BuildMacCatalystApp=true
                 """,
                 $"open {app.ProjectPath}/{app.OutputPath}/MAUITests.app"
