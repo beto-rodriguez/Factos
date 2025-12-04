@@ -48,6 +48,27 @@ internal sealed class FactosFramework
                     .Where(app => app.TestGroups is null)
             ];
         }
+
+        if (cliOptions.TryGetOptionArgumentList(CommandLineOptionsProvider.OPTION_ENVIRONMENT, out var envVars))
+        {
+            foreach (var envVar in envVars)
+            {
+                var parts = envVar.Split('=', 2);
+                if (parts.Length != 2) throw new ArgumentException(
+                    $"Invalid environment test variable format: {envVar}. Expected format is 'key=value'.");
+
+                foreach (var testedApp in settings.TestedApps)
+                {
+                    if (testedApp.Commands is null) continue;
+
+                    testedApp.Commands = [..
+                        testedApp.Commands.Select(cmd =>
+                            cmd.Replace($"[{parts[0]}]", parts[1]))
+                    ];
+                }
+                
+            }
+        }
     }
 
     protected override string Id =>

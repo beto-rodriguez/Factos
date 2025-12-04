@@ -169,6 +169,21 @@ var settings = new FactosSettings
                 $"open {app.ProjectPath}/{app.OutputPath}/MAUITests.app"
             ]
         ),
+        TestApp.FromCommands(
+            config: (
+                projectPath: $"{root}MAUITests",
+                outputPath: "bin/Release/net10.0-ios",
+                ["maccatalyst", "maui", "maui-ios"]),
+            commands: app => [
+                $"""
+                dotnet build {app.ProjectPath}
+                    -c Release
+                    -f net10.0-ios
+                    -t:Run
+                    -p:_DeviceName=:v2:udid=[device] &
+                """
+            ]
+        ),
         // new DesktopApp
         // {
         //     ProjectPath = $"{root}MAUITests",
