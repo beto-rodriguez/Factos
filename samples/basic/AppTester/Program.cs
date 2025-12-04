@@ -177,9 +177,9 @@ var settings = new FactosSettings
             commands: app => [
                 $"""
                 dotnet build {app.ProjectPath}
+                    -t:Run
                     -c Release
                     -f net10.0-ios
-                    -t:Run
                     -p:_DeviceName=:v2:udid=[device] &
                 """
             ]
