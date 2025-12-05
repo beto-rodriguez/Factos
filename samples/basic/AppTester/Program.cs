@@ -177,7 +177,7 @@ var settings = new FactosSettings
                 ["maccatalyst", "maui", "maui-ios"]),
             commands: app => [
                 $"{Constants.TASK_COMMAND} cd-at-project",
-                $"dotnet run -f net10.0-ios -c Release &",
+                $"dotnet run -f net10.0-ios -c Debug &", // maybe trimming is too agressive?
                 $"{Constants.TASK_COMMAND} cd-pop"
             ]
         ),
