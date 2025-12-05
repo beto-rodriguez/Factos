@@ -164,6 +164,12 @@ internal sealed class FactosFramework
                 "The result of all the apps is displayed below, " +
                 "each app logged its own results (see log above).", cancellationToken);
         }
+        catch (Exception ex)
+        {
+            await deviceWriter.Red(
+                $"An error occurred during test execution: {ex.Message}\n{ex.StackTrace}", cancellationToken);
+            throw;
+        }
         finally
         {
             context.Complete();
