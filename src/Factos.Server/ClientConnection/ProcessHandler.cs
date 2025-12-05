@@ -86,7 +86,14 @@ internal class ProcessHandler
         cancellationToken.Register(Dispose);
 
         if (!isBackground)
+        {
             _process.WaitForExit();
+        }
+        else
+        {
+            _ = deviceWritter.Dimmed(
+                $"Started background process for command '{command}' with PID {_process.Id}", cancellationToken);
+        }
     }
 
     public bool IsRunning => !_process?.HasExited == true;
