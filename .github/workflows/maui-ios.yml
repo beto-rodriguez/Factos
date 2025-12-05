@@ -7,7 +7,7 @@ on:
 
 jobs:
   run-ios-test:
-    runs-on: macos-15-intel
+    runs-on: macos-15
     permissions:
       contents: read
       actions: read
