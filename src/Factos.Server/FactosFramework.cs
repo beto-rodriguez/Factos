@@ -187,6 +187,9 @@ internal sealed class FactosFramework
     {
         var requests = new List<Task<TestSessionResponse>>();
 
+        await deviceWriter.Blue(
+            "Waiting for test nodes from the test app...", cancellationToken);
+
         // listen for test nodes from all protocols
         foreach (var protocol in ProtocolosLifeTime.ActiveProtocols)
             requests.Add(protocol
@@ -210,6 +213,9 @@ internal sealed class FactosFramework
 
             throw new TimeoutException("No test nodes received from any client.");
         }
+
+        await deviceWriter.Blue(
+            $"Test nodes received from the test app!\nprotocol {response.Result.Protocol}\n{response.Result.Response}", cancellationToken);
 
         return response.Result;
     }
