@@ -1,4 +1,5 @@
-﻿using Factos.Server;
+﻿using Factos.Abstractions;
+using Factos.Server;
 using Factos.Server.Settings;
 using Factos.Server.Settings.Apps;
 using Microsoft.Testing.Extensions;
@@ -175,15 +176,9 @@ var settings = new FactosSettings
                 outputPath: "bin/Release/net10.0-ios",
                 ["maccatalyst", "maui", "maui-ios"]),
             commands: app => [
-                $"""
-                dotnet build {app.ProjectPath}
-                    -c Release
-                    -f net10.0-ios
-                    -r iossimulator-arm64
-                    -p:_DeviceName=:v2:udid=[device]
-                """,
-                $"xcrun simctl install [device] {app.ProjectPath}/bin/Release/net10.0-ios/iossimulator-arm64/MAUITest.app &",
-                "xcrun simctl launch [device] com.companyname.mauitests &"
+                $"{Constants.TASK_COMMAND} cd-at-project",
+                $"dotnet run -f net10.0-ios -c Release &",
+                $"{Constants.TASK_COMMAND} cd-pop"
             ]
         ),
         // new DesktopApp

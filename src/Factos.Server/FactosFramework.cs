@@ -69,6 +69,17 @@ internal sealed class FactosFramework
                 
             }
         }
+
+        if (settings.TestedApps.Count == 0)
+        {
+            _ = deviceWriter.Red(
+                "No tested apps were selected to run. " +
+                "Please check that the test groups specified in the CLI match the apps configuration.",
+                CancellationToken.None);
+
+            throw new InvalidOperationException(
+                "No tested apps were selected to run.");
+        }
     }
 
     protected override string Id =>
