@@ -183,7 +183,7 @@ internal sealed class FactosFramework
         Task.FromResult(true);
 
     private async Task<TestSessionResponse> GetActiveProtocolsClientResponse(
-        string appName, ExecuteRequestContext context, CancellationToken cancellationToken)
+        string appName, ExecuteRequestContext context, CancellationToken cancellationToken, int retryCount = 0)
     {
         var requests = new List<Task<TestSessionResponse>>();
 
@@ -226,6 +226,20 @@ internal sealed class FactosFramework
 
         await deviceWriter.Blue(
             $"{response.Result.Response.Results.Count()} nodes received by {response.Result.Protocol}", cancellationToken);
+
+        if (response.Result.Protocol is null)
+        {
+            // im not completely sure when this happens, but it happens on ios simulators sometimes
+            // maybe a race condition... ToDo: investigate further
+            // for now we will retry a few times before failing
+            if (retryCount < 3)
+            {
+                retryCount++;
+                await deviceWriter.Green(
+                    $"No active protocol found, retrying to get test nodes... (attempt {retryCount}/3)", cancellationToken);
+                return await GetActiveProtocolsClientResponse(appName, context, cancellationToken, retryCount);
+            }
+        }
 
         return response.Result;
     }
