@@ -194,8 +194,8 @@ internal sealed class FactosFramework
         foreach (var protocol in ProtocolosLifeTime.ActiveProtocols)
             requests.Add(protocol
                 .RequestClient(appName, context)
-                .ContinueWith(r => r.IsFaulted || r.Result == null 
-                    ? new TestSessionResponse(null, new())
+                .ContinueWith(r => r.IsFaulted || r.Result == null
+                    ? new TestSessionResponse(protocol, new(), r.Exception)
                     : new TestSessionResponse(protocol, r.Result)));
 
         var timeoutTask = GetTimeOutTask();
@@ -214,8 +214,20 @@ internal sealed class FactosFramework
             throw new TimeoutException("No test nodes received from any client.");
         }
 
+        if (response.Exception is not null)
+        {
+            await deviceWriter.Red(
+                $"Error receiving test nodes from the test app: {response.Exception.Message}\n" +
+                $"{response.Exception.StackTrace}", cancellationToken);
+
+            throw new InvalidOperationException(
+                "Error receiving test nodes from the test app.", response.Exception);
+        }
+
         await deviceWriter.Blue(
-            $"Test nodes received from the test app!\nprotocol {response.Result.Protocol}\n{response.Result.Response}", cancellationToken);
+            $"Test nodes received from the test app!\n" +
+            $"protocol {response.Result.Protocol}\n" +
+            $"{response.Result.Response.Results}", cancellationToken);
 
         return response.Result;
     }
@@ -227,10 +239,11 @@ internal sealed class FactosFramework
     }
 
     private class TestSessionResponse(
-        IServerSessionProtocol? protocol, ExecutionResponse response)
+        IServerSessionProtocol? protocol, ExecutionResponse response, Exception? exception = null)
     {
         [JsonIgnore]
         public IServerSessionProtocol? Protocol { get; } = protocol;
         public ExecutionResponse Response { get; } = response;
+        public Exception? Exception { get; } = exception;
     }
 }
