@@ -225,9 +225,7 @@ internal sealed class FactosFramework
         }
 
         await deviceWriter.Blue(
-            $"Test nodes received from the test app!\n" +
-            $"protocol {response.Result.Protocol}\n" +
-            $"{response.Result.Response.Results.Count()} nodes found", cancellationToken);
+            $"{response.Result.Response.Results.Count()} nodes received by {response.Result.Protocol}", cancellationToken);
 
         return response.Result;
     }

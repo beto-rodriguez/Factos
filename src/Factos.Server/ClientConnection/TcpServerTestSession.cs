@@ -67,12 +67,23 @@ internal sealed class TcpServerTestSession(
             using var reader = new StreamReader(stream);
 
             var sb = new StringBuilder();
-            string? line = null;
 
-            while ((line = await reader.ReadLineAsync(cancellationToken)) is not null)
+            while (true)
             {
+                var line = await reader.ReadLineAsync(cancellationToken);
+
                 if (line is null || line.Length == 0)
+                {
+                    await deviceWritter.Green(
+                        $"null or emtpy message received, ignoring, waiting for explicit '{Constants.END_STREAM}'.", cancellationToken);
+
                     continue;
+                }
+
+                // if needed, log each line received
+                // disabled for now to reduce noise
+                // await deviceWritter.Green(
+                //     $"[{appName}:{client.Client.RemoteEndPoint}]: {line}", cancellationToken);
 
                 if (line == Constants.END_STREAM)
                 {
