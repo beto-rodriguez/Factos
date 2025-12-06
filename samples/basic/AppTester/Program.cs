@@ -122,6 +122,15 @@ var settings = new FactosSettings
                 $"{Constants.TASK_COMMAND} cd-pop"
             ]
         ),
+        TestApp.FromCommands(
+            config: (
+                projectPath: $"{root}AvaloniaTests.Desktop",
+                outputPath: "",
+                groups: ["linux", "avalonia", "avalonia-linux"]),
+            commands: app => [
+                $"dotnet run --project {app.ProjectPath} -c Release &"
+            ]
+        ),
 
          // == uno example ==
         new DesktopApp
@@ -177,6 +186,15 @@ var settings = new FactosSettings
                 $"dotnet build -f net10.0-ios -c Debug",
                 $"dotnet run -f net10.0-ios -c Debug &",
                 $"{Constants.TASK_COMMAND} cd-pop"
+            ]
+        ),
+        TestApp.FromCommands(
+            config: (
+                projectPath: $"{root}UnoTests/UnoTests",
+                outputPath: "",
+                groups: ["linux", "uno", "uno-linux"]),
+            commands: app => [
+                $"dotnet run --project {app.ProjectPath} -c Release -f net10.0-desktop &"
             ]
         ),
 
