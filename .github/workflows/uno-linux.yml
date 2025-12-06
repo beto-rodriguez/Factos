@@ -26,6 +26,9 @@ jobs:
         run: 
           dotnet workload install android
 
+      - name: Setup headless display
+        uses: pyvista/setup-headless-display-action@v4.2
+
       - name: Run tests
         run:
           dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --test-groups uno-linux
