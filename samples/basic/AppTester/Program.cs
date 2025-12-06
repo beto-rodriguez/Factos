@@ -97,6 +97,21 @@ var settings = new FactosSettings
         },
         TestApp.FromCommands(
             config: (
+                projectPath: $"{root}AvaloniaTests.Desktop",
+                outputPath: "bin/Release/net10.0/osx-arm64",
+                groups: ["maccatalyst", "avalonia", "avalonia-maccatalyst"]),
+            commands: app => [
+                $"""
+                dotnet publish {app.ProjectPath}
+                    -c Release
+                    -r osx-arm64 
+                    --self-contained true
+                """,
+                $"./{app.ProjectPath}/bin/Release/net10.0/osx-arm64/AvaloniaTests.Desktop &"
+            ]
+        ),
+        TestApp.FromCommands(
+            config: (
                 projectPath: $"{root}AvaloniaTests.iOS",
                 outputPath: "bin/Release/net10.0-ios",
                 ["ios", "avalonia", "avalonia-ios"]),
@@ -143,6 +158,15 @@ var settings = new FactosSettings
             PublishArgs = "-c Release -f net10.0-browserwasm",
             TestGroups = ["browser", "uno-wasm-ci"]
         },
+        TestApp.FromCommands(
+            config: (
+                projectPath: $"{root}UnoTests/UnoTests",
+                outputPath: "bin/Release/net10.0-maccatalyst",
+                ["maccatalyst", "uno", "uno-maccatalyst"]),
+            commands: app => [
+                $"dotnet run --project {app.ProjectPath} -f net10.0-desktop &"
+            ]
+        ),
         TestApp.FromCommands(
             config: (
                 projectPath: $"{root}UnoTests/UnoTests",
