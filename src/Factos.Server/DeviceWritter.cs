@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Factos.Server;
 
-internal class DeviceWritter(IOutputDeviceDataProducer dataProducer, IOutputDevice outputDevice)
+public class DeviceWritter(IOutputDeviceDataProducer dataProducer, IOutputDevice outputDevice)
 {
     const int SeparatorLength = 36;
     const char Separator = '-';

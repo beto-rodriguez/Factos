@@ -1,4 +1,5 @@
-﻿using Factos.Server.Settings;
+﻿using Factos.Abstractions;
+using Factos.Server.Settings;
 using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.OutputDevice;
 
@@ -9,7 +10,6 @@ internal class AppRunner
 {
     readonly DeviceWritter deviceWritter;
     readonly List<ProcessHandler> _activeProcesses = [];
-    public const string TASK_COMMAND = "app-runner-task";
 
     public AppRunner(IOutputDevice outputDevice)
     {
@@ -42,16 +42,16 @@ internal class AppRunner
             await deviceWritter.Normal($"Executing '{command}'...", cancellationToken);
             await deviceWritter.Dimmed($"Creating new process for command '{command}'.", cancellationToken);
 
-            if (command.StartsWith(TASK_COMMAND))
+            if (command.StartsWith(Constants.TASK_COMMAND))
             {
                 // then it is a task registered in the app
-                var taskKey = command[TASK_COMMAND.Length..].Trim();
+                var taskKey = command[Constants.TASK_COMMAND.Length..].Trim();
 
                 if (!app.Tasks.TryGetValue(taskKey, out var taskToRun))
                     throw new InvalidOperationException(
                         $"The task '{taskKey}' was not found in the registered tasks for app '{appName}'.");
 
-                await taskToRun();
+                await taskToRun(deviceWritter, cancellationToken);
             }
             else
             {

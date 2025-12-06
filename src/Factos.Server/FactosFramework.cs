@@ -48,6 +48,38 @@ internal sealed class FactosFramework
                     .Where(app => app.TestGroups is null)
             ];
         }
+
+        if (cliOptions.TryGetOptionArgumentList(CommandLineOptionsProvider.OPTION_ENVIRONMENT, out var envVars))
+        {
+            foreach (var envVar in envVars)
+            {
+                var parts = envVar.Split('=', 2);
+                if (parts.Length != 2) throw new ArgumentException(
+                    $"Invalid environment test variable format: {envVar}. Expected format is 'key=value'.");
+
+                foreach (var testedApp in settings.TestedApps)
+                {
+                    if (testedApp.Commands is null) continue;
+
+                    testedApp.Commands = [..
+                        testedApp.Commands.Select(cmd =>
+                            cmd.Replace($"[{parts[0]}]", parts[1]))
+                    ];
+                }
+                
+            }
+        }
+
+        if (settings.TestedApps.Count == 0)
+        {
+            _ = deviceWriter.Red(
+                "No tested apps were selected to run. " +
+                "Please check that the test groups specified in the CLI match the apps configuration.",
+                CancellationToken.None);
+
+            throw new InvalidOperationException(
+                "No tested apps were selected to run.");
+        }
     }
 
     protected override string Id =>
@@ -132,6 +164,12 @@ internal sealed class FactosFramework
                 "The result of all the apps is displayed below, " +
                 "each app logged its own results (see log above).", cancellationToken);
         }
+        catch (Exception ex)
+        {
+            await deviceWriter.Red(
+                $"An error occurred during test execution: {ex.Message}\n{ex.StackTrace}", cancellationToken);
+            throw;
+        }
         finally
         {
             context.Complete();
@@ -145,16 +183,19 @@ internal sealed class FactosFramework
         Task.FromResult(true);
 
     private async Task<TestSessionResponse> GetActiveProtocolsClientResponse(
-        string appName, ExecuteRequestContext context, CancellationToken cancellationToken)
+        string appName, ExecuteRequestContext context, CancellationToken cancellationToken, int retryCount = 0)
     {
         var requests = new List<Task<TestSessionResponse>>();
+
+        await deviceWriter.Blue(
+            "Waiting for test nodes from the test app...", cancellationToken);
 
         // listen for test nodes from all protocols
         foreach (var protocol in ProtocolosLifeTime.ActiveProtocols)
             requests.Add(protocol
                 .RequestClient(appName, context)
-                .ContinueWith(r => r.IsFaulted || r.Result == null 
-                    ? new TestSessionResponse(null, new())
+                .ContinueWith(r => r.IsFaulted || r.Result == null
+                    ? new TestSessionResponse(protocol, new(), r.Exception)
                     : new TestSessionResponse(protocol, r.Result)));
 
         var timeoutTask = GetTimeOutTask();
@@ -173,6 +214,33 @@ internal sealed class FactosFramework
             throw new TimeoutException("No test nodes received from any client.");
         }
 
+        if (response.Exception is not null)
+        {
+            await deviceWriter.Red(
+                $"Error receiving test nodes from the test app: {response.Exception.Message}\n" +
+                $"{response.Exception.StackTrace}", cancellationToken);
+
+            throw new InvalidOperationException(
+                "Error receiving test nodes from the test app.", response.Exception);
+        }
+
+        await deviceWriter.Blue(
+            $"{response.Result.Response.Results.Count()} nodes received by {response.Result.Protocol}", cancellationToken);
+
+        if (response.Result.Protocol is null)
+        {
+            // im not completely sure when this happens, but it happens on ios simulators sometimes
+            // maybe a race condition... ToDo: investigate further
+            // for now we will retry a few times before failing
+            if (retryCount < 3)
+            {
+                retryCount++;
+                await deviceWriter.Green(
+                    $"No active protocol found, retrying to get test nodes... (attempt {retryCount}/3)", cancellationToken);
+                return await GetActiveProtocolsClientResponse(appName, context, cancellationToken, retryCount);
+            }
+        }
+
         return response.Result;
     }
 
@@ -183,10 +251,11 @@ internal sealed class FactosFramework
     }
 
     private class TestSessionResponse(
-        IServerSessionProtocol? protocol, ExecutionResponse response)
+        IServerSessionProtocol? protocol, ExecutionResponse response, Exception? exception = null)
     {
         [JsonIgnore]
         public IServerSessionProtocol? Protocol { get; } = protocol;
         public ExecutionResponse Response { get; } = response;
+        public Exception? Exception { get; } = exception;
     }
 }

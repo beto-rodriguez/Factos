@@ -1,4 +1,4 @@
-name: WinUI
+name: Uno
 
 on:
   push:
@@ -6,11 +6,8 @@ on:
   pull_request:
 
 jobs:
-  run-test:
-    runs-on: windows-2025
-    defaults:
-      run:
-        shell: pwsh
+  run-maccatalyst-test:
+    runs-on: macos-15
     permissions:
       contents: read
       actions: read
@@ -25,10 +22,17 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Run tests
+      - name: Verify Xcode version
+        run: xcodebuild -version
+
+      - name: Setup
         run: |
-          dotnet build src/Factos.WinUI -c Release # workaround for a moment...
-          dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --test-groups winui
+          dotnet workload install ios
+          dotnet workload install android
+
+      - name: Run tests
+        run:
+          dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --test-groups uno-maccatalyst
 
       - name: Publish results
         uses: dorny/test-reporter@v2.2.0

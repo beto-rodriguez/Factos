@@ -1,4 +1,4 @@
-﻿using Factos.Server.ClientConnection;
+﻿using Factos.Abstractions;
 using System.Diagnostics;
 
 namespace Factos.Server.Settings.Apps;
@@ -18,12 +18,12 @@ public class AndroidApp : TestApp
 
     protected override string[]? GetDefaultCommands() => [
         $"dotnet publish {ProjectPath} -o {ProjectPath}/{OutputPath} {PublishArgs}",
-        $"{AppRunner.TASK_COMMAND} start-emulator",
+        $"{Constants.TASK_COMMAND} start-emulator",
         $"adb install -r {ProjectPath}/{OutputPath}/{AppName}-Signed.apk",
         $"adb shell monkey -p {AppName} -c android.intent.category.LAUNCHER 1"
     ];
 
-    protected virtual async Task StartEmulator()
+    protected virtual async Task StartEmulator(DeviceWritter deviceWritter, CancellationToken cancellationToken)
     {
         if (AdbPath is null && !OperatingSystem.IsWindows())
             throw new InvalidOperationException(
@@ -32,7 +32,7 @@ public class AndroidApp : TestApp
         var adbPath = AdbPath ?? Environment.ExpandEnvironmentVariables(
             @"%ProgramFiles(x86)%\Android\android-sdk\platform-tools\adb.exe");
         
-        Console.WriteLine($"Using adb at: {adbPath}");
+        await deviceWritter.Normal($"Using adb at: {adbPath}", cancellationToken);
 
         if (EmulatorPath is null && !OperatingSystem.IsWindows())
             throw new InvalidOperationException(
@@ -40,8 +40,8 @@ public class AndroidApp : TestApp
 
         var emulatorPath = EmulatorPath ?? Environment.ExpandEnvironmentVariables(
             @"%ProgramFiles(x86)%\Android\android-sdk\emulator\emulator.exe");
-        
-        Console.WriteLine($"Using emulator at: {emulatorPath}");
+
+        await deviceWritter.Normal($"Using emulator at: {emulatorPath}", cancellationToken);
 
         // List AVDs
         var listInfo = new ProcessStartInfo
@@ -76,11 +76,11 @@ public class AndroidApp : TestApp
 
         if (emulatorRunning)
         {
-            Console.WriteLine("An emulator is already running. Skipping start.");
+            await deviceWritter.Dimmed("An emulator is already running. Skipping start.", cancellationToken);
             return;
         }
 
-        Console.WriteLine($"Starting emulator: {firstAvd}");
+        await deviceWritter.Normal($"Starting emulator: {firstAvd}", cancellationToken);
 
         var startInfo = new ProcessStartInfo
         {
@@ -92,7 +92,7 @@ public class AndroidApp : TestApp
         };
 
         Process.Start(startInfo);
-        Console.WriteLine("Emulator launched, waiting for device...");
+        await deviceWritter.Normal("Emulator launched, waiting for device...", cancellationToken);
 
         // Wait until emulator shows up in adb devices
         while (true)
@@ -102,10 +102,12 @@ public class AndroidApp : TestApp
             if (devices.Contains("emulator-"))
                 break;
 
-            await Task.Delay(2000);
+            await Task.Delay(2000, cancellationToken);
+            if (cancellationToken.IsCancellationRequested)
+                return;
         }
 
-        Console.WriteLine("Emulator detected, waiting for boot...");
+        await deviceWritter.Normal("Emulator detected, waiting for boot...", cancellationToken);
 
         // Wait until sys.boot_completed=1
         while (true)
@@ -116,10 +118,12 @@ public class AndroidApp : TestApp
             if (boot.Trim() == "1")
                 break;
 
-            await Task.Delay(2000);
+            await Task.Delay(2000, cancellationToken);
+            if (cancellationToken.IsCancellationRequested)
+                return;
         }
 
-        Console.WriteLine("Emulator fully booted!");
+        await deviceWritter.Normal("Emulator fully booted!", cancellationToken);
     }
 
     private static string? RunAdb(string adbPath, string args)

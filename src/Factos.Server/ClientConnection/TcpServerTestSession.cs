@@ -54,36 +54,47 @@ internal sealed class TcpServerTestSession(
     private async Task<string> ReadStream(
         string name, string appName, CancellationToken cancellationToken)
     {
-        await deviceWritter.Dimmed($"Waiting for {appName} to respond '{name}' on {listener.LocalEndpoint}...", cancellationToken);
-
-        using var client = await listener.AcceptTcpClientAsync(cancellationToken);
-        using var stream = client.GetStream();
-        using var writer = new StreamWriter(stream) { AutoFlush = true };
-
-        writer.WriteLine(name);
-
-        using var reader = new StreamReader(stream);
-
-        var sb = new StringBuilder();
-        string? line = null;
-
-        while ((line = await reader.ReadLineAsync(cancellationToken)) is not null)
+        try
         {
-            if (line is null || line.Length == 0)
-                continue;
+            await deviceWritter.Dimmed($"Waiting for {appName} to respond '{name}' on {listener.LocalEndpoint}...", cancellationToken);
 
-            if (line == Constants.END_STREAM)
+            using var client = await listener.AcceptTcpClientAsync(cancellationToken);
+            using var stream = client.GetStream();
+            using var writer = new StreamWriter(stream) { AutoFlush = true };
+
+            writer.WriteLine(name);
+
+            using var reader = new StreamReader(stream);
+
+            var sb = new StringBuilder();
+            string? line = null;
+
+            while ((line = await reader.ReadLineAsync(cancellationToken)) is not null)
             {
-                await deviceWritter.Dimmed(
-                    "Message received, client connection will be closed soon.", cancellationToken);
+                if (line.Length == 0)
+                    continue;
 
-                break;
+                if (line == Constants.END_STREAM)
+                {
+                    await deviceWritter.Dimmed(
+                        "Message received, client connection will be closed soon.", cancellationToken);
+
+                    break;
+                }
+
+                sb.AppendLine(line);
             }
 
-            sb.AppendLine(line);
+            return sb.ToString();
         }
+        catch (Exception ex)
+        {
+            await deviceWritter.Red(
+                $"Error reading stream '{name}' from client '{appName}': {ex.Message}\n{ex.StackTrace}", cancellationToken);
 
-        return sb.ToString();
+            throw new InvalidOperationException(
+                $"Could not read stream '{name}' from client '{appName}'.", ex);
+        }
     }
 
     private static async Task<ExecutionResponse> GetTestNodesStream(
