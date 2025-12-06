@@ -28,6 +28,7 @@ jobs:
       - name: Setup
         run:
           dotnet workload install ios
+          dotnet workload install android
 
       - name: Run tests
         run:

@@ -104,7 +104,7 @@ var settings = new FactosSettings
                 $"""
                 dotnet publish {app.ProjectPath}
                     -c Release
-                    -r osx-arm64 
+                    -r osx-arm64
                     --self-contained true
                 """,
                 $"./{app.ProjectPath}/bin/Release/net10.0/osx-arm64/AvaloniaTests.Desktop &"
@@ -207,15 +207,9 @@ var settings = new FactosSettings
                 outputPath: "bin/Release/net10.0-maccatalyst",
                 ["maccatalyst", "maui", "maui-maccatalyst"]),
             commands: app => [
-                $"""
-                dotnet build {app.ProjectPath}
-                    -o {app.ProjectPath}/{app.OutputPath}
-                    -c Release
-                    -f net10.0-maccatalyst
-                    -r maccatalyst-x64
-                    -p:BuildMacCatalystApp=true
-                """,
-                $"open {app.ProjectPath}/{app.OutputPath}/MAUITests.app"
+                $"{Constants.TASK_COMMAND} cd-at-project",
+                $"dotnet run -f net10.0-maccatalyst -c Debug &",
+                $"{Constants.TASK_COMMAND} cd-pop"
             ]
         ),
         TestApp.FromCommands(
@@ -230,16 +224,6 @@ var settings = new FactosSettings
                 $"{Constants.TASK_COMMAND} cd-pop"
             ]
         ),
-        // new DesktopApp
-        // {
-        //     ProjectPath = $"{root}MAUITests",
-        //     ExecutableName = "MAUITests.app",
-        //     PublishArgs = "-c Release -f net10.0-maccatalyst -p:BuildMacCatalystApp=true",
-        //     // it seems that the default output path is not working for mac catalyst
-        //     // lets use the explicit path produced by the publish command
-        //     OutputPath = "bin/Release/net10.0-maccatalyst",
-        //     TestGroups = ["maccatalyst", "maui", "maui-maccatalyst"]
-        // },
         new AndroidApp
         {
             ProjectPath = $"{root}MAUITests",
