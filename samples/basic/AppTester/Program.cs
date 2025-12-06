@@ -1,4 +1,5 @@
-﻿using Factos.Server;
+﻿using Factos.Abstractions;
+using Factos.Server;
 using Factos.Server.Settings;
 using Factos.Server.Settings.Apps;
 using Microsoft.Testing.Extensions;
@@ -19,18 +20,18 @@ var settings = new FactosSettings
     TestedApps = [
 
         // example app without test groups (runs always)
-        new WindowsApp
-        {
-            ProjectPath = $"{root}WPFTests",
-            ExecutableName = "WPFTests.exe"
-        },
+        // new DesktopApp
+        // {
+        //     ProjectPath = $"{root}WPFTests",
+        //     ExecutableName = "WPFTests.exe"
+        // },
 
         // when test groups are defined, the app will only run if the group is specified in the CLI.
         // the next command will run tests for browser and windows apps:
         // dotnet test --test-groups browser windows
 
         // == wpf example ==
-        new WindowsApp
+        new DesktopApp
         {
             ProjectPath = $"{root}WPFTests",
             ExecutableName = "WPFTests.exe",
@@ -38,7 +39,7 @@ var settings = new FactosSettings
         },
 
         // == winui example ==
-        new WindowsApp
+        new DesktopApp
         {
             ProjectPath = $"{root}WinUITests",
             ExecutableName = "WinUITests.exe",
@@ -49,7 +50,7 @@ var settings = new FactosSettings
         },
 
         // == winforms example ==
-        new WindowsApp
+        new DesktopApp
         {
             ProjectPath = $"{root}WinFormsTests",
             ExecutableName = "WinFormsTests.exe",
@@ -57,7 +58,7 @@ var settings = new FactosSettings
         },
 
         // == etoforms example ==
-        new WindowsApp
+        new DesktopApp
         {
             ProjectPath = $"{root}EtoFormsTests",
             ExecutableName = "EtoFormsTests.exe",
@@ -65,7 +66,7 @@ var settings = new FactosSettings
         },
 
         // == avalonia example ==
-        new WindowsApp
+        new DesktopApp
         {
             ProjectPath = $"{root}AvaloniaTests.Desktop",
             ExecutableName = "AvaloniaTests.Desktop.exe",
@@ -94,9 +95,36 @@ var settings = new FactosSettings
             HeadlessChrome = true, // use headless Chrome for CI
             TestGroups = ["browser", "avalonia-wasm-ci"]
         },
+        TestApp.FromCommands(
+            config: (
+                projectPath: $"{root}AvaloniaTests.Desktop",
+                outputPath: "bin/Release/net10.0/osx-arm64",
+                groups: ["maccatalyst", "avalonia", "avalonia-maccatalyst"]),
+            commands: app => [
+                $"""
+                dotnet publish {app.ProjectPath}
+                    -c Release
+                    -r osx-arm64
+                    --self-contained true
+                """,
+                $"./{app.ProjectPath}/bin/Release/net10.0/osx-arm64/AvaloniaTests.Desktop &"
+            ]
+        ),
+        TestApp.FromCommands(
+            config: (
+                projectPath: $"{root}AvaloniaTests.iOS",
+                outputPath: "bin/Release/net10.0-ios",
+                ["ios", "avalonia", "avalonia-ios"]),
+            commands: app => [
+                $"{Constants.TASK_COMMAND} cd-at-project",
+                $"dotnet build -f net10.0-ios -c Debug",
+                $"dotnet run -f net10.0-ios -c Debug &",
+                $"{Constants.TASK_COMMAND} cd-pop"
+            ]
+        ),
 
          // == uno example ==
-        new WindowsApp
+        new DesktopApp
         {
             ProjectPath = $"{root}UnoTests/UnoTests",
             ExecutableName = "UnoTests.exe",
@@ -130,6 +158,27 @@ var settings = new FactosSettings
             PublishArgs = "-c Release -f net10.0-browserwasm",
             TestGroups = ["browser", "uno-wasm-ci"]
         },
+        TestApp.FromCommands(
+            config: (
+                projectPath: $"{root}UnoTests/UnoTests",
+                outputPath: "bin/Release/net10.0-maccatalyst",
+                ["maccatalyst", "uno", "uno-maccatalyst"]),
+            commands: app => [
+                $"dotnet run --project {app.ProjectPath} -f net10.0-desktop &"
+            ]
+        ),
+        TestApp.FromCommands(
+            config: (
+                projectPath: $"{root}UnoTests/UnoTests",
+                outputPath: "bin/Release/net10.0-ios",
+                ["ios", "uno", "uno-ios"]),
+            commands: app => [
+                $"{Constants.TASK_COMMAND} cd-at-project",
+                $"dotnet build -f net10.0-ios -c Debug",
+                $"dotnet run -f net10.0-ios -c Debug &",
+                $"{Constants.TASK_COMMAND} cd-pop"
+            ]
+        ),
 
         // == blazor wasm example ==
         new BrowserApp
@@ -145,13 +194,36 @@ var settings = new FactosSettings
         },
 
         // == maui example ==
-        new WindowsApp
+        new DesktopApp
         {
             ProjectPath = $"{root}MAUITests",
             ExecutableName = "MAUITests.exe",
             PublishArgs = "-c Release -f net10.0-windows10.0.19041.0",
             TestGroups = ["windows", "maui", "maui-windows"]
         },
+        TestApp.FromCommands(
+            config: (
+                projectPath: $"{root}MAUITests",
+                outputPath: "bin/Release/net10.0-maccatalyst",
+                ["maccatalyst", "maui", "maui-maccatalyst"]),
+            commands: app => [
+                $"{Constants.TASK_COMMAND} cd-at-project",
+                $"dotnet run -f net10.0-maccatalyst -c Debug &",
+                $"{Constants.TASK_COMMAND} cd-pop"
+            ]
+        ),
+        TestApp.FromCommands(
+            config: (
+                projectPath: $"{root}MAUITests",
+                outputPath: "bin/Release/net10.0-ios",
+                ["ios", "maui", "maui-ios"]),
+            commands: app => [
+                $"{Constants.TASK_COMMAND} cd-at-project",
+                $"dotnet build -f net10.0-ios -c Debug",
+                $"dotnet run -f net10.0-ios -c Debug &",
+                $"{Constants.TASK_COMMAND} cd-pop"
+            ]
+        ),
         new AndroidApp
         {
             ProjectPath = $"{root}MAUITests",

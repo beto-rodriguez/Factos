@@ -9,6 +9,7 @@ internal class CommandLineOptionsProvider
     : BaseExtension, ICommandLineOptionsProvider
 {
     public const string OPTION_TEST_GROUP = "test-groups";
+    public const string OPTION_ENVIRONMENT = "test-env";
 
     override protected string Id => nameof(CommandLineOptionsProvider);
 
@@ -16,6 +17,12 @@ internal class CommandLineOptionsProvider
         new CommandLineOption(
             OPTION_TEST_GROUP,
             $"Defines the tests to run based on the defined {nameof(TestApp.TestGroups)} of each {nameof(TestApp)}.",
+            ArgumentArity.OneOrMore,
+            false),
+        new CommandLineOption(
+            OPTION_ENVIRONMENT,
+            "Defines test environment variables, this variables will be replaced in commands. Use the format 'key=value', " +
+            "then the command can use [key] to be replaced with value.",
             ArgumentArity.OneOrMore,
             false)
         ];

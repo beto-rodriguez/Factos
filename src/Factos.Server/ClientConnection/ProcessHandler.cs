@@ -41,7 +41,7 @@ internal class ProcessHandler
             if (string.IsNullOrEmpty(e.Data)) 
                 return;
 
-            await deviceWritter.Dimmed(e.Data, cancellationToken);
+            await deviceWritter.Dimmed($"[{fileName}:{_process.Id}]{e.Data}", cancellationToken);
         };
 
         _process.ErrorDataReceived += async (sender, e) =>
@@ -49,7 +49,7 @@ internal class ProcessHandler
             if (string.IsNullOrEmpty(e.Data)) 
                 return;
 
-            await deviceWritter.Red(e.Data, cancellationToken);
+            await deviceWritter.Red($"[{fileName}:{_process.Id}]{e.Data}", cancellationToken);
         };
 
         _process.Exited += async (sender, e) =>
@@ -68,14 +68,14 @@ internal class ProcessHandler
                 Command:    '{command}'
                 """;
 
-                await deviceWritter.Red(message, cancellationToken);
+                await deviceWritter.Red($"[{fileName}:{_process.Id}]{message}", cancellationToken);
 
                 Environment.Exit(1);
             }
             else
             {
                 await deviceWritter.Dimmed(
-                    $"The process finished successfully for command '{command}'", cancellationToken);
+                    $"[{fileName}:{_process.Id}] The process finished successfully for command '{command}'", cancellationToken);
             }
         };
 
@@ -86,7 +86,14 @@ internal class ProcessHandler
         cancellationToken.Register(Dispose);
 
         if (!isBackground)
+        {
             _process.WaitForExit();
+        }
+        else
+        {
+            _ = deviceWritter.Dimmed(
+                $"[{fileName}:{_process.Id}] Started background process for command '{command}' with PID {_process.Id}", cancellationToken);
+        }
     }
 
     public bool IsRunning => !_process?.HasExited == true;
@@ -100,7 +107,9 @@ internal class ProcessHandler
         if (!_process.HasExited)
         {
             _process.Kill(true);
-            _process.WaitForExit();
+            // disable for now? it seems to hang sometimes in macOS
+            // in background processes
+            // _process.WaitForExit();
         }
 
         _process.Dispose();
