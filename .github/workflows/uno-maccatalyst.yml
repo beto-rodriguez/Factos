@@ -25,6 +25,10 @@ jobs:
       - name: Verify Xcode version
         run: xcodebuild -version
 
+      - name: Setup
+        run:
+          dotnet workload install ios
+
       - name: Run tests
         run:
           dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --test-groups uno-maccatalyst

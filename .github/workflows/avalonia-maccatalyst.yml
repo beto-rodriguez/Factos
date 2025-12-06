@@ -1,4 +1,4 @@
-name: MAUI
+name: Avalonia
 
 on:
   push:

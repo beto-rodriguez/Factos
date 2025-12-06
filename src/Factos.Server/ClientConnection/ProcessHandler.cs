@@ -107,7 +107,9 @@ internal class ProcessHandler
         if (!_process.HasExited)
         {
             _process.Kill(true);
-            _process.WaitForExit();
+            // disable for now? it seems to hang sometimes in macOS
+            // in background processes
+            // _process.WaitForExit();
         }
 
         _process.Dispose();
