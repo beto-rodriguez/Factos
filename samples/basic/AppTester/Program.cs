@@ -95,6 +95,18 @@ var settings = new FactosSettings
             HeadlessChrome = true, // use headless Chrome for CI
             TestGroups = ["browser", "avalonia-wasm-ci"]
         },
+        TestApp.FromCommands(
+            config: (
+                projectPath: $"{root}AvaloniaTests.iOS",
+                outputPath: "bin/Release/net10.0-ios",
+                ["ios", "avalonia", "avalonia-ios"]),
+            commands: app => [
+                $"{Constants.TASK_COMMAND} cd-at-project",
+                $"dotnet build -f net10.0-ios -c Debug",
+                $"dotnet run -f net10.0-ios -c Debug &",
+                $"{Constants.TASK_COMMAND} cd-pop"
+            ]
+        ),
 
          // == uno example ==
         new DesktopApp
@@ -131,6 +143,18 @@ var settings = new FactosSettings
             PublishArgs = "-c Release -f net10.0-browserwasm",
             TestGroups = ["browser", "uno-wasm-ci"]
         },
+        TestApp.FromCommands(
+            config: (
+                projectPath: $"{root}UnoTests/UnoTests",
+                outputPath: "bin/Release/net10.0-ios",
+                ["ios", "uno", "uno-ios"]),
+            commands: app => [
+                $"{Constants.TASK_COMMAND} cd-at-project",
+                $"dotnet build -f net10.0-ios -c Debug",
+                $"dotnet run -f net10.0-ios -c Debug &",
+                $"{Constants.TASK_COMMAND} cd-pop"
+            ]
+        ),
 
         // == blazor wasm example ==
         new BrowserApp
@@ -174,11 +198,11 @@ var settings = new FactosSettings
             config: (
                 projectPath: $"{root}MAUITests",
                 outputPath: "bin/Release/net10.0-ios",
-                ["maccatalyst", "maui", "maui-ios"]),
+                ["ios", "maui", "maui-ios"]),
             commands: app => [
                 $"{Constants.TASK_COMMAND} cd-at-project",
                 $"dotnet build -f net10.0-ios -c Debug",
-                $"dotnet run -f net10.0-ios -c Debug &", // maybe trimming is too agressive?
+                $"dotnet run -f net10.0-ios -c Debug &",
                 $"{Constants.TASK_COMMAND} cd-pop"
             ]
         ),
