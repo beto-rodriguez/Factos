@@ -56,13 +56,13 @@ testedApps
 
     // == UNO ==
     .Add(project: $"{root}/UnoTests/UnoTests",      uid: "uno",                 targetFramework: "[tfm]")
-    .Add(project: $"{root}/UnoTests/UnoTests",      uid: "uno-browser",         targetFramework: "net10.0-browserwasm", appHost: AppHost.Browser)
+    .Add(project: $"{root}/UnoTests/UnoTests",      uid: "uno-browser",         targetFramework: "net10.0-browserwasm", appHost: AppHost.HeadlessChrome)
 
     // == BLAZOR ==
     .Add(project: $"{root}/BlazorTests",            uid: "blazor",         appHost: AppHost.HeadlessChrome)
 
     // == ETO ==
-    .Add(project: $"{root}EtoFormsTests",           uid: "eto");
+    .Add(project: $"{root}/EtoFormsTests",           uid: "eto");
 
 #endif
 
