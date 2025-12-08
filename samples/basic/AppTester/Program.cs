@@ -14,8 +14,7 @@ var testedApps = new List<TestedApp>();
 var root = "../../../..";
 
 testedApps
-    //.Add(project: $"{root}/WPFTests");
-    .Add(project: $"{root}/BlazorTests", configuration: "Release", uid: "blazor-wasm", appHost: AppHost.HeadlessChrome);
+    .Add(project: $"{root}/WPFTests");
 #else
 
 // We also add applications to test in Release mode
