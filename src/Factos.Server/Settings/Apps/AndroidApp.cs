@@ -3,25 +3,22 @@ using System.Diagnostics;
 
 namespace Factos.Server.Settings.Apps;
 
-public class AndroidApp : TestApp
+public class AndroidApp : BaseTestApp
 {
     public AndroidApp()
     {
         Tasks.Add("start-emulator", StartEmulator);
+        StartupCommands = [
+            $"dotnet publish {ProjectPath} -o {ProjectPath}/{OutputPath} {PublishArgs}",
+            $"{Constants.TASK_COMMAND} start-emulator",
+            $"adb install -r {ProjectPath}/{OutputPath}/{AppName}-Signed.apk",
+            $"adb shell monkey -p {AppName} -c android.intent.category.LAUNCHER 1"
+        ];
     }
 
     public required string AppName { get; set; }
     public string? AdbPath { get; set; }
     public string? EmulatorPath { get; set; }
-
-    protected override string GetDefaultDisplayName() => nameof(AndroidApp);
-
-    protected override string[]? GetDefaultCommands() => [
-        $"dotnet publish {ProjectPath} -o {ProjectPath}/{OutputPath} {PublishArgs}",
-        $"{Constants.TASK_COMMAND} start-emulator",
-        $"adb install -r {ProjectPath}/{OutputPath}/{AppName}-Signed.apk",
-        $"adb shell monkey -p {AppName} -c android.intent.category.LAUNCHER 1"
-    ];
 
     protected virtual async Task StartEmulator(DeviceWritter deviceWritter, CancellationToken cancellationToken)
     {

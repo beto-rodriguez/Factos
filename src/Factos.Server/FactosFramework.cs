@@ -2,6 +2,7 @@
 using Factos.RemoteTesters;
 using Factos.Server.ClientConnection;
 using Factos.Server.Settings;
+using Factos.Server.Settings.Apps;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
@@ -18,59 +19,41 @@ internal sealed class FactosFramework
     readonly FactosSettings settings;
     readonly DeviceWritter deviceWriter;
     readonly AppRunner appRunner;
+    readonly IList<TestedApp> testedApps = [];
 
     public FactosFramework(IServiceProvider serviceProvider, FactosSettings factosSettings)
     {
         var outputDevice = serviceProvider.GetOutputDevice();
+        var cliOptions = serviceProvider.GetCommandLineOptions();
         deviceWriter = new(this, outputDevice);
-        appRunner = new(outputDevice);
+        appRunner = new(outputDevice, cliOptions);
         settings = factosSettings;
 
-        var cliOptions = serviceProvider.GetCommandLineOptions();
-
-        if (cliOptions.TryGetOptionArgumentList(CommandLineOptionsProvider.OPTION_TEST_GROUP, out var group))
+        if (cliOptions.TryGetOptionArgumentList(CommandLineOptionsProvider.OPTION_SELECT, out var group))
         {
-            var groupSet = new HashSet<string>(group);
-
-            settings.TestedApps = [..
+            testedApps = [..
                 settings.TestedApps
                     .Where(app =>
                     {
-                        if (app.TestGroups is null) return false;
-                        return app.TestGroups.Any(g => groupSet.Contains(g));
+                        foreach (var g in group)
+                        {
+                            if (string.Equals(app.ProjectPath, g, StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(app.Uid, g, StringComparison.OrdinalIgnoreCase))
+                            {
+                                return true;
+                            }
+                        }
+
+                        return false;
                     })
             ];
         }
         else
         {
-            settings.TestedApps = [..
-                settings.TestedApps
-                    .Where(app => app.TestGroups is null)
-            ];
+            testedApps = [.. settings.TestedApps ];
         }
 
-        if (cliOptions.TryGetOptionArgumentList(CommandLineOptionsProvider.OPTION_ENVIRONMENT, out var envVars))
-        {
-            foreach (var envVar in envVars)
-            {
-                var parts = envVar.Split('=', 2);
-                if (parts.Length != 2) throw new ArgumentException(
-                    $"Invalid environment test variable format: {envVar}. Expected format is 'key=value'.");
-
-                foreach (var testedApp in settings.TestedApps)
-                {
-                    if (testedApp.Commands is null) continue;
-
-                    testedApp.Commands = [..
-                        testedApp.Commands.Select(cmd =>
-                            cmd.Replace($"[{parts[0]}]", parts[1]))
-                    ];
-                }
-                
-            }
-        }
-
-        if (settings.TestedApps.Count == 0)
+        if (testedApps.Count == 0)
         {
             _ = deviceWriter.Red(
                 "No tested apps were selected to run. " +
@@ -99,9 +82,9 @@ internal sealed class FactosFramework
         {
             var appNames = new HashSet<string?>();
 
-            foreach (var testedApp in settings.TestedApps)
+            foreach (var testedApp in testedApps)
             {
-                var appName = testedApp.DisplayName ?? "test runner";
+                var appName = testedApp.Uid ?? "test runner";
                 // sanitize name to be file system friendly
                 foreach (var c in Path.GetInvalidFileNameChars())
                     appName = appName.Replace(c, '_');
@@ -109,7 +92,7 @@ internal sealed class FactosFramework
                 // prevent repeated names
                 var i = 1;
                 while (!appNames.Add(appName))
-                    appName = $"{testedApp.DisplayName} ({i++})";
+                    appName = $"{testedApp.Uid} ({i++})";
                 var cacheFile = $"{appName}_cache.json";
 
                 // lets try to cache results on discovery to prevent

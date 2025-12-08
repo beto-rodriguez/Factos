@@ -1,22 +1,14 @@
 ﻿namespace Factos.Server.Settings.Apps;
 
-public class DesktopApp : TestApp
+public class DesktopApp : BaseTestApp
 {
-    /// <summary>
-    /// Gets or sets the name of the executable to run the app, if the extension is not provided,
-    /// it will be resolved based on the OS (.exe for Windows, .app for MacOS or none for Linux).
-    /// </summary>
-    public required string ExecutableName { get; set; }
-
-    protected override string GetDefaultDisplayName() => nameof(DesktopApp);
-
-    protected override string[]? GetDefaultCommands()
+    public DesktopApp()
     {
         List<string> commands = [
-            $"dotnet publish {ProjectPath} -o {ProjectPath}/{OutputPath} {PublishArgs}"
-        ];
+           $"dotnet publish {ProjectPath} -o {ProjectPath}/{OutputPath} {PublishArgs}"
+       ];
 
-        var extensionName = Path.GetExtension(ExecutableName).ToLowerInvariant();
+        var extensionName = Path.GetExtension(ExecutableName)?.ToLowerInvariant();
 
         if (OperatingSystem.IsWindows())
         {
@@ -36,6 +28,13 @@ public class DesktopApp : TestApp
             commands.Add($"{ProjectPath}/{OutputPath}/{ExecutableName} &");
         }
 
-        return [.. commands];
+        StartupCommands = [.. commands];
     }
+
+    /// <summary>
+    /// Gets or sets the name of the executable to run the app, if the extension is not provided,
+    /// it will be resolved based on the OS (.exe for Windows, .app for MacOS or none for Linux).
+    /// </summary>
+    public required string ExecutableName { get; set; }
+
 }

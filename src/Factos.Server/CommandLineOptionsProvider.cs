@@ -1,4 +1,4 @@
-﻿using Factos.Server.Settings;
+﻿using Factos.Server.Settings.Apps;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.CommandLine;
@@ -8,15 +8,15 @@ namespace Factos.Server;
 internal class CommandLineOptionsProvider
     : BaseExtension, ICommandLineOptionsProvider
 {
-    public const string OPTION_TEST_GROUP = "test-groups";
+    public const string OPTION_SELECT = "select";
     public const string OPTION_ENVIRONMENT = "test-env";
 
     override protected string Id => nameof(CommandLineOptionsProvider);
 
     public IReadOnlyCollection<CommandLineOption> GetCommandLineOptions() => [
         new CommandLineOption(
-            OPTION_TEST_GROUP,
-            $"Defines the tests to run based on the defined {nameof(TestApp.TestGroups)} of each {nameof(TestApp)}.",
+            OPTION_SELECT,
+            $"Defines the apps to run, either by {nameof(TestedApp.ProjectPath)} or {nameof(TestedApp.Uid)}",
             ArgumentArity.OneOrMore,
             false),
         new CommandLineOption(

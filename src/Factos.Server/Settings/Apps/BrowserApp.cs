@@ -1,13 +1,8 @@
 ﻿namespace Factos.Server.Settings.Apps;
 
-public class BrowserApp : TestApp
+public class BrowserApp : BaseTestApp
 {
-    public int Port { get; set; } = 5080;
-    public bool HeadlessChrome { get; set; } = false;
-
-    protected override string GetDefaultDisplayName() => nameof(BrowserApp);
-
-    protected override string[]? GetDefaultCommands()
+    public BrowserApp()
     {
         var commands = new List<string>
         {
@@ -35,6 +30,9 @@ public class BrowserApp : TestApp
         if (OperatingSystem.IsMacOS())
             commands.Add($"\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" http://localhost:{Port} {chromeArgs}");
 
-        return [.. commands];
+        StartupCommands = [.. commands ];
     }
+
+    public int Port { get; set; } = 5080;
+    public bool HeadlessChrome { get; set; } = false;
 }

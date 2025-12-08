@@ -1,5 +1,7 @@
 ﻿using Factos.Abstractions;
 using Factos.Server.Settings;
+using Factos.Server.Settings.Apps;
+using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.OutputDevice;
 
@@ -10,21 +12,23 @@ internal class AppRunner
 {
     readonly DeviceWritter deviceWritter;
     readonly List<ProcessHandler> _activeProcesses = [];
+    readonly ICommandLineOptions cliOptions;
 
-    public AppRunner(IOutputDevice outputDevice)
+    public AppRunner(IOutputDevice outputDevice, ICommandLineOptions commandLineManager)
     {
         deviceWritter = new(this, outputDevice);
+        cliOptions = commandLineManager;
     }
 
     protected override string Id =>
         nameof(AppRunner);
 
-    public virtual async Task StartApp(TestApp app, string appName, CancellationToken cancellationToken)
+    public virtual async Task StartApp(TestedApp app, string appName, CancellationToken cancellationToken)
     {
         await deviceWritter.Dimmed(
             $"{appName} app is starting...", cancellationToken);
 
-        var startCommands = app.Commands ?? [];
+        var startCommands = GetCommands(app);
 
         for (int i = 0; i < startCommands.Length; i++)
         {
@@ -78,5 +82,27 @@ internal class AppRunner
         }
 
         _activeProcesses.Clear();
+    }
+
+    private string[] GetCommands(TestedApp app)
+    {
+        var commands = app.StartupCommands;
+
+        if (cliOptions.TryGetOptionArgumentList(CommandLineOptionsProvider.OPTION_ENVIRONMENT, out var envVars))
+        {
+            foreach (var envVar in envVars)
+            {
+                var parts = envVar.Split('=', 2);
+                if (parts.Length != 2) throw new ArgumentException(
+                    $"Invalid environment test variable format: {envVar}. Expected format is 'key=value'.");
+
+                commands = [..
+                    commands.Select(cmd =>
+                        cmd.Replace($"[{parts[0]}]", parts[1]))
+                ];
+            }
+        }
+
+        return commands;
     }
 }
