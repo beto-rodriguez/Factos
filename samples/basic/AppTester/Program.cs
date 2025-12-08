@@ -1,266 +1,77 @@
-﻿using Factos.Abstractions;
-using Factos.Server;
+﻿using Factos.Server;
 using Factos.Server.Settings;
 using Factos.Server.Settings.Apps;
 using Microsoft.Testing.Extensions;
 using Microsoft.Testing.Platform.Builder;
 
 var testsBuilder = await TestApplication.CreateBuilderAsync(args);
+var testedApps = new List<TestedApp>();
 
-var root = "../../../../";
+#if DEBUG
 
-#if !DEBUG
-// we are using the release mode in CI pipelines
-// we adjust the path, in this case, the relative path to the samples
-root = "samples/basic/";
+// Add the applications to test here
+// paths are relative to the AppTester output folder
+var root = "../../../..";
+
+testedApps
+    .Add(project: $"{root}/WPFTests");
+#else
+
+// We also add applications to test in Release mode
+// but we use the release build for CI pipelines
+// paths are relative to the repo root
+// also, we select only a subset of apps depending on the CI needs
+// for example if testing both WPF and WinUI, from the root folder run:
+//    dotnet test -c Release --project samples/basic/AppTester --select wpf winui
+// when values like [key] are used, they are replaced from command line environment variables:
+//    dotnet test -c Release --project samples/basic/AppTester --test-env key=value
+var root = "samples/basic";
+
+testedApps
+
+    // == WPF ==
+    .Add(project: $"{root}/WPFTests",               uid: "wpf")
+
+    // == WINFORMS ==
+    .Add(project: $"{root}/WinFormsTests",          uid: "winforms")
+
+    // == WINUI ==
+    .Add(project: $"{root}/WinUITests",             uid: "winui",
+        runtimeIdentifier:
+            "win-x64",
+        msBuildArgs: [
+            new("WindowsPackageType", "None"),
+            new("WindowsAppSDKSelfContained", "true"),
+            new("UseSrc", "false")
+        ])
+
+    // == MAUI ==
+    .Add(project: $"{root}/MAUITests",              uid: "maui",                targetFramework: "[tfm]")
+
+    // == AVALONIA ==
+    .Add(project: $"{root}/AvaloniaTests.Desktop",  uid: "avalonia-desktop")
+    .Add(project: $"{root}/AvaloniaTests.Android",  uid: "avalonia-android")
+    .Add(project: $"{root}/AvaloniaTests.iOS",      uid: "avalonia-ios")
+    .Add(project: $"{root}/AvaloniaTests.Browser",  uid: "avalonia-browser",    appHost: AppHost.HeadlessChrome)
+
+    // == UNO ==
+    .Add(project: $"{root}/UnoTests/UnoTests",      uid: "uno",                 targetFramework: "[tfm]")
+    .Add(project: $"{root}/UnoTests/UnoTests",      uid: "uno-browser",         targetFramework: "net10.0-browserwasm", appHost: AppHost.HeadlessChrome)
+
+    // == BLAZOR ==
+    .Add(project: $"{root}/BlazorTests",            uid: "blazor",         appHost: AppHost.HeadlessChrome)
+
+    // == ETO ==
+    .Add(project: $"{root}/EtoFormsTests",           uid: "eto");
+
 #endif
 
-var settings = new FactosSettings
-{
-    TestedApps = [
-
-        // example app without test groups (runs always)
-        // new DesktopApp
-        // {
-        //     ProjectPath = $"{root}WPFTests",
-        //     ExecutableName = "WPFTests.exe"
-        // },
-
-        // when test groups are defined, the app will only run if the group is specified in the CLI.
-        // the next command will run tests for browser and windows apps:
-        // dotnet test --test-groups browser windows
-
-        // == wpf example ==
-        new DesktopApp
-        {
-            ProjectPath = $"{root}WPFTests",
-            ExecutableName = "WPFTests.exe",
-            TestGroups = ["windows", "wpf"]
-        },
-
-        // == winui example ==
-        new DesktopApp
-        {
-            ProjectPath = $"{root}WinUITests",
-            ExecutableName = "WinUITests.exe",
-            PublishArgs =
-                "-c Release -r win-x64 -p:WindowsPackageType=None -p:WindowsAppSDKSelfContained=true " +
-                "-p:PublishTrimmed=false -p:PublishSingleFile=false -p:UseSrc=false",
-            TestGroups = ["windows", "winui"]
-        },
-
-        // == winforms example ==
-        new DesktopApp
-        {
-            ProjectPath = $"{root}WinFormsTests",
-            ExecutableName = "WinFormsTests.exe",
-            TestGroups = ["windows", "winforms"]
-        },
-
-        // == etoforms example ==
-        new DesktopApp
-        {
-            ProjectPath = $"{root}EtoFormsTests",
-            ExecutableName = "EtoFormsTests.exe",
-            TestGroups = ["windows", "etoforms"]
-        },
-
-        // == avalonia example ==
-        new DesktopApp
-        {
-            ProjectPath = $"{root}AvaloniaTests.Desktop",
-            ExecutableName = "AvaloniaTests.Desktop.exe",
-            TestGroups = ["windows", "avalonia", "avalonia-windows"]
-        },
-        new AndroidApp
-        {
-            ProjectPath = $"{root}AvaloniaTests.Android",
-            AppName = "com.CompanyName.AvaloniaTest",
-            TestGroups = ["android", "avalonia", "avalonia-android"]
-        },
-        new ReactiveCircusActionApp // uses Reactive Circus Action runner for Android CI
-        {
-            ProjectPath = $"{root}AvaloniaTests.Android",
-            AppName = "com.CompanyName.AvaloniaTest",
-            TestGroups = ["avalonia-android-ci"]
-        },
-        new BrowserApp
-        {
-            ProjectPath = $"{root}AvaloniaTests.Browser",
-            TestGroups = ["browser", "avalonia-wasm"]
-        },
-        new BrowserApp
-        {
-            ProjectPath = $"{root}AvaloniaTests.Browser",
-            HeadlessChrome = true, // use headless Chrome for CI
-            TestGroups = ["browser", "avalonia-wasm-ci"]
-        },
-        TestApp.FromCommands(
-            config: (
-                projectPath: $"{root}AvaloniaTests.Desktop",
-                outputPath: "bin/Release/net10.0/osx-arm64",
-                groups: ["maccatalyst", "avalonia", "avalonia-maccatalyst"]),
-            commands: app => [
-                $"""
-                dotnet publish {app.ProjectPath}
-                    -c Release
-                    -r osx-arm64
-                    --self-contained true
-                """,
-                $"./{app.ProjectPath}/bin/Release/net10.0/osx-arm64/AvaloniaTests.Desktop &"
-            ]
-        ),
-        TestApp.FromCommands(
-            config: (
-                projectPath: $"{root}AvaloniaTests.iOS",
-                outputPath: "bin/Release/net10.0-ios",
-                ["ios", "avalonia", "avalonia-ios"]),
-            commands: app => [
-                $"{Constants.TASK_COMMAND} cd-at-project",
-                $"dotnet build -f net10.0-ios -c Debug",
-                $"dotnet run -f net10.0-ios -c Debug &",
-                $"{Constants.TASK_COMMAND} cd-pop"
-            ]
-        ),
-        TestApp.FromCommands(
-            config: (
-                projectPath: $"{root}AvaloniaTests.Desktop",
-                outputPath: "",
-                groups: ["linux", "avalonia", "avalonia-linux"]),
-            commands: app => [
-                $"dotnet run --project {app.ProjectPath} -c Release &"
-            ]
-        ),
-
-         // == uno example ==
-        new DesktopApp
-        {
-            ProjectPath = $"{root}UnoTests/UnoTests",
-            ExecutableName = "UnoTests.exe",
-            PublishArgs = "-c Release -f net10.0-desktop",
-            TestGroups = ["windows", "uno", "uno-windows"]
-        },
-        new AndroidApp
-        {
-            ProjectPath = $"{root}UnoTests/UnoTests",
-            AppName = "com.companyname.UnoTests",
-            PublishArgs = "-c Release -f net10.0-android",
-            TestGroups = ["android", "uno", "uno-android"]
-        },
-        new ReactiveCircusActionApp // uses Reactive Circus Action runner for Android CI
-        {
-            ProjectPath = $"{root}UnoTests/UnoTests",
-            AppName = "com.companyname.UnoTests",
-            PublishArgs = "-c Release -f net10.0-android",
-            TestGroups = ["uno-android-ci"]
-        },
-        new BrowserApp
-        {
-            ProjectPath = $"{root}UnoTests/UnoTests",
-            PublishArgs = "-c Release -f net10.0-browserwasm",
-            TestGroups = ["browser", "uno-wasm"]
-        },
-        new BrowserApp
-        {
-            ProjectPath = $"{root}UnoTests/UnoTests",
-            HeadlessChrome = true, // use headless Chrome for CI
-            PublishArgs = "-c Release -f net10.0-browserwasm",
-            TestGroups = ["browser", "uno-wasm-ci"]
-        },
-        TestApp.FromCommands(
-            config: (
-                projectPath: $"{root}UnoTests/UnoTests",
-                outputPath: "bin/Release/net10.0-maccatalyst",
-                ["maccatalyst", "uno", "uno-maccatalyst"]),
-            commands: app => [
-                $"dotnet run --project {app.ProjectPath} -f net10.0-desktop &"
-            ]
-        ),
-        TestApp.FromCommands(
-            config: (
-                projectPath: $"{root}UnoTests/UnoTests",
-                outputPath: "bin/Release/net10.0-ios",
-                ["ios", "uno", "uno-ios"]),
-            commands: app => [
-                $"{Constants.TASK_COMMAND} cd-at-project",
-                $"dotnet build -f net10.0-ios -c Debug",
-                $"dotnet run -f net10.0-ios -c Debug &",
-                $"{Constants.TASK_COMMAND} cd-pop"
-            ]
-        ),
-        TestApp.FromCommands(
-            config: (
-                projectPath: $"{root}UnoTests/UnoTests",
-                outputPath: "",
-                groups: ["linux", "uno", "uno-linux"]),
-            commands: app => [
-                $"dotnet run --project {app.ProjectPath} -c Release -f net10.0-desktop &"
-            ]
-        ),
-
-        // == blazor wasm example ==
-        new BrowserApp
-        {
-            ProjectPath = $"{root}BlazorTests",
-            TestGroups = ["browser", "blazor-wasm"]
-        },
-        new BrowserApp
-        {
-            ProjectPath = $"{root}BlazorTests",
-            HeadlessChrome = true, // use headless Chrome for CI
-            TestGroups = ["blazor-wasm-ci"]
-        },
-
-        // == maui example ==
-        new DesktopApp
-        {
-            ProjectPath = $"{root}MAUITests",
-            ExecutableName = "MAUITests.exe",
-            PublishArgs = "-c Release -f net10.0-windows10.0.19041.0",
-            TestGroups = ["windows", "maui", "maui-windows"]
-        },
-        TestApp.FromCommands(
-            config: (
-                projectPath: $"{root}MAUITests",
-                outputPath: "bin/Release/net10.0-maccatalyst",
-                ["maccatalyst", "maui", "maui-maccatalyst"]),
-            commands: app => [
-                $"{Constants.TASK_COMMAND} cd-at-project",
-                $"dotnet run -f net10.0-maccatalyst -c Debug &",
-                $"{Constants.TASK_COMMAND} cd-pop"
-            ]
-        ),
-        TestApp.FromCommands(
-            config: (
-                projectPath: $"{root}MAUITests",
-                outputPath: "bin/Release/net10.0-ios",
-                ["ios", "maui", "maui-ios"]),
-            commands: app => [
-                $"{Constants.TASK_COMMAND} cd-at-project",
-                $"dotnet build -f net10.0-ios -c Debug",
-                $"dotnet run -f net10.0-ios -c Debug &",
-                $"{Constants.TASK_COMMAND} cd-pop"
-            ]
-        ),
-        new AndroidApp
-        {
-            ProjectPath = $"{root}MAUITests",
-            AppName = "com.companyname.mauitests",
-            PublishArgs = "-c Release -f net10.0-android",
-            TestGroups = ["android", "maui", "maui-android"]
-        },
-        new ReactiveCircusActionApp // uses Reactive Circus Action runner for Android CI
-        {
-            ProjectPath = $"{root}MAUITests",
-            AppName = "com.companyname.mauitests",
-            PublishArgs = "-c Release -f net10.0-android",
-            TestGroups = ["maui-android-ci"]
-        }
-    ]
-};
-
 testsBuilder
-    .AddFactos(settings)
+    .AddFactos(new FactosSettings()
+    {
+        ConnectionTimeout = 180,
+        TestedApps = testedApps
+    })
     .AddTrxReportProvider(); // optional, add TRX if needed
 
 using ITestApplication testApp = await testsBuilder.BuildAsync();

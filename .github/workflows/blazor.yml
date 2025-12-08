@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  run-test:
+  test:
     runs-on: ubuntu-24.04
     defaults:
       run:
@@ -30,7 +30,8 @@ jobs:
 
       - name: Run tests
         run:
-          dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --test-groups blazor-wasm-ci
+          # select the test defined in the AppTester project, this project harnesses the UI tests.
+          dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --select blazor
 
       - name: Publish results
         uses: dorny/test-reporter@v2.2.0

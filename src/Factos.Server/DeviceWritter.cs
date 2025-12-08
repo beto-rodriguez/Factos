@@ -1,5 +1,6 @@
 ﻿using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.OutputDevice;
+using System.Diagnostics;
 using System.Text;
 
 namespace Factos.Server;
@@ -8,10 +9,15 @@ public class DeviceWritter(IOutputDeviceDataProducer dataProducer, IOutputDevice
 {
     const int SeparatorLength = 36;
     const char Separator = '-';
+    static readonly Stopwatch stopwatch = Stopwatch.StartNew();
 
     public async Task Write(string message, ConsoleColor? color, CancellationToken? cancellationToken)
     {
         cancellationToken ??= CancellationToken.None;
+
+        // lets get the stopwatch elapsed time in format mm:ss.fff
+        var elapsed = stopwatch.Elapsed;
+        message = $"{elapsed:mm\\:ss} {message}";
 
         var data = color is null
             ? new TextOutputDeviceData(message)

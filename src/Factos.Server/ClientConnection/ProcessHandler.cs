@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using Factos.Abstractions;
+using System.Diagnostics;
 
 namespace Factos.Server.ClientConnection;
 
@@ -16,9 +17,9 @@ internal class ProcessHandler
         var rawArgs = command[fileName.Length..].Trim();
 
         var isBackground = false;
-        if (rawArgs.EndsWith('&'))
+        if (rawArgs.EndsWith(Constants.BACKGROUND_TASK))
         {
-            rawArgs = rawArgs[..^1].Trim();
+            rawArgs = rawArgs[..^Constants.BACKGROUND_TASK.Length].Trim();
             isBackground = true;
         }
 
@@ -41,7 +42,7 @@ internal class ProcessHandler
             if (string.IsNullOrEmpty(e.Data)) 
                 return;
 
-            await deviceWritter.Dimmed($"[{fileName}:{_process.Id}]{e.Data}", cancellationToken);
+            await deviceWritter.Dimmed($"{_process.Id} - {e.Data}", cancellationToken);
         };
 
         _process.ErrorDataReceived += async (sender, e) =>
@@ -49,7 +50,7 @@ internal class ProcessHandler
             if (string.IsNullOrEmpty(e.Data)) 
                 return;
 
-            await deviceWritter.Red($"[{fileName}:{_process.Id}]{e.Data}", cancellationToken);
+            await deviceWritter.Red($"{_process.Id} - {e.Data}", cancellationToken);
         };
 
         _process.Exited += async (sender, e) =>
@@ -68,14 +69,14 @@ internal class ProcessHandler
                 Command:    '{command}'
                 """;
 
-                await deviceWritter.Red($"[{fileName}:{_process.Id}]{message}", cancellationToken);
+                await deviceWritter.Red($"{_process.Id} - {message}", cancellationToken);
 
                 Environment.Exit(1);
             }
             else
             {
                 await deviceWritter.Dimmed(
-                    $"[{fileName}:{_process.Id}] The process finished successfully for command '{command}'", cancellationToken);
+                    $"{_process.Id} - The process finished successfully for command '{command}'", cancellationToken);
             }
         };
 
@@ -92,7 +93,7 @@ internal class ProcessHandler
         else
         {
             _ = deviceWritter.Dimmed(
-                $"[{fileName}:{_process.Id}] Started background process for command '{command}' with PID {_process.Id}", cancellationToken);
+                $"Started background process for command '{fileName} {rawArgs}' with PID {_process.Id}", cancellationToken);
         }
     }
 
