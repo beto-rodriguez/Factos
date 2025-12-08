@@ -1,4 +1,4 @@
-name: MAUI
+name: MAUI Catalyst
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  run-maccatalyst-test:
+  test:
     runs-on: macos-15
     permissions:
       contents: read
@@ -34,7 +34,8 @@ jobs:
 
       - name: Run tests
         run:
-          dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --test-groups maui-maccatalyst
+          # select the test defined in the AppTester project, this project harnesses the UI tests.
+          dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --select maui --test-env tfm=net10.0-maccatalyst
 
       - name: Publish results
         uses: dorny/test-reporter@v2.2.0

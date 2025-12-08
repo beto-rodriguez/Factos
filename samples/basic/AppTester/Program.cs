@@ -52,14 +52,14 @@ testedApps
     .Add(project: $"{root}/AvaloniaTests.Desktop",  uid: "avalonia-desktop")
     .Add(project: $"{root}/AvaloniaTests.Android",  uid: "avalonia-android")
     .Add(project: $"{root}/AvaloniaTests.iOS",      uid: "avalonia-ios")
-    .Add(project: $"{root}/AvaloniaTests.Browser",  uid: "avalonia-wasm",       appHost: AppHost.HeadlessChrome)
+    .Add(project: $"{root}/AvaloniaTests.Browser",  uid: "avalonia-browser",    appHost: AppHost.HeadlessChrome)
 
     // == UNO ==
     .Add(project: $"{root}/UnoTests/UnoTests",      uid: "uno",                 targetFramework: "[tfm]")
-    .Add(project: $"{root}/UnoTests/UnoTests",      uid: "uno-wasm",            targetFramework: "net10.0-browserwasm", appHost: AppHost.Browser)
+    .Add(project: $"{root}/UnoTests/UnoTests",      uid: "uno-browser",         targetFramework: "net10.0-browserwasm", appHost: AppHost.Browser)
 
     // == BLAZOR ==
-    .Add(project: $"{root}/BlazorTests",            uid: "blazor-wasm",         appHost: AppHost.HeadlessChrome)
+    .Add(project: $"{root}/BlazorTests",            uid: "blazor",         appHost: AppHost.HeadlessChrome)
 
     // == ETO ==
     .Add(project: $"{root}EtoFormsTests",           uid: "eto");

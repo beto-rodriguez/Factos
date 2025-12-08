@@ -1,4 +1,4 @@
-name: Avalonia
+name: Avalonia Linux
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  run-linux-test:
+  test:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -27,7 +27,8 @@ jobs:
 
       - name: Run tests
         run:
-          dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --test-groups avalonia-linux
+          # select the test defined in the AppTester project, this project harnesses the UI tests.
+          dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --select avalonia-desktop
 
       - name: Publish results
         uses: dorny/test-reporter@v2.2.0

@@ -1,4 +1,4 @@
-name: Uno
+name: Uno Android
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  run-android-test:
+  test:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -39,9 +39,10 @@ jobs:
           target: google_apis
           arch: x86_64
           script:
-            dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --test-groups uno-android-ci
+            # select the test defined in the AppTester project, this project harnesses the UI tests.
+            dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --select uno --test-env tfm=net10.0-android
 
-      - name: Publish test results to GitHub UI
+      - name: Publish test results
         uses: dorny/test-reporter@v2.2.0
         with:
           name: test-results

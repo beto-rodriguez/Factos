@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  run-test:
+  test:
     runs-on: windows-2025
     defaults:
       run:
@@ -28,7 +28,8 @@ jobs:
       - name: Run tests
         run: |
           dotnet build src/Factos.WinUI -c Release # workaround for a moment...
-          dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --test-groups winui
+          # select the test defined in the AppTester project, this project harnesses the UI tests.
+          dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --select winui
 
       - name: Publish results
         uses: dorny/test-reporter@v2.2.0

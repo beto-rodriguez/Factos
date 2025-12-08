@@ -1,4 +1,4 @@
-name: Uno
+name: Uno browser
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  run-browser-test:
+  test:
     runs-on: ubuntu-24.04
     defaults:
       run:
@@ -32,7 +32,8 @@ jobs:
 
       - name: Run tests
         run:
-          dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --test-groups uno-wasm-ci
+          # select the test defined in the AppTester project, this project harnesses the UI tests.
+          dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --select uno-browser
 
       - name: Publish results
         uses: dorny/test-reporter@v2.2.0

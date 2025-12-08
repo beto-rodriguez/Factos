@@ -1,7 +1,7 @@
 # disabled for now
 # https://github.com/unoplatform/uno/issues/22031
 
-# name: Uno
+# name: Uno iOS
 
 # on:
 #   push:
@@ -9,7 +9,7 @@
 #   pull_request:
 
 # jobs:
-#   run-ios-test:
+#   test:
 #     runs-on: macos-15
 #     permissions:
 #       contents: read
@@ -40,7 +40,8 @@
 
 #       - name: Run tests
 #         run:
-#           dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --test-groups uno-ios
+#           # select the test defined in the AppTester project, this project harnesses the UI tests.
+#           dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --select uno --test-env tfm=net10.0-ios
 
 #       - name: Publish results
 #         uses: dorny/test-reporter@v2.2.0
