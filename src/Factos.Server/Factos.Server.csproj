@@ -9,7 +9,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<PackageId>Factos.Server</PackageId>
+		<PackageId>Factos</PackageId>
 		<Description>Factos testing framework.</Description>
 	</PropertyGroup>
 
