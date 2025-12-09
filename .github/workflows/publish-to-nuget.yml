@@ -1,0 +1,40 @@
+name: Publish to NuGet
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5.0.1
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup
+        run: |
+          dotnet workload install maui
+          dotnet workload install wasm-tools
+
+      - name: Build and Pack
+        run:
+          dotnet build src/CodeGen
+          dotnet pack src/Factos.Avalonia --configuration Release -o ./nupkg
+          dotnet pack src/Factos.Blazor --configuration Release -o ./nupkg
+          dotnet pack src/Factos.EtoForms --configuration Release -o ./nupkg
+          dotnet pack src/Factos.MAUI --configuration Release -o ./nupkg
+          dotnet pack src/Factos.Uno --configuration Release -o ./nupkg
+          dotnet pack src/Factos.WinForms --configuration Release -o ./nupkg
+          dotnet pack src/Factos.WinUI --configuration Release -o ./nupkg
+          dotnet pack src/Factos.WPF --configuration Release -o ./nupkg
+
+      - name: Publish to NuGet
+        run:
+          dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json

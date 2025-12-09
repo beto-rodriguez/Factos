@@ -13,6 +13,7 @@
     <File Path=".github/workflows/maui-ios.yml" />
     <File Path=".github/workflows/maui-maccatalyst.yml" />
     <File Path=".github/workflows/maui-windows.yml" />
+    <File Path=".github/workflows/publish-to-nuget.yml" />
     <File Path=".github/workflows/uno-android.yml" />
     <File Path=".github/workflows/uno-browser.yml" />
     <File Path=".github/workflows/uno-ios.yml" />
