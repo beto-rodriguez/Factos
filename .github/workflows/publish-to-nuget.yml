@@ -25,7 +25,7 @@ jobs:
 
       - name: Build and Pack
         run: |
-          dotnet build src/CodeGen
+          dotnet build src/CodeGen --configuration Release
           dotnet pack src/Factos.Avalonia --configuration Release -o ./nupkg
           dotnet pack src/Factos.Blazor --configuration Release -o ./nupkg
           dotnet pack src/Factos.EtoForms --configuration Release -o ./nupkg
