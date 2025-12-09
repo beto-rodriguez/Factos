@@ -56,6 +56,7 @@
   <Folder Name="/solution/">
     <File Path=".gitignore" />
     <File Path="directory.build.props" />
+    <File Path="nuget.props" />
   </Folder>
   <Project Path="src/CodeGen/CodeGen.csproj" Id="810399e1-61c4-4e3b-83f7-a40fa09a187c" />
   <Project Path="src/Factos.Abstractions/Factos.Abstractions.csproj" />
