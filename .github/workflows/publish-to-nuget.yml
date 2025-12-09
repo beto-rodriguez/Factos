@@ -6,7 +6,7 @@ on:
       - 'v*'
 
 jobs:
-  test:
+  run:
     runs-on: windows-2025
 
     steps:
@@ -24,7 +24,7 @@ jobs:
           dotnet workload install wasm-tools
 
       - name: Build and Pack
-        run:
+        run: |
           dotnet build src/CodeGen
           dotnet pack src/Factos.Avalonia --configuration Release -o ./nupkg
           dotnet pack src/Factos.Blazor --configuration Release -o ./nupkg
