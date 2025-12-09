@@ -8,6 +8,13 @@
 		<IsTestingPlatformApplication>false</IsTestingPlatformApplication>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<PackageId>Factos.Server</PackageId>
+		<Description>Factos testing framework.</Description>
+	</PropertyGroup>
+
+	<Import Project="../../nuget.props"/>
+
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Testing.Platform" Version="2.0.2" />
 		<PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="2.0.2" />

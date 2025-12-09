@@ -9,6 +9,17 @@
 		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<PackageId>Factos.CodeGen</PackageId>
+		<Description>Code genearion for Factos.</Description>
+	</PropertyGroup>
+
+	<Import Project="../../nuget.props"/>
+
+	<ItemGroup>
+		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" />
+	</ItemGroup>
+
 	<ItemGroup>
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.13.0" PrivateAssets="all" />
 		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all" />

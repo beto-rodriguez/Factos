@@ -10,12 +10,23 @@
 		<SupportedPlatform Include="browser" />
 	</ItemGroup>
 
+	<PropertyGroup>
+		<PackageId>Factos.Blazor</PackageId>
+		<Description>Factos testing framework for Blazor WASM.</Description>
+	</PropertyGroup>
+
+	<Import Project="../../nuget.props"/>
+
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.0" />
 	</ItemGroup>
 	
 	<ItemGroup>
 		<ProjectReference Include="..\Factos.Client\Factos.Client.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\CodeGen\bin\Release\netstandard2.0\Factos.TestsAnalizers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" />
 	</ItemGroup>
 
 </Project>

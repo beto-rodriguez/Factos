@@ -8,7 +8,7 @@
 
 	<PropertyGroup>
 		<PackageId>Factos.Abstractions</PackageId>
-		<Description>Factos abstractions package</Description>
+		<Description>Contains common definitions between Factos client and server.</Description>
 	</PropertyGroup>
 
 	<Import Project="../../nuget.props"/>

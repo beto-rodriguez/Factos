@@ -12,14 +12,15 @@
 
 	<PropertyGroup>
 		<PackageId>Factos.Client</PackageId>
-		<Description>Factos client package</Description>
+		<Description>Factos client package.</Description>
 	</PropertyGroup>
 
 	<Import Project="../../nuget.props" />
 
 	<ItemGroup>
 		<PackageReference Include="xunit.v3.assert" Version="3.2.0" />
-		<ProjectReference Include="..\Factos.Abstractions\Factos.Abstractions.csproj" />
+		<PackageReference Condition="$(UseNuGetReferences) == 'true'" Include="Factos.Abstractions" Version="$(NuGetVersion)"/>
+		<ProjectReference Condition="$(UseNuGetReferences) != 'true'" Include="..\Factos.Abstractions\Factos.Abstractions.csproj" />
 	</ItemGroup>
 
 </Project>

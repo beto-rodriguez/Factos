@@ -7,8 +7,19 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<PackageId>Factos.WPF</PackageId>
+		<Description>Factos testing framework for WPF.</Description>
+	</PropertyGroup>
+
+	<Import Project="../../nuget.props"/>
+
 	<ItemGroup>
 		<ProjectReference Include="..\Factos.Client\Factos.Client.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\CodeGen\bin\Release\netstandard2.0\Factos.TestsAnalizers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" />
 	</ItemGroup>
 
 </Project>

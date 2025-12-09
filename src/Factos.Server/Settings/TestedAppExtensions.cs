@@ -4,38 +4,6 @@ using System.Text;
 
 namespace Factos.Server.Settings;
 
-public abstract class BaseTestApp : TestedApp
-{
-    public string OutputPath { get; set; } = "bin/artifacts";
-    
-    public string? PublishArgs { get; set; } = "-c Release";
-    
-    public bool ManualStart { get; set; } = false;
-
-    public static CustomApp FromCommands(
-        (string projectPath, string? outputPath, string[]? groups) config,
-        Func<CustomApp, string[]> commands)
-    {
-        var app = new CustomApp() { ProjectPath = config.projectPath };
-
-        app.OutputPath = config.outputPath ?? app.OutputPath;
-        app.StartupCommands = commands(app);
-        app.StartupCommands = [.. // clean commands multiple lines
-            app.StartupCommands
-                .Select(x => x
-                    .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
-                    .Aggregate("", (a, b) => a + " " + b.Trim())
-                    .Trim())
-            ];
-
-        return app;
-    }
-
-    public class CustomApp : BaseTestApp
-    {
-    }
-}
-
 public static class TestedAppExtensions
 {
     extension (IList<TestedApp> appsList)
