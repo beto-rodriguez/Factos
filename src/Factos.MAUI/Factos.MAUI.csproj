@@ -1,9 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net10.0-android;</TargetFrameworks>
-		<TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">$(TargetFrameworks);net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0</TargetFrameworks>
+		<TargetFrameworks>
+			net10.0-android;
+		</TargetFrameworks>
+		<TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">
+			$(TargetFrameworks);
+			net10.0-ios;net10.0-maccatalyst
+		</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">
+			$(TargetFrameworks);
+			net10.0-windows10.0.19041.0
+		</TargetFrameworks>
 
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
@@ -34,11 +42,22 @@
 		</MauiSplashScreen>
 	</ItemGroup>
 
+	<PropertyGroup>
+		<PackageId>Factos.MAUI</PackageId>
+		<Description>Factos testing framework for MAUI.</Description>
+	</PropertyGroup>
+
+	<Import Project="../../nuget.props"/>
+
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Factos.Client\Factos.Client.csproj" />
+		<ProjectReference Include="..\Factos.Client\Factos.Client.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\CodeGen\bin\Release\netstandard2.0\Factos.TestsAnalizers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" />
 	</ItemGroup>
 </Project>

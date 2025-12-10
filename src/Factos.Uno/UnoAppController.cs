@@ -13,7 +13,7 @@ public class UnoAppController(ControllerSettings settings)
         var platformView = view as FrameworkElement ??
             throw new ArgumentException($"The view is not compatible with {nameof(UnoAppController)}", nameof(view));
 
-        FactosShell.Current.UIContentControl.Content = platformView;
+        FactosShell.Current.ContentControl.Content = platformView;
 
         return Task.CompletedTask;
     }
@@ -23,7 +23,7 @@ public class UnoAppController(ControllerSettings settings)
         if (FactosShell.Current is null)
             throw new InvalidOperationException("FactosShell is not initialized.");
 
-        FactosShell.Current.UIContentControl.Content = null;
+        FactosShell.Current.ContentControl.Content = null;
 
         return Task.CompletedTask;
     }

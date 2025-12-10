@@ -1,0 +1,76 @@
+name: Publish to NuGet
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  run:
+    runs-on: windows-2025
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5.0.1
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup
+        run: |
+          dotnet workload install maui
+          dotnet workload install wasm-tools
+
+      - name: Build Source generators
+        run:
+          dotnet build src/CodeGen --configuration Release
+
+      - name: Pack Abstractions
+        run:
+          dotnet pack src/Factos.Abstractions --configuration Release -o ./nupkg
+
+      - name: Pack Client
+        run:
+          dotnet pack src/Factos.Client --configuration Release -o ./nupkg
+
+      - name: Pack Server
+        run:
+          dotnet pack src/Factos.Server --configuration Release -o ./nupkg
+
+      - name: Pack Avalonia
+        run:
+          dotnet pack src/Factos.Avalonia --configuration Release -o ./nupkg
+
+      - name: Pack Blazor
+        run:
+          dotnet pack src/Factos.Blazor --configuration Release -o ./nupkg
+
+      - name: Pack Eto
+        run: 
+          dotnet pack src/Factos.EtoForms --configuration Release -o ./nupkg
+
+      - name: Pack MAUI
+        run: 
+          dotnet pack src/Factos.MAUI --configuration Release -o ./nupkg
+
+      - name: Pack Uno
+        run: 
+          dotnet pack src/Factos.Uno --configuration Release -o ./nupkg
+
+      - name: Pack WinForms
+        run: 
+          dotnet pack src/Factos.WinForms --configuration Release -o ./nupkg
+
+      - name: Pack WinUI
+        run: 
+          dotnet pack src/Factos.WinUI --configuration Release -o ./nupkg
+
+      - name: Pack WPF
+        run: 
+          dotnet pack src/Factos.WPF --configuration Release -o ./nupkg  
+
+      - name: Publish to NuGet
+        run:
+          dotnet nuget push **/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json

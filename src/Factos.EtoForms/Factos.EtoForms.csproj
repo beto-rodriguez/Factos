@@ -1,15 +1,29 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>
+			net8.0;
+			net10.0;
+		</TargetFrameworks>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Eto.SkiaDraw" Version="0.2.0" />
-    <PackageReference Include="SkiaSharp" Version="2.88.6" />
-    <ProjectReference Include="..\Factos.Client\Factos.Client.csproj" />
-  </ItemGroup>
+	<PropertyGroup>
+		<PackageId>Factos.Eto</PackageId>
+		<Description>Factos testing framework for Eto.</Description>
+	</PropertyGroup>
+
+	<Import Project="../../nuget.props"/>
+
+	<ItemGroup>
+		<PackageReference Include="Eto.SkiaDraw" Version="0.2.0" />
+		<PackageReference Include="SkiaSharp" Version="2.88.6" />
+		<ProjectReference Include="..\Factos.Client\Factos.Client.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\CodeGen\bin\Release\netstandard2.0\Factos.TestsAnalizers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" />
+	</ItemGroup>
 
 </Project>
