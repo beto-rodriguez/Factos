@@ -6,70 +6,53 @@ namespace Factos.Server.Settings;
 
 public static class TestedAppExtensions
 {
-    extension (IList<TestedApp> appsList)
+    public static IList<TestedApp> Add(
+        this IList<TestedApp> appsList,
+        string? project = null,
+        string? targetFramework = null,
+        string? configuration = null,
+        string? runtimeIdentifier = null,
+        MSBuildArg[]? msBuildArgs = null,
+        AppHost appHost = AppHost.Auto,
+        int browserServePort = 5080,
+        string? uid = null)
     {
-        public IList<TestedApp> Add(
-            string? project = null,
-            string? targetFramework = null,
-            string? configuration = null,
-            string? runtimeIdentifier = null,
-            MSBuildArg[]? msBuildArgs = null,
-            AppHost appHost = AppHost.Auto,
-            int browserServePort = 5080,
-            string? uid = null)
-        {
 #if !DEBUG
             configuration ??= "Release";
 #endif
 
-            var ctx = new TestedAppContext(
-                project, targetFramework, configuration, runtimeIdentifier, msBuildArgs, appHost);
+        var ctx = new TestedAppContext(
+            project, targetFramework, configuration, runtimeIdentifier, msBuildArgs, appHost);
 
-            var app = new TestedApp
-            {
-                Context = ctx,
-                ProjectPath = project,
-                Uid = uid ?? Path.GetFileNameWithoutExtension(project),
-                StartupCommands = [
-                    TestedApp.CD_AT_PROJECT_COMMAND,
+        var app = new TestedApp
+        {
+            Context = ctx,
+            ProjectPath = project,
+            Uid = uid ?? Path.GetFileNameWithoutExtension(project),
+            StartupCommands = [
+                TestedApp.CD_AT_PROJECT_COMMAND,
                     Dotnet("build", ctx),
                     Dotnet("run", ctx, $"--no-build {Constants.BACKGROUND_TASK}"),
                     TestedApp.CD_POP_COMMAND
-                ]
-            };
+            ]
+        };
 
-            if (appHost.HasFlag(AppHost.Browser))
-            {
-                // if browser, we publish and serve instead, it is easier to manage that way
-                var outputPath = $"{project}/bin/publish";
+        if (appHost.HasFlag(AppHost.Browser))
+        {
+            // if browser, we publish and serve instead, it is easier to manage that way
+            var outputPath = $"{project}/bin/publish";
 
-                app.StartupCommands = [
-                    Dotnet($"publish {ctx.Project}", ctx, $"-o {outputPath}"),
+            app.StartupCommands = [
+                Dotnet($"publish {ctx.Project}", ctx, $"-o {outputPath}"),
                     "dotnet tool install --global dotnet-serve",
                     $"dotnet serve -d {outputPath}/wwwroot -p {browserServePort} {Constants.BACKGROUND_TASK}",
                     GetBrowserStartCommands(appHost, browserServePort)
-                ];
-            }
-
-            appsList.Add(app);
-
-            return appsList;
+            ];
         }
 
-        public IList<TestedApp> AddFromCommands(
-            string[] commands,
-            string? displayName)
-        {
-            var app = new TestedApp
-            {
-                Uid = displayName ?? "Tested App",
-                StartupCommands = commands
-            };
+        appsList.Add(app);
 
-            appsList.Add(app);
-
-            return appsList;
-        }
+        return appsList;
     }
 
     private static string Dotnet(string command, TestedAppContext ctx, string? extras = null)
