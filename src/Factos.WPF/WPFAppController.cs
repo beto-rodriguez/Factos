@@ -53,6 +53,14 @@ public class WPFAppController(Window window, ControllerSettings settings)
     {
         var tcs = new TaskCompletionSource();
 
+        var dispatcher = Window.Dispatcher;
+
+        dispatcher.UnhandledException += (s, e) =>
+        {
+            tcs.SetException(e.Exception);
+            e.Handled = true;
+        };
+
         Window.Dispatcher.InvokeAsync(async () =>
         {
             try

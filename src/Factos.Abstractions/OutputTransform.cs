@@ -8,6 +8,7 @@ public static class OutputTransform
     public static string SummarizeResults(ExecutionResponse response)
     {
         int execured = 0, passed = 0, failed = 0, skipped = 0;
+        string explanation = string.Empty;
 
         foreach (var result in response.Results ?? [])
         {
@@ -17,8 +18,11 @@ public static class OutputTransform
             {
                 if (prop is PassedTestNodeStatePropertyDto)
                     passed++;
-                else if (prop is FailedTestNodeStatePropertyDto)
+                else if (prop is FailedTestNodeStatePropertyDto fProp)
+                {
                     failed++;
+                    explanation += $"failed [{result.DisplayName}]\n{fProp.Explanation}";
+                }
                 else if (prop is SkippedTestNodeStatePropertyDto)
                     skipped++;
             }
@@ -27,9 +31,11 @@ public static class OutputTransform
         return
             $"""
             Execution Summary:
+                ▶️ {skipped} Skipped
                 ✔️ {passed} Passed
                 ❌ {failed} Failed
-                ▶️ {skipped} Skipped
+
+            {explanation}
             """;
     }
 }

@@ -95,6 +95,9 @@ public class SourceGeneratedTestExecutor
                 DisplayName = test.DisplayName,
                 Properties = properties
             });
+
+            if (!passed)
+                break;
         }
 
         return nodes;

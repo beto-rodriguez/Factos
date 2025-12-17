@@ -43,7 +43,7 @@ internal sealed class TcpServerTestSession(
     public async Task CloseClient(string clientName, CancellationToken cancellationToken)
     {
         var quitRequest = await ReadStream(
-                Constants.QUIT_APP, clientName, cancellationToken);
+            Constants.QUIT_APP, clientName, cancellationToken);
 
         if (quitRequest == Constants.QUIT_APP)
             // at this point the client answers to the quit request
