@@ -13,8 +13,13 @@ public class WebSocketsProtocolHandler : IProtocolHandler
 
         var tcs = new TaskCompletionSource();
 
+        var uri = controller.Settings.WebSocketsServerUri;
+
+        if (controller.GetIsAndroid())
+            uri = uri.Replace("localhost", "10.0.2.2");
+
         var connection = new HubConnectionBuilder()
-            .WithUrl($"{controller.Settings.WebSocketsServerUri}/test")
+            .WithUrl($"{uri}/test")
             .Build();
 
         connection.On("RunTests", async () =>

@@ -63,4 +63,3 @@ public class SomeTests
         Assert.Equal(1, skipped);
     }
 }
-}

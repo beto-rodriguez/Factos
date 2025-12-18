@@ -62,7 +62,9 @@ public class UnoAppController(ControllerSettings settings)
     {
         var tcs = new TaskCompletionSource();
 
-        DispatcherQueue.GetForCurrentThread().TryEnqueue(async () =>
+        var q = FactosShell.Current?.DispatcherQueue ?? DispatcherQueue.GetForCurrentThread();
+
+        q.TryEnqueue(async () =>
         {
             try
             {

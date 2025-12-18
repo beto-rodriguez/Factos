@@ -11,7 +11,10 @@ public sealed partial class FactosShell : UserControl, IContentControlProvider
         var controller = new UnoAppController(Settings);
 
         Loaded += async (s, e) =>
+        {
+            await Task.Delay(5000); // allow UI to settle
             await AppController.InitializeController(controller);
+        };
 
         Content = content = new ContentControl
         {
