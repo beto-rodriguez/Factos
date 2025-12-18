@@ -10,7 +10,7 @@ public partial class ContentControl
     public Dictionary<string, object>? CurrentParameters { get; set; }
 
     [Parameter]
-    public ControllerSettings Settings { get; set; } = ControllerSettings.Default with { Protocol = ProtocolType.Http };
+    public ControllerSettings Settings { get; set; } = ControllerSettings.Default;
 
     internal TaskCompletionSource SetContent(Type type, Dictionary<string, object>? parameters = null)
     {

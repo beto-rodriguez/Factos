@@ -6,11 +6,7 @@ public static class SetupExtensions
 {
     public static void UseFactosApp(this IHostBuilder builder)
     {
-        var settings = OperatingSystem.IsBrowser()
-            ? ControllerSettings.Default with { Protocol = ProtocolType.Http }
-            : ControllerSettings.Default;
-
-        builder.UseFactosApp(settings);
+        builder.UseFactosApp(ControllerSettings.Default);
     }
 
     public static void UseFactosApp(this IHostBuilder builder, ControllerSettings settings)
