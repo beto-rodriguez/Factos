@@ -30,7 +30,7 @@ jobs:
 
       - name: Setup MAUI
         run:
-          dotnet workload install maui
+          dotnet workload install maui@10.0.100
 
       - name: Run tests
         run:
