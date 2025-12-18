@@ -4,9 +4,5 @@
   },
   "msbuild-sdks": {
     "Uno.Sdk": "6.4.24"
-  },
-  "sdk": {
-    "version": "10.0.100",
-    "rollForward": "disable"
   }
 }
