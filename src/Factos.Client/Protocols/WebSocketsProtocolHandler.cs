@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+﻿using Factos.Abstractions;
+using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.DependencyInjection;
+using System.Text.Json;
+using System.Xml.Linq;
 
 namespace Factos.Protocols;
 
@@ -20,6 +24,13 @@ public class WebSocketsProtocolHandler : IProtocolHandler
 
         var connection = new HubConnectionBuilder()
             .WithUrl($"{uri}/test")
+            .AddJsonProtocol(o =>
+            {
+                o.PayloadSerializerOptions = new JsonSerializerOptions
+                {
+                    TypeInfoResolver = JsonGenerationContext.Default
+                };
+            })
             .Build();
 
         connection.On("RunTests", async () =>
@@ -27,7 +38,15 @@ public class WebSocketsProtocolHandler : IProtocolHandler
             await foreach (var test in controller.TestExecutor.Execute())
             {
                 controller.LogMessage($"{test.Uid} sent.");
-                await connection.InvokeAsync("TestNodeGenerated", test);
+
+                try
+                {
+                    await connection.InvokeAsync("TestNodeGenerated", test);
+                }
+                catch (Exception ex)
+                {
+                    var a = ex;
+                }
             }
 
             await connection.InvokeAsync("AllTestsCompleted");
