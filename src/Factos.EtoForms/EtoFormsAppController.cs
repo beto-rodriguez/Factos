@@ -34,7 +34,7 @@ public class EtoFormsAppController(Form form, ControllerSettings settings)
     public override void QuitApp() =>
         Application.Instance.Quit();
 
-    internal override Task InvokeOnUIThread(Task task)
+    internal override Task InvokeOnUIThread(Func<Task> task)
     {
         var tcs = new TaskCompletionSource();
 
@@ -42,7 +42,7 @@ public class EtoFormsAppController(Form form, ControllerSettings settings)
         {
             try
             {
-                await task;
+                await task();
                 tcs.SetResult();
             }
             catch (Exception ex)

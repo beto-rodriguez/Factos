@@ -1,4 +1,4 @@
-﻿using Factos.RemoteTesters;
+﻿using Factos.Abstractions.Dto;
 using Factos.Server.Settings;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 
@@ -14,7 +14,7 @@ internal sealed class HTTPServerTestSession(
     WebApplication? app;
 
     public string Id => nameof(HTTPServerTestSession);
-    public event Action<ExecutionResponse>? NodesReceived;
+    public event Action<List<TestNodeDto>>? NodesReceived;
 
     public async Task Start(CancellationToken cancellationToken)
     {
@@ -36,7 +36,7 @@ internal sealed class HTTPServerTestSession(
             app = builder.Build();
 
             app.UseCors("AllowAll");
-            app.MapPost(endPoint, async (ExecutionResponse nodes) =>
+            app.MapPost(endPoint, async (List<TestNodeDto> nodes) =>
             {
                 await deviceWritter.Dimmed("HTTP message received", cancellationToken);
                 NodesReceived?.Invoke(nodes);
@@ -58,9 +58,13 @@ internal sealed class HTTPServerTestSession(
         await deviceWritter.Dimmed("HTTP server stopped", cancellationToken);
     }
 
-    public async Task<ExecutionResponse> RequestClient
-        (string clientName, ExecuteRequestContext context) =>
-            await NodesListener();
+    public async IAsyncEnumerable<TestNodeDto> RequestClient(string clientName, ExecuteRequestContext context)
+    {
+        var nodes = await NodesListener();
+        
+        foreach (var node in nodes)
+            yield return node;
+    }
 
     public Task CloseClient(string clientName, CancellationToken cancellationToken)
     {
@@ -68,11 +72,11 @@ internal sealed class HTTPServerTestSession(
         return Task.CompletedTask;
     }
 
-    private Task<ExecutionResponse> NodesListener()
+    private Task<List<TestNodeDto>> NodesListener()
     {
-        var tcs = new TaskCompletionSource<ExecutionResponse>();
+        var tcs = new TaskCompletionSource<List<TestNodeDto>>();
 
-        void OnNodesReceived(ExecutionResponse nodes)
+        void OnNodesReceived(List<TestNodeDto> nodes)
         {
             NodesReceived -= OnNodesReceived;
 

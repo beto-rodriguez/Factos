@@ -5,5 +5,6 @@ public enum ProtocolType
 {
     None = 0,
     Tcp = 1 << 0,
-    Http = 1 << 1
+    Http = 1 << 1,
+    WebSockets = 1 << 2
 }

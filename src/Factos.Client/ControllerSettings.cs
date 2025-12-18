@@ -8,10 +8,12 @@ public readonly struct ControllerSettings
     {
         TcpPort = Constants.DEFAULT_TCP_PORT,
         HttpServerUri = Constants.DEFAULT_HTTP_URI,
+        WebSocketsServerUri = Constants.DEFAULT_WEBSOCKETS_URI,
         Protocol = ProtocolType.Tcp
     };
 
     public int TcpPort { get; init; }
     public string HttpServerUri { get; init; }
+    public string WebSocketsServerUri { get; init; }
     public ProtocolType Protocol { get; init; }
 }

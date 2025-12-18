@@ -20,11 +20,13 @@ internal sealed class ProtocolosLifeTime
 
         var activeProtocols = new List<IServerSessionProtocol>();
 
-        if (settings.Protocols.HasFlag(ProtocolType.Http))
-            activeProtocols.Add(new HTTPServerTestSession(deviceWritter, settings));
+        //if (settings.Protocols.HasFlag(ProtocolType.Http))
+        //    activeProtocols.Add(new HTTPServerTestSession(deviceWritter, settings));
 
-        if (settings.Protocols.HasFlag(ProtocolType.Tcp))
-            activeProtocols.Add(new TcpServerTestSession(deviceWritter, settings));
+        //if (settings.Protocols.HasFlag(ProtocolType.Tcp))
+        //    activeProtocols.Add(new TcpServerTestSession(deviceWritter, settings));
+
+        activeProtocols.Add(new WebSocketsServerTestSession(deviceWritter, settings));
 
         protocols = activeProtocols;
     }

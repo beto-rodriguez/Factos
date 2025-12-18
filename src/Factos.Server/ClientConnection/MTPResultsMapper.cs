@@ -80,30 +80,35 @@ internal static class MTPResultsMapper
 
         foreach (var nodeDto in dtos ?? [])
         {
-            var methodId = nodeDto.Properties
-                .FirstOrDefault(x => x is TestMethodIdentifierPropertyDto);
-
-            if (methodId is not null)
-            {
-                var tmip = (TestMethodIdentifierPropertyDto)methodId;
-
-                // hack to display properly tests in the VS UI
-                // specially when running the same project for different targets.
-                tmip.Namespace = $"[{clientName}] {tmip.Namespace}";
-            }
-
-            var testNode = new TestNode
-            {
-                DisplayName = $"[{clientName}]{nodeDto.DisplayName}",
-                Uid = $"[{clientName}]{nodeDto.Uid}",
-                Properties = nodeDto.Properties.AsPropertyBagResult()
-            };
-
-            testNode.FillTrxProperties(nodeDto);
-
-            results.Add(testNode);
+            results.Add(ReadNode(clientName, nodeDto));
         }
 
         return results;
+    }
+
+    public static TestNode ReadNode(string clientName, TestNodeDto nodeDto)
+    {
+        var methodId = nodeDto.Properties
+            .FirstOrDefault(x => x is TestMethodIdentifierPropertyDto);
+
+        if (methodId is not null)
+        {
+            var tmip = (TestMethodIdentifierPropertyDto)methodId;
+
+            // hack to display properly tests in the VS UI
+            // specially when running the same project for different targets.
+            tmip.Namespace = $"[{clientName}] {tmip.Namespace}";
+        }
+
+        var testNode = new TestNode
+        {
+            DisplayName = $"[{clientName}]{nodeDto.DisplayName}",
+            Uid = $"[{clientName}]{nodeDto.Uid}",
+            Properties = nodeDto.Properties.AsPropertyBagResult()
+        };
+
+        testNode.FillTrxProperties(nodeDto);
+
+        return testNode;
     }
 }

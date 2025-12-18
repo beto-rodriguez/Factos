@@ -8,5 +8,5 @@ internal interface IProtocolHandler
     /// </summary>
     /// <param name="controller">The app controller.</param>
     /// <returns>A value indicating whether the execution finished.</returns>
-    Task<bool> Execute(AppController controller);
+    Task Execute(AppController controller);
 }

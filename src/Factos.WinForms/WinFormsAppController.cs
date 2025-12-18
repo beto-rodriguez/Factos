@@ -33,7 +33,7 @@ public class WinFormsAppController(Form form, ControllerSettings settings)
     public override void QuitApp() =>
         Application.Exit();
 
-    internal override Task InvokeOnUIThread(Task task)
+    internal override Task InvokeOnUIThread(Func<Task> task)
     {
         var tcs = new TaskCompletionSource();
 
@@ -41,7 +41,7 @@ public class WinFormsAppController(Form form, ControllerSettings settings)
         {
             try
             {
-                await task;
+                await task();
                 tcs.SetResult();
             }
             catch (Exception ex)

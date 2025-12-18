@@ -40,7 +40,7 @@ public class MAUIAppController(ControllerSettings settings)
     public override void QuitApp() =>
         Application.Current?.Quit();
 
-    internal override Task InvokeOnUIThread(Task task)
+    internal override Task InvokeOnUIThread(Func<Task> task)
     {
         var tcs = new TaskCompletionSource();
 
@@ -48,7 +48,7 @@ public class MAUIAppController(ControllerSettings settings)
         {
             try
             {
-                await task;
+                await task();
                 tcs.SetResult();
             }
             catch (Exception ex)

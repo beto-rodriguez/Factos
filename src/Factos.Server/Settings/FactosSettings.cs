@@ -27,6 +27,11 @@ public class FactosSettings
     public string HttpUri { get; set; } = Constants.DEFAULT_HTTP_URI;
 
     /// <summary>
+    /// Gets or sets the WebSockets URI endpoint used for network requests.
+    /// </summary>
+    public string WebSocketsUri { get; set; } = Constants.DEFAULT_WEBSOCKETS_URI;
+
+    /// <summary>
     /// Gets or sets the collection of applications to be tested.
     /// </summary>
     public IList<TestedApp> TestedApps { get; set; } = [];

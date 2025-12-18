@@ -55,6 +55,18 @@ public static class TestedAppExtensions
         return appsList;
     }
 
+    public static IList<TestedApp> AddManuallyStartedApp(
+        this IList<TestedApp> appsList)
+    {
+        appsList.Add(new TestedApp
+        {
+            Uid = "manual-start",
+            StartupCommands = []
+        });
+
+        return appsList;
+    }
+
     private static string Dotnet(string command, TestedAppContext ctx, string? extras = null)
     {
         var sb = new StringBuilder();

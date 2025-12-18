@@ -38,7 +38,7 @@ public class BlazorAppController(ControllerSettings settings)
         // nothing to do here, the browser must be closed externally
     }
 
-    internal override Task InvokeOnUIThread(Task task)
+    internal override Task InvokeOnUIThread(Func<Task> task)
     {
         var tcs = new TaskCompletionSource();
 
@@ -46,7 +46,7 @@ public class BlazorAppController(ControllerSettings settings)
         {
             try
             {
-                await task;
+                await task();
                 tcs.SetResult();
             }
             catch (Exception ex)

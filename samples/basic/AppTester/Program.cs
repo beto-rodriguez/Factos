@@ -14,7 +14,8 @@ var testedApps = new List<TestedApp>();
 var root = "../../../..";
 
 testedApps
-    .Add(project: $"{root}/WPFTests");
+    .AddManuallyStartedApp();
+    //.Add(project: $"{root}/WPFTests");
 #else
 
 // We also add applications to test in Release mode
