@@ -9,6 +9,8 @@ public class SomeTests
     [AppTestMethod]
     public async Task SuccessfulTest()
     {
+        await Task.Delay(10000); // simulate some async work
+
         var app = AppController.Current;
 
         var button = new Button { Content = "click me" };
@@ -40,12 +42,12 @@ public class SomeTests
     {
         // this method is what actually runs test internally in the testing framework
         // lets just ensure that the results are as expected
-        var resultNodes = await Factos.RemoteTesters.SourceGeneratedTestExecutor
+        var testsStream = Factos.RemoteTesters.SourceGeneratedTestExecutor
             .GetResults(x => x.DisplayName != nameof(EnsureTestsResultsAreCorrect));
 
         int passed = 0, failed = 0, skipped = 0;
 
-        foreach (var test in resultNodes)
+        await foreach (var test in testsStream)
         {
             foreach (var property in test.Properties)
             {

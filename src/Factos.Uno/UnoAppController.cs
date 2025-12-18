@@ -58,15 +58,17 @@ public class UnoAppController(ControllerSettings settings)
         // https://github.com/unoplatform/uno/issues/10436
         Application.Current.Exit();
 
-    internal override Task InvokeOnUIThread(Task task)
+    internal override Task InvokeOnUIThread(Func<Task> task)
     {
         var tcs = new TaskCompletionSource();
 
-        DispatcherQueue.GetForCurrentThread().TryEnqueue(async () =>
+        var q = FactosShell.Current?.DispatcherQueue ?? DispatcherQueue.GetForCurrentThread();
+
+        q.TryEnqueue(async () =>
         {
             try
             {
-                await task;
+                await task();
                 tcs.SetResult();
             }
             catch (Exception ex)

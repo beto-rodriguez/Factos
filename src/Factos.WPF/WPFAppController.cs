@@ -49,15 +49,23 @@ public class WPFAppController(Window window, ControllerSettings settings)
     public override void QuitApp() =>
         Application.Current.Shutdown();
 
-    internal override Task InvokeOnUIThread(Task task)
+    internal override Task InvokeOnUIThread(Func<Task> task)
     {
         var tcs = new TaskCompletionSource();
+
+        var dispatcher = Window.Dispatcher;
+
+        dispatcher.UnhandledException += (s, e) =>
+        {
+            tcs.SetException(e.Exception);
+            e.Handled = true;
+        };
 
         Window.Dispatcher.InvokeAsync(async () =>
         {
             try
             {
-                await task;
+                await task();
                 tcs.SetResult();
             }
             catch (Exception ex)

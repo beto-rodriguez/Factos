@@ -1,6 +1,8 @@
-﻿namespace Factos.RemoteTesters;
+﻿using Factos.Abstractions.Dto;
+
+namespace Factos.RemoteTesters;
 
 public abstract class TestExecutor
 {
-    internal abstract Task<ExecutionResponse> Execute();
+    internal abstract IAsyncEnumerable<TestNodeDto> Execute();
 }

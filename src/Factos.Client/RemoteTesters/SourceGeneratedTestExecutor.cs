@@ -14,31 +14,23 @@ public class SourceGeneratedTestExecutor
         return instance;
     }
 
-    internal override async Task<ExecutionResponse> Execute() =>
-        new()
-        {
-            Discovered = GetDiscoverNodes(),
-            Results = await GetResultsNodes()
-        };
-
-    private static IEnumerable<TestNodeDto> GetDiscoverNodes()
+    internal override IAsyncEnumerable<TestNodeDto> Execute()
     {
-        foreach (var test in _registeredTests)
-        {
-            var testNode = new TestNodeDto()
-            {
-                Uid = test.Uid,
-                DisplayName = test.DisplayName,
-                Properties = [new DiscoveredTestNodeStatePropertyDto(), test.Identifier]
-            };
-
-            yield return testNode;
-        }
+        return GetResultsNodes();
     }
 
-    private static async Task<IEnumerable<TestNodeDto>> GetResultsNodes(IEnumerable<TestInfo>? source = null)
+    private static async IAsyncEnumerable<TestNodeDto> GetResultsNodes(IEnumerable<TestInfo>? source = null)
     {
-        var nodes = new List<TestNodeDto>();
+        // quick hack.. do not discover if source is provided
+        // because it makes no sense for the intended usage of source
+        if (source is not null)
+            yield return new TestNodeDto()
+            {
+                Uid = TestNodeDto.DISCOVERED_NODES,
+                DisplayName = "Discovered Tests",
+                Properties = [],
+                Children = [.. GetDiscoverNodes()]
+            };
 
         foreach (var test in source ?? _registeredTests)
         {
@@ -49,12 +41,12 @@ public class SourceGeneratedTestExecutor
 
             if (test.SkipReason is not null)
             {
-                nodes.Add(new TestNodeDto()
+                yield return new TestNodeDto()
                 {
                     Uid = test.Uid,
                     DisplayName = test.DisplayName,
                     Properties = [new SkippedTestNodeStatePropertyDto { Explanation = test.SkipReason }],
-                });
+                };
 
                 continue;
             }
@@ -64,8 +56,7 @@ public class SourceGeneratedTestExecutor
 
             try
             {
-                await AppController.Current.InvokeOnUIThread(test.Invoker());
-
+                await AppController.Current.InvokeOnUIThread(test.Invoker);
                 properties = [new PassedTestNodeStatePropertyDto()];
                 passed = true;
             }
@@ -87,19 +78,37 @@ public class SourceGeneratedTestExecutor
                 properties = passed
                     ? [new FailedTestNodeStatePropertyDto { Explanation = "Test was expected to fail but passed." }]
                     : [new PassedTestNodeStatePropertyDto()];
+
+                passed = !passed;
             }
 
-            nodes.Add(new TestNodeDto
+            yield return new TestNodeDto
             {
                 Uid = test.Uid,
                 DisplayName = test.DisplayName,
                 Properties = properties
-            });
-        }
+            };
 
-        return nodes;
+            if (!passed)
+                yield break;
+        }
     }
 
-    public static async Task<IEnumerable<TestNodeDto>> GetResults(Func<TestInfo, bool> filter) =>
-        await GetResultsNodes(_registeredTests.Where(filter));
+    private static IEnumerable<TestNodeDto> GetDiscoverNodes()
+    {
+        foreach (var test in _registeredTests)
+        {
+            var testNode = new TestNodeDto()
+            {
+                Uid = test.Uid,
+                DisplayName = test.DisplayName,
+                Properties = [new DiscoveredTestNodeStatePropertyDto(), test.Identifier]
+            };
+
+            yield return testNode;
+        }
+    }
+
+    public static IAsyncEnumerable<TestNodeDto> GetResults(Func<TestInfo, bool> filter) =>
+        GetResultsNodes(_registeredTests.Where(filter));
 }

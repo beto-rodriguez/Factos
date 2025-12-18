@@ -4,77 +4,89 @@ using System.Text.Json;
 
 namespace Factos.Protocols;
 
+[Obsolete]
 public class TcpProtocolHandler : IProtocolHandler
 {
-    static string? cachedResults;
-
-    public async Task<bool> Execute(AppController controller)
+    public async Task Execute(AppController controller)
     {
-        var commands = new Dictionary<string, Func<Task<string>>>()
+        while (true)
         {
-            [Constants.EXECUTE_TESTS] = ExecuteCommand(controller),
-            [Constants.QUIT_APP] = QuitAppCommand(controller),
-        };
+            var commands = new Dictionary<string, Func<IAsyncEnumerable<string>>>()
+            {
+                [Constants.EXECUTE_TESTS] = ExecuteCommand(controller),
+                [Constants.QUIT_APP] = QuitAppCommand(controller),
+            };
 
-        var address = controller.GetIsAndroid()
-            ? "10.0.2.2"
-            : "localhost";
+            var address = controller.GetIsAndroid()
+                ? "10.0.2.2"
+                : "localhost";
 
-        controller.LogMessage($"Tcp conecting to {address}:{controller.Settings.TcpPort}...");
+            controller.LogMessage($"Tcp conecting to {address}:{controller.Settings.TcpPort}...");
 
-        using var client = new TcpClient();
-        await client.ConnectAsync(address, controller.Settings.TcpPort, DefaultCT());
+            using var client = new TcpClient();
+            await client.ConnectAsync(address, controller.Settings.TcpPort, DefaultCT());
 
-        controller.LogMessage($"connected.");
+            controller.LogMessage($"connected.");
 
-        using var stream = client.GetStream();
-        using var reader = new StreamReader(stream);
-        using var writter = new StreamWriter(stream) { AutoFlush = true };
+            using var stream = client.GetStream();
+            using var reader = new StreamReader(stream);
+            using var writter = new StreamWriter(stream) { AutoFlush = true };
 
-        controller.LogMessage($"waiting for message...");
+            controller.LogMessage($"waiting for message...");
 
-        var command = await reader.ReadLineAsync(DefaultCT()) ?? string.Empty;
+            var command = await reader.ReadLineAsync(DefaultCT()) ?? string.Empty;
 
-        controller.LogMessage($"message recived.");
+            controller.LogMessage($"message recived.");
 
-        if (!commands.TryGetValue(command, out var commandTask))
-        {
-            controller.LogMessage($"the command {command} was not found, skipping execution.");
-            return false;
+            if (!commands.TryGetValue(command, out var commandTask))
+            {
+                controller.LogMessage($"the command {command} was not found, skipping execution.");
+                return;// false;
+            }
+
+            var message = commandTask();
+
+            controller.LogMessage($"responding to {command}:");
+            await foreach (var content in message)
+            {
+                await writter.WriteLineAsync(content);
+                controller.LogMessage($"[message sent] {content}");
+            }
+
+            //var content = await commandTask();
+            //await writter.WriteLineAsync(content);
+            await writter.WriteLineAsync(Constants.END_STREAM);
         }
-
-        var content = await commandTask();
-
-        await writter.WriteLineAsync(content);
-        await writter.WriteLineAsync(Constants.END_STREAM);
-
-        controller.LogMessage($"response for command {command} sent, content: {content}.");
-
-        // in tcp we always return false, it means the protocol is not finished and
-        // is constantly listening for new commands.
-        // then the app can be closed only by the QUIT_APP command.
-        return false;
     }
 
-    private static Func<Task<string>> ExecuteCommand(AppController controller) =>
-        async () =>
+    private static Func<IAsyncEnumerable<string>> ExecuteCommand(AppController controller)
+    {
+        async IAsyncEnumerable<string> ExecuteAsyncEnumerable()
         {
-            if (cachedResults is not null)
-                return cachedResults;
+            await foreach (var test in controller.TestExecutor.Execute())
+            {
+                controller.LogMessage($"Executing test: {test.Uid}");
+                
+                var serializedTest = JsonSerializer.Serialize(
+                    test, JsonGenerationContext.Default.TestNodeDto);
 
-            var result = await controller.TestExecutor.Execute();
-            var serializedResult = JsonSerializer.Serialize(
-                result,
-                JsonGenerationContext.Default.ExecutionResponse);
+                yield return $"node {serializedTest}";
+            }
+        }
 
-            return cachedResults = serializedResult;
-        };
+        return ExecuteAsyncEnumerable;
+    }
 
-    private static Func<Task<string>> QuitAppCommand(AppController controller) =>
-        () => {
+    private static Func<IAsyncEnumerable<string>> QuitAppCommand(AppController controller)
+    {
+        async IAsyncEnumerable<string> QuitAsyncEnumerable()
+        {
             controller.QuitApp();
-            return Task.FromResult(Constants.QUIT_APP); 
-        };
+            yield return $"action {Constants.QUIT_APP}";
+        }
+
+        return QuitAsyncEnumerable;
+    }
 
     private static CancellationToken DefaultCT() =>
         new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token;

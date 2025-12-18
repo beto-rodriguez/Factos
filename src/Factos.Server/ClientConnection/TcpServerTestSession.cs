@@ -1,14 +1,14 @@
 ﻿using Factos.Abstractions;
-using Factos.RemoteTesters;
+using Factos.Abstractions.Dto;
 using Factos.Server.Settings;
-using Microsoft.Testing.Platform.Extensions.TestFramework;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 
 namespace Factos.Server.ClientConnection;
 
+[Obsolete]
 internal sealed class TcpServerTestSession(
     DeviceWritter serviceProvider,
     FactosSettings factosSettings) 
@@ -36,76 +36,69 @@ internal sealed class TcpServerTestSession(
         await deviceWritter.Dimmed("TCP server stopped", cancellationToken);
     }
 
-    public Task<ExecutionResponse> RequestClient(string clientName, ExecuteRequestContext context) =>
-        GetTestNodesStream(
-            this, Constants.EXECUTE_TESTS, clientName, context);
+    public async IAsyncEnumerable<TestNodeDto> RequestClient(
+        string clientName, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        const string nodePrefix = "node ";
+
+        await foreach (var line in ReadStream(Constants.EXECUTE_TESTS, clientName, cancellationToken))
+        {
+            if (line.StartsWith(nodePrefix))
+            {
+                var json = line[nodePrefix.Length..];
+
+                var testNode = JsonSerializer.Deserialize(
+                    json, JsonGenerationContext.Default.TestNodeDto);
+
+                yield return testNode ??
+                    throw new InvalidOperationException("Could not deserialize the test node.");
+            }
+        }
+    }
 
     public async Task CloseClient(string clientName, CancellationToken cancellationToken)
     {
-        var quitRequest = await ReadStream(
-                Constants.QUIT_APP, clientName, cancellationToken);
-
-        if (quitRequest == Constants.QUIT_APP)
-            // at this point the client answers to the quit request
-            await deviceWritter.Dimmed(
-                $"Client has acknowledged the quit request.", cancellationToken);
+        await foreach (var line in ReadStream(Constants.QUIT_APP, clientName, cancellationToken))
+        {
+            if (line == Constants.QUIT_APP)
+            {
+                // at this point the client answers to the quit request
+                await deviceWritter.Dimmed(
+                    $"Client has acknowledged the quit request.", cancellationToken);
+            }
+        }
     }
 
-    private async Task<string> ReadStream(
-        string name, string appName, CancellationToken cancellationToken)
+    private async IAsyncEnumerable<string> ReadStream(
+        string name, string appName, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        try
+        await deviceWritter.Dimmed(
+            $"Waiting for {appName} to respond '{name}' on {listener.LocalEndpoint}...", cancellationToken);
+
+        using var client = await listener.AcceptTcpClientAsync(cancellationToken);
+        using var stream = client.GetStream();
+        using var writer = new StreamWriter(stream) { AutoFlush = true };
+
+        writer.WriteLine(name);
+
+        using var reader = new StreamReader(stream);
+
+        string? line = null;
+
+        while ((line = await reader.ReadLineAsync(cancellationToken)) is not null)
         {
-            await deviceWritter.Dimmed($"Waiting for {appName} to respond '{name}' on {listener.LocalEndpoint}...", cancellationToken);
+            if (line.Length == 0)
+                continue;
 
-            using var client = await listener.AcceptTcpClientAsync(cancellationToken);
-            using var stream = client.GetStream();
-            using var writer = new StreamWriter(stream) { AutoFlush = true };
-
-            writer.WriteLine(name);
-
-            using var reader = new StreamReader(stream);
-
-            var sb = new StringBuilder();
-            string? line = null;
-
-            while ((line = await reader.ReadLineAsync(cancellationToken)) is not null)
+            if (line == Constants.END_STREAM)
             {
-                if (line.Length == 0)
-                    continue;
+                await deviceWritter.Dimmed(
+                    "Message received, client connection will be closed soon.", cancellationToken);
 
-                if (line == Constants.END_STREAM)
-                {
-                    await deviceWritter.Dimmed(
-                        "Message received, client connection will be closed soon.", cancellationToken);
-
-                    break;
-                }
-
-                sb.AppendLine(line);
+                yield break;
             }
 
-            return sb.ToString();
+            yield return line;
         }
-        catch (Exception ex)
-        {
-            await deviceWritter.Red(
-                $"Error reading stream '{name}' from client '{appName}': {ex.Message}\n{ex.StackTrace}", cancellationToken);
-
-            throw new InvalidOperationException(
-                $"Could not read stream '{name}' from client '{appName}'.", ex);
-        }
-    }
-
-    private static async Task<ExecutionResponse> GetTestNodesStream(
-        TcpServerTestSession session, string streamName, string clientName, ExecuteRequestContext request)
-    {
-        var executionResponseJson = await session.ReadStream(
-            streamName, clientName, request.CancellationToken);
-
-        var executionResponse = JsonSerializer.Deserialize(executionResponseJson, JsonGenerationContext.Default.ExecutionResponse);
-
-        return executionResponse 
-            ?? throw new InvalidOperationException("Could not deserialize the execution response.");
     }
 }

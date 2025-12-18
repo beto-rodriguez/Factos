@@ -10,11 +10,7 @@ public static class SetupExtensions
 {
     public static void UseFactosApp(this Application app)
     {
-        var settings = OperatingSystem.IsBrowser()
-            ? ControllerSettings.Default with { Protocol = ProtocolType.Http }
-            : ControllerSettings.Default;
-
-        UseFactosApp(app, settings);
+        UseFactosApp(app, ControllerSettings.Default);
     }
 
     public static void UseFactosApp(this Application app, ControllerSettings settings)

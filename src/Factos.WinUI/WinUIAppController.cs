@@ -52,15 +52,17 @@ public class WinUIAppController(Window window, ControllerSettings settings)
     public override void QuitApp() =>
         Application.Current.Exit();
 
-    internal override Task InvokeOnUIThread(Task task)
+    internal override Task InvokeOnUIThread(Func<Task> task)
     {
         var tcs = new TaskCompletionSource();
 
-        DispatcherQueue.GetForCurrentThread().TryEnqueue(async () =>
+        var q = Window.DispatcherQueue ?? DispatcherQueue.GetForCurrentThread();
+
+        q.TryEnqueue(async () =>
         {
             try
             {
-                await task;
+                await task();
                 tcs.SetResult();
             }
             catch (Exception ex)

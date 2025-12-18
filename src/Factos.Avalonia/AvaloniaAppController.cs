@@ -58,7 +58,7 @@ public class AvaloniaAppController(ContentControl contentControl, ControllerSett
             Environment.Exit(0);
     }
 
-    internal override Task InvokeOnUIThread(Task task)
+    internal override Task InvokeOnUIThread(Func<Task> task)
     {
         var tcs = new TaskCompletionSource();
 
@@ -66,7 +66,7 @@ public class AvaloniaAppController(ContentControl contentControl, ControllerSett
         {
             try
             {
-                await task;
+                await task();
                 tcs.SetResult();
             }
             catch (Exception ex)

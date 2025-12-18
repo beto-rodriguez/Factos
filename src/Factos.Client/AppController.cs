@@ -1,4 +1,5 @@
 ﻿using Factos.Abstractions;
+using Factos.Abstractions.Dto;
 using Factos.Protocols;
 using Factos.RemoteTesters;
 
@@ -32,7 +33,7 @@ public abstract class AppController
 
     public abstract void QuitApp();
 
-    internal abstract Task InvokeOnUIThread(Task task);
+    internal abstract Task InvokeOnUIThread(Func<Task> task);
 
     internal abstract object GetWelcomeView();
 
@@ -40,54 +41,33 @@ public abstract class AppController
 
     internal virtual async Task Listen()
     {
-        if (!HasSingleFlag(Settings.Protocol))
-            throw new InvalidOperationException("The client can only implement one protocol.");
+        var protocolHandler = new WebSocketsProtocolHandler();
 
-        IProtocolHandler protocolHandler = Settings.Protocol == ProtocolType.Http
-            ? new HTTPProtocolHandler()
-            : new TcpProtocolHandler();
-
-        LogMessage($"using {Settings.Protocol} by client settings.");
-
-        var resultsShown = false;
-        var finished = false;
-
-        while (!finished)
+        try
         {
-            try
+            await protocolHandler.Execute(this);
+        }
+        catch (Exception? ex)
+        {
+            LogMessage($"the protocol execution failed.");
+
+            while (ex is not null)
             {
-                finished = await protocolHandler.Execute(this);
+                LogMessage($" - {ex.Message}");
+                LogMessage(ex.StackTrace ?? string.Empty);
+                ex = ex.InnerException;
             }
-            catch (Exception? ex)
-            {
-                LogMessage($"the protocol execution failed.");
 
-                while (ex is not null)
-                {
-                    LogMessage($" - {ex.Message}");
-                    LogMessage(ex.StackTrace ?? string.Empty);
-                    ex = ex.InnerException;
-                }
+            // if the server is not reachable, most likely this is 
+            // a local test run, so we run and show the results locally
 
-                // if there was an error connecting to the server (TCP/HTTP)
-                // we wait a bit before trying again
+            var results = new List<TestNodeDto>();
+            await foreach(var result in TestExecutor.Execute())
+                results.Add(result);
 
-                if (!resultsShown)
-                {
-                    // if the server is not reachable, most likely this is 
-                    // a local test run, so we run and show the results locally
+            var formatted = OutputTransform.SummarizeResults(results);
 
-                    var result = await TestExecutor.Execute();
-
-                    var formatted = OutputTransform.SummarizeResults(result);
-
-                    await NavigateToView(GetResultsView(formatted));
-
-                    resultsShown = true;
-                }
-
-                await Task.Delay(2000);
-            }
+            await NavigateToView(GetResultsView(formatted));
         }
     }
 
@@ -96,13 +76,4 @@ public abstract class AppController
 
     internal void LogMessage(string message) =>
         LogMessageReceived?.Invoke(message);
-
-    private static bool HasSingleFlag(ProtocolType value)
-    {
-        if (value == ProtocolType.None)
-            return false;
-
-        var intValue = (int)value;
-        return (intValue & (intValue - 1)) == 0;
-    }
 }
