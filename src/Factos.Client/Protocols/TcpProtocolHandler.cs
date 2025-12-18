@@ -4,6 +4,7 @@ using System.Text.Json;
 
 namespace Factos.Protocols;
 
+[Obsolete]
 public class TcpProtocolHandler : IProtocolHandler
 {
     public async Task Execute(AppController controller)

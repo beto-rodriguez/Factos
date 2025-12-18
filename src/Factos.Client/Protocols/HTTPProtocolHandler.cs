@@ -4,6 +4,7 @@ using System.Text.Json;
 
 namespace Factos.Protocols;
 
+[Obsolete]
 public class HTTPProtocolHandler : IProtocolHandler
 {
     static string? cachedResults;

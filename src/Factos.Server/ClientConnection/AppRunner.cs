@@ -1,5 +1,4 @@
 ﻿using Factos.Abstractions;
-using Factos.Server.Settings;
 using Factos.Server.Settings.Apps;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.OutputDevice;

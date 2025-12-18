@@ -1,7 +1,6 @@
 ﻿using Factos.Abstractions;
 using Factos.Abstractions.Dto;
 using Factos.Server.Settings;
-using Microsoft.Testing.Platform.Extensions.TestFramework;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
@@ -9,6 +8,7 @@ using System.Text.Json;
 
 namespace Factos.Server.ClientConnection;
 
+[Obsolete]
 internal sealed class TcpServerTestSession(
     DeviceWritter serviceProvider,
     FactosSettings factosSettings) 
@@ -36,11 +36,12 @@ internal sealed class TcpServerTestSession(
         await deviceWritter.Dimmed("TCP server stopped", cancellationToken);
     }
 
-    public async IAsyncEnumerable<TestNodeDto> RequestClient(string clientName, ExecuteRequestContext context)
+    public async IAsyncEnumerable<TestNodeDto> RequestClient(
+        string clientName, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         const string nodePrefix = "node ";
 
-        await foreach (var line in ReadStream(Constants.EXECUTE_TESTS, clientName, context.CancellationToken))
+        await foreach (var line in ReadStream(Constants.EXECUTE_TESTS, clientName, cancellationToken))
         {
             if (line.StartsWith(nodePrefix))
             {

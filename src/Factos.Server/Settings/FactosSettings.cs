@@ -14,7 +14,7 @@ public class FactosSettings
     /// <summary>
     /// Gets or sets the connection timeout in seconds.
     /// </summary>
-    public int ConnectionTimeout { get; set; } = 180;
+    public int ConnectionTimeout { get; set; } = 1200;
 
     /// <summary>
     /// Gets or sets the TCP port number used for network communication.
@@ -35,11 +35,4 @@ public class FactosSettings
     /// Gets or sets the collection of applications to be tested.
     /// </summary>
     public IList<TestedApp> TestedApps { get; set; } = [];
-
-    /// <summary>
-    /// Gets or sets the network protocols supported by the service.
-    /// </summary>
-    /// <remarks>Multiple protocols can be specified by combining values using a bitwise OR operation. The
-    /// default value includes both HTTP and TCP protocols.</remarks>
-    public ProtocolType Protocols { get; set; } = ProtocolType.Http | ProtocolType.Tcp;
 }

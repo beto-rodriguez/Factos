@@ -1,9 +1,10 @@
 ﻿using Factos.Abstractions.Dto;
 using Factos.Server.Settings;
-using Microsoft.Testing.Platform.Extensions.TestFramework;
+using System.Runtime.CompilerServices;
 
 namespace Factos.Server.ClientConnection;
 
+[Obsolete]
 internal sealed class HTTPServerTestSession(
     DeviceWritter serviceProvider,
     FactosSettings factosSettings)
@@ -58,7 +59,8 @@ internal sealed class HTTPServerTestSession(
         await deviceWritter.Dimmed("HTTP server stopped", cancellationToken);
     }
 
-    public async IAsyncEnumerable<TestNodeDto> RequestClient(string clientName, ExecuteRequestContext context)
+    public async IAsyncEnumerable<TestNodeDto> RequestClient(
+        string clientName, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var nodes = await NodesListener();
         

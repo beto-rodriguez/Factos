@@ -1,5 +1,4 @@
 ﻿using Factos.Abstractions.Dto;
-using Microsoft.Testing.Platform.Extensions.TestFramework;
 
 namespace Factos.Server.ClientConnection;
 
@@ -11,7 +10,7 @@ internal interface IServerSessionProtocol
 
     Task Finish(CancellationToken cancellationToken);
 
-    IAsyncEnumerable<TestNodeDto> RequestClient(string clientName, ExecuteRequestContext context);
+    IAsyncEnumerable<TestNodeDto> RequestClient(string clientName, CancellationToken cancellationToken);
 
     Task CloseClient(string clientName, CancellationToken cancellationToken);
 }

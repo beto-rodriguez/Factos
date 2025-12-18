@@ -41,16 +41,7 @@ public abstract class AppController
 
     internal virtual async Task Listen()
     {
-        if (!HasSingleFlag(Settings.Protocol))
-            throw new InvalidOperationException("The client can only implement one protocol.");
-
-        //IProtocolHandler protocolHandler = Settings.Protocol == ProtocolType.Http
-        //    ? new HTTPProtocolHandler()
-        //    : new TcpProtocolHandler();
-
-        //LogMessage($"using {Settings.Protocol} by client settings.");
-
-        IProtocolHandler protocolHandler = new WebSocketsProtocolHandler();
+        var protocolHandler = new WebSocketsProtocolHandler();
 
         try
         {
@@ -85,13 +76,4 @@ public abstract class AppController
 
     internal void LogMessage(string message) =>
         LogMessageReceived?.Invoke(message);
-
-    private static bool HasSingleFlag(ProtocolType value)
-    {
-        if (value == ProtocolType.None)
-            return false;
-
-        var intValue = (int)value;
-        return (intValue & (intValue - 1)) == 0;
-    }
 }

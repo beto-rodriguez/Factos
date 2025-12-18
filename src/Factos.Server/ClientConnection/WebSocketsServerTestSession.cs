@@ -1,7 +1,7 @@
 ﻿using Factos.Abstractions.Dto;
 using Factos.Server.Settings;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Testing.Platform.Extensions.TestFramework;
+using System.Runtime.CompilerServices;
 
 namespace Factos.Server.ClientConnection;
 
@@ -55,7 +55,8 @@ internal sealed class WebSocketsServerTestSession(
         await deviceWritter.Dimmed("WebSockets server stopped", cancellationToken);
     }
 
-    public async IAsyncEnumerable<TestNodeDto> RequestClient(string clientName, ExecuteRequestContext context)
+    public async IAsyncEnumerable<TestNodeDto> RequestClient(
+        string clientName, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         // this will run as soon as the client connects
         // see TestHub.OnConnectedAsync
@@ -72,12 +73,15 @@ internal sealed class WebSocketsServerTestSession(
 
             void OnAllTestsCompleted()
             {
-                tcs.TrySetCanceled();
+                tcs.TrySetCanceled(cancellationToken);
                 TestHub.OnAllTestsCompleted -= OnAllTestsCompleted;
             }
 
-            await using var cancellationRegistration = context.CancellationToken.Register(() =>
+            await using var cancellationRegistration = cancellationToken.Register(async () =>
             {
+                await deviceWritter.Red(
+                    $"Cancellation requested while waiting for test node from client '{clientName}'.", CancellationToken.None);
+
                 tcs.TrySetCanceled();
                 TestHub.OnTestNodeGenerated -= OnTestNodeGenerated;
             });
@@ -98,7 +102,7 @@ internal sealed class WebSocketsServerTestSession(
             catch (Exception ex)
             {
                 await deviceWritter.Red(
-                    $"Error receiving test node from client '{clientName}': {ex.Message}", context.CancellationToken);
+                    $"Error receiving test node from client '{clientName}': {ex.Message}", cancellationToken);
 
                 break;
             }

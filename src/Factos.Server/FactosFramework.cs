@@ -94,10 +94,12 @@ internal sealed class FactosFramework
                 await deviceWriter.Title($"Starting {appName}...", cancellationToken);
                 await appRunner.StartApp(testedApp, appName, cancellationToken);
 
-                var ct = new CancellationTokenSource(TimeSpan.FromSeconds(settings.ConnectionTimeout));
-                var nodesStream = GetNodes(appName, context, cancellationToken).WithCancellation(ct.Token);
+                var timeOut = new CancellationTokenSource(TimeSpan.FromSeconds(settings.ConnectionTimeout));
+                using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeOut.Token, cancellationToken);
 
-                await foreach (var node in nodesStream)
+                var nodesStream = GetNodes(appName, context, cancellationToken);
+
+                await foreach (var node in nodesStream.WithCancellation(linkedCts.Token))
                     await context.MessageBus.PublishAsync(
                         this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, node));
 
@@ -135,11 +137,11 @@ internal sealed class FactosFramework
         string appName, ExecuteRequestContext context, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         await deviceWriter.Blue(
-            "Waiting for test nodes from the test app...", cancellationToken);
+            "Waiting for test to run in the client app...", cancellationToken);
 
         var protocol = ProtocolosLifeTime.ActiveProtocols.First();
 
-        await foreach (var node in protocol.RequestClient(appName, context))
+        await foreach (var node in protocol.RequestClient(appName, cancellationToken))
         {
             yield return MTPResultsMapper.ReadNode(appName, node);
         }

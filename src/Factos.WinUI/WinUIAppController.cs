@@ -56,7 +56,9 @@ public class WinUIAppController(Window window, ControllerSettings settings)
     {
         var tcs = new TaskCompletionSource();
 
-        DispatcherQueue.GetForCurrentThread().TryEnqueue(async () =>
+        var q = Window.DispatcherQueue ?? DispatcherQueue.GetForCurrentThread();
+
+        q.TryEnqueue(async () =>
         {
             try
             {

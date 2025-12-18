@@ -9,6 +9,8 @@ public class SomeTests
     [AppTestMethod]
     public async Task SuccessfulTest()
     {
+        await Task.Delay(10000); // simulate some async work
+
         var app = AppController.Current;
 
         var button = new Button { Content = "click me" };

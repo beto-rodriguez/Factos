@@ -14,8 +14,8 @@ var testedApps = new List<TestedApp>();
 var root = "../../../..";
 
 testedApps
-    .AddManuallyStartedApp();
-    //.Add(project: $"{root}/WPFTests");
+    //.AddManuallyStartedApp(); // waits for manual start of the app to test
+    .Add(project: $"{root}/WPFTests");
 #else
 
 // We also add applications to test in Release mode
@@ -70,7 +70,6 @@ testedApps
 testsBuilder
     .AddFactos(new FactosSettings()
     {
-        ConnectionTimeout = 180,
         TestedApps = testedApps
     })
     .AddTrxReportProvider(); // optional, add TRX if needed
