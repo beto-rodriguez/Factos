@@ -33,7 +33,7 @@
 	<Import Project="../../nuget.props" />
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
