@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
+using Factos.RemoteTesters;
 
 namespace Factos.Avalonia;
 
@@ -58,7 +59,7 @@ public class AvaloniaAppController(ContentControl contentControl, ControllerSett
             Environment.Exit(0);
     }
 
-    internal override Task InvokeOnUIThread(Func<Task> task)
+    internal override Task InvokeOnUIThread(Func<Task> task, TestStreamHandler streamHandler)
     {
         var tcs = new TaskCompletionSource();
 

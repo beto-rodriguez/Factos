@@ -1,3 +1,5 @@
+using Factos.RemoteTesters;
+
 namespace Factos.WinForms;
 
 public class WinFormsAppController(Form form, ControllerSettings settings)
@@ -7,6 +9,8 @@ public class WinFormsAppController(Form form, ControllerSettings settings)
     {
         var platformView = view as Control ??
             throw new ArgumentException($"The view is not compatible with {nameof(WinFormsAppController)}", nameof(view));
+
+        platformView.Dock = DockStyle.Fill;
 
         form.SuspendLayout();
         form.Controls.Clear();
@@ -33,7 +37,7 @@ public class WinFormsAppController(Form form, ControllerSettings settings)
     public override void QuitApp() =>
         Application.Exit();
 
-    internal override Task InvokeOnUIThread(Func<Task> task)
+    internal override Task InvokeOnUIThread(Func<Task> task, TestStreamHandler streamHandler)
     {
         var tcs = new TaskCompletionSource();
 

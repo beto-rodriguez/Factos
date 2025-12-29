@@ -1,3 +1,4 @@
+using Factos.RemoteTesters;
 using System.Reflection;
 
 namespace Factos.MAUI;
@@ -40,9 +41,44 @@ public class MAUIAppController(ControllerSettings settings)
     public override void QuitApp() =>
         Application.Current?.Quit();
 
-    internal override Task InvokeOnUIThread(Func<Task> task)
+    internal override Task InvokeOnUIThread(Func<Task> task, TestStreamHandler streamHandler)
     {
         var tcs = new TaskCompletionSource();
+
+        void HandleException(Exception exception)
+        {
+            streamHandler.Cancel(exception);
+            tcs.TrySetException(exception);
+        }
+
+#if WINDOWS
+        Microsoft.UI.Xaml.Application.Current.UnhandledException += (sender, e) =>
+        {
+            HandleException(e.Exception);
+            e.Handled = true;
+        };
+#endif
+
+#if ANDROID
+        Android.Runtime.AndroidEnvironment.UnhandledExceptionRaiser += (s, e) =>
+        {
+            HandleException(e.Exception);
+            e.Handled = true;
+        };
+#endif
+
+#if IOS || MACCATALYST
+        AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+        {
+            if (e.ExceptionObject is not Exception ex)
+            {
+                tcs.TrySetException(new Exception("Unhandled exception is not of type Exception"));
+                return;
+            }
+
+            HandleException(ex);
+        };
+#endif
 
         MainThread.InvokeOnMainThreadAsync(async () =>
         {

@@ -142,6 +142,7 @@ internal sealed class WebSocketsServerTestSession(
 
         public override Task OnDisconnectedAsync(Exception? exception)
         {
+            OnAllTestsCompleted?.Invoke();
             return base.OnDisconnectedAsync(exception);
         }
     }

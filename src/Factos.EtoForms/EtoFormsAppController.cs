@@ -1,4 +1,5 @@
 using Eto.Forms;
+using Factos.RemoteTesters;
 
 namespace Factos.EtoForms;
 
@@ -34,7 +35,7 @@ public class EtoFormsAppController(Form form, ControllerSettings settings)
     public override void QuitApp() =>
         Application.Instance.Quit();
 
-    internal override Task InvokeOnUIThread(Func<Task> task)
+    internal override Task InvokeOnUIThread(Func<Task> task, TestStreamHandler streamHandler)
     {
         var tcs = new TaskCompletionSource();
 

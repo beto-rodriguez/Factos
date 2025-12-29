@@ -1,3 +1,5 @@
+using Factos.RemoteTesters;
+
 namespace Factos.Blazor;
 
 public class BlazorAppController(ControllerSettings settings) 
@@ -38,7 +40,7 @@ public class BlazorAppController(ControllerSettings settings)
         // nothing to do here, the browser must be closed externally
     }
 
-    internal override Task InvokeOnUIThread(Func<Task> task)
+    internal override Task InvokeOnUIThread(Func<Task> task, TestStreamHandler streamHandler)
     {
         var tcs = new TaskCompletionSource();
 
