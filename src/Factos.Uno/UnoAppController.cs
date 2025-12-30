@@ -1,3 +1,4 @@
+using Factos.RemoteTesters;
 using Microsoft.UI.Dispatching;
 
 namespace Factos.Uno;
@@ -58,9 +59,16 @@ public class UnoAppController(ControllerSettings settings)
         // https://github.com/unoplatform/uno/issues/10436
         Application.Current.Exit();
 
-    internal override Task InvokeOnUIThread(Func<Task> task)
+    internal override Task InvokeOnUIThread(Func<Task> task, TestStreamHandler streamHandler)
     {
         var tcs = new TaskCompletionSource();
+
+        Application.Current.UnhandledException += (sender, e) =>
+        {
+            streamHandler.Cancel(e.Exception);
+            tcs.TrySetException(e.Exception);
+            e.Handled = true;
+        };
 
         var q = FactosShell.Current?.DispatcherQueue ?? DispatcherQueue.GetForCurrentThread();
 

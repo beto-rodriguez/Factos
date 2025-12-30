@@ -1,3 +1,4 @@
+using Factos.RemoteTesters;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -49,7 +50,7 @@ public class WPFAppController(Window window, ControllerSettings settings)
     public override void QuitApp() =>
         Application.Current.Shutdown();
 
-    internal override Task InvokeOnUIThread(Func<Task> task)
+    internal override Task InvokeOnUIThread(Func<Task> task, TestStreamHandler streamHandler)
     {
         var tcs = new TaskCompletionSource();
 
@@ -57,7 +58,8 @@ public class WPFAppController(Window window, ControllerSettings settings)
 
         dispatcher.UnhandledException += (s, e) =>
         {
-            tcs.SetException(e.Exception);
+            streamHandler.Cancel(e.Exception);
+            tcs.TrySetException(e.Exception);
             e.Handled = true;
         };
 

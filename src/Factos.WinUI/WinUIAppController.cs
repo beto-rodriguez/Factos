@@ -1,7 +1,9 @@
+using Factos.RemoteTesters;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Factos.WinUI;
@@ -52,9 +54,16 @@ public class WinUIAppController(Window window, ControllerSettings settings)
     public override void QuitApp() =>
         Application.Current.Exit();
 
-    internal override Task InvokeOnUIThread(Func<Task> task)
+    internal override Task InvokeOnUIThread(Func<Task> task, TestStreamHandler streamHandler)
     {
         var tcs = new TaskCompletionSource();
+
+        Application.Current.UnhandledException += (sender, e) =>
+        {
+            streamHandler.Cancel(e.Exception);
+            tcs.TrySetException(e.Exception);
+            e.Handled = true;
+        };
 
         var q = Window.DispatcherQueue ?? DispatcherQueue.GetForCurrentThread();
 

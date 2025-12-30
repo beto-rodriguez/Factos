@@ -40,8 +40,8 @@ public class WebSocketsProtocolHandler : IProtocolHandler
             await controller.InvokeOnUIThread(async () =>
             {
                 controller.QuitApp();
-            });
-            
+            }, null!);
+
             tcs.SetResult();
         });
 

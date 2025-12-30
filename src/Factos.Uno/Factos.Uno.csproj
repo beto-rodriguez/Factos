@@ -1,4 +1,4 @@
-﻿<Project Sdk="Uno.Sdk">
+﻿<Project Sdk="Uno.Sdk/6.4.42">
 	<PropertyGroup>
 		<TargetFrameworks>
 			net9.0;net9.0-ios;net9.0-android;net9.0-windows10.0.19041;net9.0-browserwasm;net9.0-desktop;
@@ -44,7 +44,7 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0" />
 		<PackageReference Include="Uno.Extensions.Navigation.WinUI" Version="7.0.4" />
-		<PackageReference Include="Uno.Toolkit.WinUI" Version="8.3.2" />
+		<PackageReference Include="Uno.Toolkit.WinUI" Version="8.0.2" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -5,17 +5,12 @@ using Factos.RemoteTesters;
 
 namespace Factos;
 
-public abstract class AppController
+public abstract class AppController(ControllerSettings settings)
 {
-    public AppController(ControllerSettings settings)
-    {
-        Settings = settings;
-        TestExecutor = new SourceGeneratedTestExecutor();
-    }
-
     public static AppController Current { get; internal set; } = null!;
-    public TestExecutor TestExecutor { get; }
-    public ControllerSettings Settings { get; set; }
+    public TestExecutor TestExecutor { get; } = new SourceGeneratedTestExecutor();
+    public ControllerSettings Settings { get; set; } = settings;
+
     public event Action<string>? LogMessageReceived;
 
     public static async Task InitializeController(AppController controller)
@@ -33,7 +28,7 @@ public abstract class AppController
 
     public abstract void QuitApp();
 
-    internal abstract Task InvokeOnUIThread(Func<Task> task);
+    internal abstract Task InvokeOnUIThread(Func<Task> task, TestStreamHandler streamHandler);
 
     internal abstract object GetWelcomeView();
 
