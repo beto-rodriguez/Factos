@@ -23,11 +23,11 @@ public class WinUIAppController(Window window, ControllerSettings settings)
         return Task.CompletedTask;
     }
 
-    public override Task PopNavigation()
+    public override async Task PopNavigation()
     {
         GetContentControl().Content = null;
 
-        return Task.CompletedTask;
+        await Task.Delay(100); // allow UI to update?
     }
 
     public override Task WaitUntilLoaded(object element)
