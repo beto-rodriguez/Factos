@@ -77,9 +77,11 @@ internal sealed class FactosFramework
         try
         {
             var appNames = new HashSet<string?>();
+            var retries = 0;
 
-            foreach (var testedApp in testedApps)
+            for (int j = 0; j < testedApps.Count; j++)
             {
+                TestedApp? testedApp = testedApps[j];
                 var appName = testedApp.Uid ?? "test runner";
                 // sanitize name to be file system friendly
                 foreach (var c in Path.GetInvalidFileNameChars())
@@ -98,12 +100,25 @@ internal sealed class FactosFramework
                 using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeOut.Token, cancellationToken);
 
                 var nodesStream = GetNodes(appName, context, 0, cancellationToken);
+                var isEmpty = true;
 
                 await foreach (var node in nodesStream.WithCancellation(linkedCts.Token))
+                {
+                    isEmpty = false;
                     await context.MessageBus.PublishAsync(
                         this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, node));
+                }
 
-                //await appRunner.EndApp(clientResponse.Protocol, appName, cancellationToken);
+                if (isEmpty)
+                {
+                    await deviceWriter.Green(
+                        $"No test results were received from the client app {appName}, attempt {retries + 1}/3", cancellationToken);
+                    j--;
+                    retries++;
+                    continue;
+                }
+                retries = 0;
+
                 var protocol = ProtocolosLifeTime.ActiveProtocols.First();
                 await appRunner.EndApp(protocol, appName, cancellationToken);
 
@@ -150,7 +165,7 @@ internal sealed class FactosFramework
 
         if (isEmpty)
         {
-            await deviceWriter.Red(
+            await deviceWriter.Green(
                 $"No test results were received from the client app, attempt {retry + 1}/3", cancellationToken);
 
             if (retry < 2)
