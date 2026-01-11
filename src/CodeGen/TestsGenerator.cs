@@ -82,11 +82,11 @@ public partial class SGTests : Factos.RemoteTesters.SourceGeneratedTestExecutor
                 hasOne = true;
                 spc.AddSource($"SGTests.{sanitizedClassName}.g.cs", SourceText.From(source, Encoding.UTF8));
             }
-
             if (!hasOne) return;
 
             var init =
-@$"namespace Factos;
+@$"#if NET8_0_OR_GREATER
+namespace Factos;
 
 public static class Init
 {{
@@ -96,6 +96,7 @@ public static class Init
         System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(Factos.SGTests).TypeHandle);
     }}
 }}
+#endif
 ";
 
             spc.AddSource($"Init.g.cs", SourceText.From(init, Encoding.UTF8));

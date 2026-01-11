@@ -2,7 +2,6 @@
 using Factos.Abstractions.Dto;
 using Factos.Protocols;
 using Factos.RemoteTesters;
-using Xunit.Sdk;
 
 namespace Factos;
 
