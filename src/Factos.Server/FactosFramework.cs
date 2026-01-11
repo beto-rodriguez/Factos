@@ -77,7 +77,6 @@ internal sealed class FactosFramework
         try
         {
             var appNames = new HashSet<string?>();
-            var retries = 0;
 
             for (int j = 0; j < testedApps.Count; j++)
             {
@@ -100,24 +99,10 @@ internal sealed class FactosFramework
                 using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeOut.Token, cancellationToken);
 
                 var nodesStream = GetNodes(appName, context, 0, cancellationToken);
-                var isEmpty = true;
 
                 await foreach (var node in nodesStream.WithCancellation(linkedCts.Token))
-                {
-                    isEmpty = false;
                     await context.MessageBus.PublishAsync(
                         this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, node));
-                }
-
-                if (isEmpty)
-                {
-                    await deviceWriter.Green(
-                        $"No test results were received from the client app {appName}, attempt {retries + 1}/3", cancellationToken);
-                    j--;
-                    retries++;
-                    continue;
-                }
-                retries = 0;
 
                 var protocol = ProtocolosLifeTime.ActiveProtocols.First();
                 await appRunner.EndApp(protocol, appName, cancellationToken);
@@ -155,6 +140,7 @@ internal sealed class FactosFramework
             "Waiting for test to run in the client app...", cancellationToken);
 
         var protocol = ProtocolosLifeTime.ActiveProtocols.First();
+        cancellationToken = CancellationToken.None;
 
         var isEmpty = true;
         await foreach (var node in protocol.RequestClient(appName, cancellationToken))
