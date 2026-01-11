@@ -2,7 +2,7 @@
 
 namespace Factos;
 
-public readonly struct ControllerSettings
+public struct ControllerSettings
 {
     public static ControllerSettings Default { get; } = new()
     {
@@ -11,7 +11,7 @@ public readonly struct ControllerSettings
         WebSocketsServerUri = Constants.DEFAULT_WEBSOCKETS_URI
     };
 
-    public int TcpPort { get; init; }
-    public string HttpServerUri { get; init; }
-    public string WebSocketsServerUri { get; init; }
+    public int TcpPort { get; set; }
+    public string HttpServerUri { get; set; }
+    public string WebSocketsServerUri { get; set; }
 }

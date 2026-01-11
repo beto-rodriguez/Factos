@@ -150,7 +150,7 @@ public class SourceGeneratedTestExecutor
         public ValueTask DisposeAsync()
         {
             _tests.Dispose();
-            return ValueTask.CompletedTask;
+            return new ValueTask(Task.CompletedTask);
         }
     }
 }

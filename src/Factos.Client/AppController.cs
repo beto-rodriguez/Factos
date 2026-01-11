@@ -2,6 +2,7 @@
 using Factos.Abstractions.Dto;
 using Factos.Protocols;
 using Factos.RemoteTesters;
+using Xunit.Sdk;
 
 namespace Factos;
 
@@ -67,7 +68,11 @@ public abstract class AppController(ControllerSettings settings)
     }
 
     internal virtual bool GetIsAndroid() =>
-        OperatingSystem.IsAndroid();
+#if NET6_0_OR_GREATER
+        OperatingSystem.IsAndroid(); 
+#else
+        throw new NotSupportedException();
+#endif
 
     internal void LogMessage(string message) =>
         LogMessageReceived?.Invoke(message);

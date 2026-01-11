@@ -11,7 +11,7 @@ public class WebSocketsProtocolHandler : IProtocolHandler
 {
     public async Task Execute(AppController controller)
     {
-        var tcs = new TaskCompletionSource();
+        var tcs = new TaskCompletionSource<object>();
 
         var uri = controller.Settings.WebSocketsServerUri;
 
@@ -65,7 +65,7 @@ public class WebSocketsProtocolHandler : IProtocolHandler
                 controller.QuitApp();
             }, null!);
 
-            tcs.SetResult();
+            tcs.SetResult(new());
         });
 
         await connection.StartAsync();

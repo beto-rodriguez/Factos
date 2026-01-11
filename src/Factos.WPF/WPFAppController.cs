@@ -34,12 +34,12 @@ public class WPFAppController(Window window, ControllerSettings settings)
         if (platformElement.IsLoaded)
             return Task.CompletedTask;
 
-        var tcs = new TaskCompletionSource();
+        var tcs = new TaskCompletionSource<object>();
 
         void OnLoaded(object? sender, RoutedEventArgs e)
         {
             platformElement.Loaded -= OnLoaded;
-            tcs.SetResult();
+            tcs.SetResult(new());
         }
 
         platformElement.Loaded += OnLoaded;
@@ -52,7 +52,7 @@ public class WPFAppController(Window window, ControllerSettings settings)
 
     internal override Task InvokeOnUIThread(Func<Task> task, TestStreamHandler streamHandler)
     {
-        var tcs = new TaskCompletionSource();
+        var tcs = new TaskCompletionSource<object>();
 
         var dispatcher = Window.Dispatcher;
 
@@ -68,7 +68,7 @@ public class WPFAppController(Window window, ControllerSettings settings)
             try
             {
                 await task();
-                tcs.SetResult();
+                tcs.SetResult(new());
             }
             catch (Exception ex)
             {
