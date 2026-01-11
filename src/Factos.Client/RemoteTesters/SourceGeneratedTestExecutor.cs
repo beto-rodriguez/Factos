@@ -7,6 +7,7 @@ public class SourceGeneratedTestExecutor
     : TestExecutor
 {
     private static readonly List<TestInfo> _registeredTests = [];
+    public static TestStreamHandler StreamHandler { get; } = new();
 
     protected static T Register<T>(T instance, TestInfo[] tests)
     {
@@ -19,8 +20,7 @@ public class SourceGeneratedTestExecutor
         return GetResultsNodes();
     }
 
-    private static async IAsyncEnumerable<TestNodeDto> GetResultsNodes(
-        IEnumerable<TestInfo>? source = null)
+    private static async IAsyncEnumerable<TestNodeDto> GetResultsNodes(IEnumerable<TestInfo>? source = null)
     {
         var enumerator = new ResultsNodesEnumerator(source);
 
@@ -55,38 +55,15 @@ public class SourceGeneratedTestExecutor
     public static IAsyncEnumerable<TestNodeDto> GetResults(Func<TestInfo, bool> filter) =>
         GetResultsNodes(_registeredTests.Where(filter));
 
-    private sealed class ResultsNodesEnumerator : IAsyncEnumerator<TestNodeDto>
+    private sealed class ResultsNodesEnumerator(IEnumerable<TestInfo>? source) 
+        : IAsyncEnumerator<TestNodeDto>
     {
-        private readonly IEnumerator<TestInfo> _tests;
-        private readonly bool _includeDiscovered;
+        private readonly IEnumerator<TestInfo> _tests = (source ?? _registeredTests).GetEnumerator();
+        private readonly bool _includeDiscovered = source is not null;
         private bool _yieldedDiscovered;
         private TestNodeDto? _current;
 
-        public ResultsNodesEnumerator(IEnumerable<TestInfo>? source)
-        {
-            _tests = (source ?? _registeredTests).GetEnumerator();
-            _includeDiscovered = source is not null;
-
-            StreamHandler = new TestStreamHandler();
-            StreamHandler.CancellationTokenSource.Token.Register(() =>
-            {
-                _current = new TestNodeDto
-                {
-                    Uid = _tests.Current.Uid,
-                    DisplayName = _tests.Current.DisplayName,
-                    Properties = [
-                        new FailedTestNodeStatePropertyDto
-                        {
-                            Explanation = $"UI Thread error.\n"
-                        }
-                    ]
-                };
-                _tests.Dispose();
-            });
-        }
-
         public TestNodeDto Current => _current!;
-        public TestStreamHandler StreamHandler { get; }
 
         public async ValueTask<bool> MoveNextAsync()
         {
@@ -108,6 +85,8 @@ public class SourceGeneratedTestExecutor
                 return false;
 
             var test = _tests.Current;
+            StreamHandler.LastKnownTestUid = test.Uid;
+            StreamHandler.LastKnownTestDisplayName = test.DisplayName;
 
             if (test.SkipReason is not null)
             {

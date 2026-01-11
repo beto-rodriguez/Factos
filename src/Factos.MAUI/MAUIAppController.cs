@@ -65,6 +65,23 @@ public class MAUIAppController(ControllerSettings settings)
             HandleException(e.Exception);
             e.Handled = true;
         };
+
+        AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+        {
+            if (e.ExceptionObject is not Exception ex)
+            {
+                tcs.TrySetException(new Exception("Unhandled exception is not of type Exception"));
+                return;
+            }
+
+            HandleException(ex);
+        };
+
+        TaskScheduler.UnobservedTaskException += (s, e) =>
+        {
+            HandleException(e.Exception);
+            e.SetObserved();
+        };
 #endif
 
 #if IOS || MACCATALYST
@@ -77,6 +94,12 @@ public class MAUIAppController(ControllerSettings settings)
             }
 
             HandleException(ex);
+        };
+
+        TaskScheduler.UnobservedTaskException += (s, e) =>
+        {
+            HandleException(e.Exception);
+            e.SetObserved();
         };
 #endif
 
