@@ -97,7 +97,7 @@ internal sealed class FactosFramework
                 var timeOut = new CancellationTokenSource(TimeSpan.FromSeconds(settings.ConnectionTimeout));
                 using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeOut.Token, cancellationToken);
 
-                var nodesStream = GetNodes(appName, context, cancellationToken);
+                var nodesStream = GetNodes(appName, context, 0, cancellationToken);
 
                 await foreach (var node in nodesStream.WithCancellation(linkedCts.Token))
                     await context.MessageBus.PublishAsync(
@@ -134,16 +134,35 @@ internal sealed class FactosFramework
         Task.FromResult(true);
 
     private async IAsyncEnumerable<TestNode> GetNodes(
-        string appName, ExecuteRequestContext context, [EnumeratorCancellation] CancellationToken cancellationToken)
+        string appName, ExecuteRequestContext context, int retry, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         await deviceWriter.Blue(
             "Waiting for test to run in the client app...", cancellationToken);
 
         var protocol = ProtocolosLifeTime.ActiveProtocols.First();
 
+        var isEmpty = true;
         await foreach (var node in protocol.RequestClient(appName, cancellationToken))
         {
+            isEmpty = false;
             yield return MTPResultsMapper.ReadNode(appName, node);
+        }
+
+        if (isEmpty)
+        {
+            await deviceWriter.Red(
+                $"No test results were received from the client app, attempt {retry + 1}/3", cancellationToken);
+
+            if (retry < 2)
+            {
+                await foreach (var node in GetNodes(appName, context, retry + 1, cancellationToken))
+                    yield return node;
+            }
+            else
+            {
+                await deviceWriter.Red(
+                    "Maximum retry attempts reached. No test results were received from the client app.", cancellationToken);
+            }
         }
     }
 }
