@@ -70,7 +70,7 @@ public abstract class AppController(ControllerSettings settings)
 #if NET6_0_OR_GREATER
         OperatingSystem.IsAndroid(); 
 #else
-        throw new NotSupportedException();
+        false;
 #endif
 
     internal void LogMessage(string message) =>

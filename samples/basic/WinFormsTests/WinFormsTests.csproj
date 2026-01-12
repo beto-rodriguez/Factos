@@ -2,8 +2,8 @@
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net10.0-windows</TargetFramework>
-		<!--<TargetFramework>net462</TargetFramework>-->
+		<!--<TargetFramework>net10.0-windows</TargetFramework>-->
+		<TargetFramework>net462</TargetFramework>
 		<Nullable>enable</Nullable>
 		<UseWindowsForms>true</UseWindowsForms>
 		<ImplicitUsings>enable</ImplicitUsings>
