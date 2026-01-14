@@ -8,7 +8,12 @@ public static class MauiProgram
 	public static MauiApp CreateMauiApp()
 	{
 		var builder = MauiApp.CreateBuilder();
-		builder
+
+        // useful to ensure the Factos.SGTests static constructor has run
+		// specially it prevents issues with tests detection on iOS.
+        System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(Factos.SGTests).TypeHandle);
+
+        builder
 			.UseFactosApp()
             .ConfigureFonts(fonts =>
 			{

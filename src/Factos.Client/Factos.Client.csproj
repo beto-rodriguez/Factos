@@ -2,13 +2,13 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>
+			net462;
 			net8.0;
 			net10.0;
 		</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<RootNamespace>Factos</RootNamespace>
-
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<EnableJsonSourceGeneration>true</EnableJsonSourceGeneration>
 	</PropertyGroup>

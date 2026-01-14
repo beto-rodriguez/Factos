@@ -1,6 +1,12 @@
 <Project>
 	<PropertyGroup>
-		<NuGetVersion>0.6.1</NuGetVersion>
+		<LangVersion>14.0</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	
+	<PropertyGroup>
+		<NuGetVersion>0.7.6</NuGetVersion>
 		<NuGetAutors>BetoRodriguez</NuGetAutors>
 	</PropertyGroup>
 

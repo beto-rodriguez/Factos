@@ -2,17 +2,17 @@
 
 public class TestMethodIdentifierPropertyDto : PropertyDto
 {
-    public required string AssemblyFullName { get; set; }
+    public string AssemblyFullName { get; set; } = string.Empty;
 
-    public required string Namespace { get; set; }
+    public string Namespace { get; set; } = string.Empty;
 
-    public required string TypeName { get; set; }
+    public string TypeName { get; set; } = string.Empty;
 
-    public required string MethodName { get; set; }
+    public string MethodName { get; set; } = string.Empty;
 
-    public required int MethodArity { get; set; }
+    public int MethodArity { get; set; }
 
-    public required string[] ParameterTypeFullNames { get; set; }
+    public string[] ParameterTypeFullNames { get; set; } = [];
 
-    public required string ReturnTypeFullName { get; set; }
+    public string ReturnTypeFullName { get; set; } = string.Empty;
 }

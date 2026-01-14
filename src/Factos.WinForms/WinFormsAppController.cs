@@ -39,14 +39,14 @@ public class WinFormsAppController(Form form, ControllerSettings settings)
 
     internal override Task InvokeOnUIThread(Func<Task> task, TestStreamHandler streamHandler)
     {
-        var tcs = new TaskCompletionSource();
+        var tcs = new TaskCompletionSource<object>();
 
         form.Invoke(async () =>
         {
             try
             {
                 await task();
-                tcs.SetResult();
+                tcs.SetResult(new());
             }
             catch (Exception ex)
             {
