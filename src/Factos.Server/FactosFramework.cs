@@ -1,4 +1,5 @@
-﻿using Factos.Server.ClientConnection;
+﻿using Factos.Abstractions.Dto;
+using Factos.Server.ClientConnection;
 using Factos.Server.Settings;
 using Factos.Server.Settings.Apps;
 using Microsoft.Testing.Platform.Extensions.Messages;
@@ -101,8 +102,20 @@ internal sealed class FactosFramework
                 var nodesStream = GetNodes(appName, context, 0, cancellationToken);
 
                 await foreach (var node in nodesStream.WithCancellation(linkedCts.Token))
+                {
                     await context.MessageBus.PublishAsync(
                         this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, node));
+
+                    if (node.Properties.Any<FailedTestNodeStateProperty>() || node.Properties.Any<ErrorTestNodeStateProperty>())
+                    {
+                        // end test on first failure, we are not sure if the client app is still running properly
+                        await deviceWriter.Red(
+                            $"Test node '{node.Uid}' reported failure or error. Ending test session for '{appName}'.",
+                            cancellationToken);
+
+                        break;
+                    }
+                }
 
                 var protocol = ProtocolosLifeTime.ActiveProtocols.First();
                 await appRunner.EndApp(protocol, appName, cancellationToken);
