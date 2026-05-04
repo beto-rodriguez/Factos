@@ -66,6 +66,9 @@
   <Project Path="src/Factos.EtoForms/Factos.EtoForms.csproj" />
   <Project Path="src/Factos.MAUI/Factos.MAUI.csproj" />
   <Project Path="src/Factos.Server/Factos.Server.csproj" />
+  <Folder Name="/tests/">
+    <Project Path="tests/Factos.Server.Tests/Factos.Server.Tests.csproj" />
+  </Folder>
   <Project Path="src/Factos.Uno/Factos.Uno.csproj" />
   <Project Path="src/Factos.WinForms/Factos.WinForms.csproj" Id="40dd81c6-576e-4f7f-a6bd-f604d3db4d2a" />
   <Project Path="src/Factos.WinUI/Factos.WinUI.csproj" Id="0bb669fb-0fe3-41e5-a050-6c311bb82251" />

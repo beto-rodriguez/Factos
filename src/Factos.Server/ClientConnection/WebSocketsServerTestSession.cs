@@ -123,6 +123,12 @@ internal sealed class WebSocketsServerTestSession(
         public static event Action<TestNodeDto>? OnTestNodeGenerated;
         public static event Action? OnAllTestsCompleted;
 
+        // Tracks whether the client signed off via the AllTestsCompleted RPC.
+        // Without this, a SignalR transport drop (client SIGSEGV, simulator
+        // killed, etc.) used to fire OnAllTestsCompleted just like a graceful
+        // exit, so partial result sets were reported as passing runs.
+        private static bool _completedGracefully;
+
         public async Task TestNodeGenerated(TestNodeDto nodeDto)
         {
             OnTestNodeGenerated?.Invoke(nodeDto);
@@ -130,11 +136,13 @@ internal sealed class WebSocketsServerTestSession(
 
         public async Task AllTestsCompleted()
         {
+            _completedGracefully = true;
             OnAllTestsCompleted?.Invoke();
         }
 
         public override Task OnConnectedAsync()
         {
+            _completedGracefully = false;
             var connectionId = Context.ConnectionId;
             Clients.Client(connectionId).SendAsync("RunTests");
             return base.OnConnectedAsync();
@@ -142,6 +150,30 @@ internal sealed class WebSocketsServerTestSession(
 
         public override Task OnDisconnectedAsync(Exception? exception)
         {
+            if (!_completedGracefully)
+            {
+                // Surface the abort as a failed test node so MTP marks the run
+                // failed (exit code != 0). FactosFramework breaks the result
+                // stream on the first failed/error node, so emitting one is
+                // enough to terminate the iterator.
+                var reason = exception?.Message ?? "the client disconnected before reporting completion";
+                OnTestNodeGenerated?.Invoke(new TestNodeDto
+                {
+                    Uid = "factos-session-aborted",
+                    DisplayName = "Factos session aborted",
+                    Properties =
+                    [
+                        new FailedTestNodeStatePropertyDto
+                        {
+                            Explanation =
+                                "The client app disconnected before sending AllTestsCompleted; " +
+                                "the remaining tests did not run. " +
+                                $"Reason: {reason}"
+                        }
+                    ]
+                });
+            }
+
             OnAllTestsCompleted?.Invoke();
             return base.OnDisconnectedAsync(exception);
         }

@@ -26,4 +26,8 @@
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="10.0.1" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<InternalsVisibleTo Include="Factos.Server.Tests" />
+	</ItemGroup>
+
 </Project>
