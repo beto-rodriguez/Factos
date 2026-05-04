@@ -6,7 +6,7 @@
 	</PropertyGroup>
 	
 	<PropertyGroup>
-		<NuGetVersion>0.8.0</NuGetVersion>
+		<NuGetVersion>0.8.1</NuGetVersion>
 		<NuGetAutors>BetoRodriguez</NuGetAutors>
 	</PropertyGroup>
 
