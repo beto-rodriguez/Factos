@@ -106,11 +106,17 @@ public static class TestedAppExtensions
 
             if (appHost.HasFlag(AppHost.HeadlessChrome))
                 chromeArgs =
-                    "--headless=new " +     // run without UI
-                    "--disable-gpu " +      // disable GPU usage
-                    "--no-sandbox " +       // disable sandboxing (required in some environments)
-                    "--enable-logging " +   // enable internal chrome logging
-                    "--v=1";                // verbosity level
+                    "--headless=new " +                  // run without UI
+                    "--disable-gpu " +                   // no hardware GPU on most CI VMs
+                    "--enable-unsafe-swiftshader " +     // re-enable software WebGL: Chrome ~127+ stopped falling
+                    "--use-angle=swiftshader " +         //   back to SwiftShader by default, so SKGLView / any
+                                                         //   WebGL-using app would silently fail context creation
+                                                         //   ("Failed to create WebGL context: err 0"). These two
+                                                         //   flags pair Chrome's renderer pipeline with the bundled
+                                                         //   software rasterizer so headless WebGL keeps working.
+                    "--no-sandbox " +                    // disable sandboxing (required in some environments)
+                    "--enable-logging " +                // enable internal chrome logging
+                    "--v=1";                             // verbosity level
 
             if (OperatingSystem.IsWindows())
                 return $"cmd.exe /c start http://localhost:{port} {chromeArgs}";
