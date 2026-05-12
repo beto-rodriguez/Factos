@@ -11,7 +11,7 @@ public partial class WelcomeView : UserControl
         {
             Text = "Tests will run shortly...",
             Foreground = new SolidColorBrush(Colors.WhiteSmoke),
-            TextAlignment = TextAlignment.Center,
+            TextAlignment = Microsoft.UI.Xaml.TextAlignment.Center,
             FontSize = 24,
             Padding = new Thickness(50)
         };

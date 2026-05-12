@@ -14,11 +14,13 @@
 		<!--
       UnoFeatures let's you quickly add and manage implicit package references based on the features you want to use.
       https://aka.platform.uno/singleproject-features
-    -->
 
-		<UnoFeatures>
-			SkiaRenderer;
-		</UnoFeatures>
+      Factos.Uno used to declare the SkiaRenderer feature here, but that baked the
+      Skia UnoUIRuntimeIdentifier into the assembly and made it impossible to
+      reference from Uno-Native consumers (Uno's runtime-replace target refused to
+      load it). Consumers pick the renderer they want — Factos itself is plain
+      XAML and works on both Skia and Native.
+    -->
 	</PropertyGroup>
 
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
