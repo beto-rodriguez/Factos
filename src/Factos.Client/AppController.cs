@@ -66,13 +66,6 @@ public abstract class AppController(ControllerSettings settings)
         }
     }
 
-    internal virtual bool GetIsAndroid() =>
-#if NET6_0_OR_GREATER
-        OperatingSystem.IsAndroid(); 
-#else
-        false;
-#endif
-
     internal void LogMessage(string message) =>
         LogMessageReceived?.Invoke(message);
 }

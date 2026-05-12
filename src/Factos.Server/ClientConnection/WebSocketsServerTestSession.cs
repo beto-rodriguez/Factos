@@ -40,7 +40,14 @@ internal sealed class WebSocketsServerTestSession(
             app.UseCors("AllowAll");
             app.MapHub<TestHub>("/test");
 
-            app.Run(settings.WebSocketsUri);
+            // Bind to all interfaces, not the literal "localhost" host portion of
+            // settings.WebSocketsUri. Android emulators reach the host machine via
+            // the special address 10.0.2.2 — when Kestrel listens on
+            // http://localhost:7008 only it binds 127.0.0.1 / ::1 and the request
+            // arriving from the emulator (with Host: 10.0.2.2:7008) cannot be
+            // routed. Substituting "+" makes Kestrel listen on every interface so
+            // both same-host clients and emulator/simulator clients can connect.
+            app.Run(settings.WebSocketsUri.Replace("localhost", "+"));
         }, cancellationToken);
 
         await deviceWritter.Dimmed(

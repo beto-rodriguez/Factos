@@ -15,7 +15,31 @@ public class WebSocketsProtocolHandler : IProtocolHandler
 
         var uri = controller.Settings.WebSocketsServerUri;
 
-        if (controller.GetIsAndroid())
+        // Detect Android with a runtime filesystem probe instead of going
+        // through controller.GetIsAndroid() / OperatingSystem.IsAndroid().
+        //
+        // Both indirections fail here:
+        //   1) OperatingSystem.IsAndroid() and RuntimeInformation.RuntimeIdentifier
+        //      are intrinsified by the JIT/AOT to a compile-time constant based on
+        //      the *calling assembly's* TargetFramework. Factos.Client targets
+        //      net10.0 (no -android variant), so the intrinsic folds to false even
+        //      when running on a real Android device.
+        //   2) The virtual override on per-platform subclasses (e.g.
+        //      Factos.Uno.UnoAppController, compiled for net10.0-android with
+        //      #if ANDROID return true) is devirtualized by the trimmer/JIT at this
+        //      call site because `controller` is declared as the base AppController
+        //      type and the trimmer treats the base implementation as the only
+        //      reachable one.
+        //
+        // /system/bin/app_process exists on every Android device and is world-
+        // readable, so File.Exists is a reliable real-runtime check that no
+        // intrinsic or trimmer pass can fold away.
+#if NET6_0_OR_GREATER
+        var isAndroid = System.IO.File.Exists("/system/bin/app_process");
+#else
+        var isAndroid = false;
+#endif
+        if (isAndroid)
             uri = uri.Replace("localhost", "10.0.2.2");
 
         var connection = new HubConnectionBuilder()
