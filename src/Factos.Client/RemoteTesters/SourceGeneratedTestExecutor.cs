@@ -15,8 +15,14 @@ public class SourceGeneratedTestExecutor
         return instance;
     }
 
-    internal override IAsyncEnumerable<TestNodeDto> Execute()
+    internal override IAsyncEnumerable<TestNodeDto> Execute(string[]? testUids = null)
     {
+        if (testUids is { Length: > 0 })
+        {
+            var set = new HashSet<string>(testUids, StringComparer.Ordinal);
+            return GetResultsNodes(_registeredTests.Where(t => set.Contains(t.Uid)));
+        }
+
         return GetResultsNodes();
     }
 

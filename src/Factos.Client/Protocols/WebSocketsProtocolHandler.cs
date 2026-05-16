@@ -53,7 +53,7 @@ public class WebSocketsProtocolHandler : IProtocolHandler
             })
             .Build();
 
-        connection.On("RunTests", async () =>
+        connection.On<string[]>("RunTests", async testUids =>
         {
             var sh = SourceGeneratedTestExecutor.StreamHandler;
 
@@ -76,7 +76,7 @@ public class WebSocketsProtocolHandler : IProtocolHandler
                 await connection.InvokeAsync("TestNodeGenerated", test);
             });
 
-            await foreach (var test in controller.TestExecutor.Execute())
+            await foreach (var test in controller.TestExecutor.Execute(testUids))
             {
                 controller.LogMessage($"{test.Uid} sent.");
                 await connection.InvokeAsync("TestNodeGenerated", test);

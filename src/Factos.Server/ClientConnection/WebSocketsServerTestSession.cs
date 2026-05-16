@@ -63,8 +63,12 @@ internal sealed class WebSocketsServerTestSession(
     }
 
     public async IAsyncEnumerable<TestNodeDto> RequestClient(
-        string clientName, [EnumeratorCancellation] CancellationToken cancellationToken)
+        string clientName, string[] testUids, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        // The hub reads this on OnConnectedAsync to forward the per-app filter
+        // to the client app over the SignalR RunTests invocation.
+        TestHub.PendingTestUids = testUids;
+
         // this will run as soon as the client connects
         // see TestHub.OnConnectedAsync
 
@@ -130,6 +134,10 @@ internal sealed class WebSocketsServerTestSession(
         public static event Action<TestNodeDto>? OnTestNodeGenerated;
         public static event Action? OnAllTestsCompleted;
 
+        // Set by RequestClient before the per-app launch so OnConnectedAsync
+        // can forward the filter on the RunTests invocation. Empty = run all.
+        public static string[] PendingTestUids { get; set; } = [];
+
         // Tracks whether the client signed off via the AllTestsCompleted RPC.
         // Without this, a SignalR transport drop (client SIGSEGV, simulator
         // killed, etc.) used to fire OnAllTestsCompleted just like a graceful
@@ -151,7 +159,7 @@ internal sealed class WebSocketsServerTestSession(
         {
             _completedGracefully = false;
             var connectionId = Context.ConnectionId;
-            Clients.Client(connectionId).SendAsync("RunTests");
+            Clients.Client(connectionId).SendAsync("RunTests", PendingTestUids);
             return base.OnConnectedAsync();
         }
 
