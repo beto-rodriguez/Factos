@@ -37,7 +37,12 @@ jobs:
           api-level: 35
           target: google_apis
           arch: x86_64
-          script:
+          script: |
+            # reactivecircus/android-emulator-runner runs this script in a subshell
+            # that drops DOTNET_HOST_PATH from setup-dotnet. The android workload
+            # pulls SDK 10.0.300, whose ILLink ComputeManagedAssemblies task host
+            # bootstrap hard-fails with MSB4221 / MSB4027 when the var is missing.
+            export DOTNET_HOST_PATH="$(command -v dotnet)"
             # select the test defined in the AppTester project, this project harnesses the UI tests.
             dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --select avalonia-android
 
