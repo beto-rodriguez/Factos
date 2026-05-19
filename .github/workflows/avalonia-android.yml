@@ -37,14 +37,13 @@ jobs:
           api-level: 35
           target: google_apis
           arch: x86_64
-          script: |
-            # reactivecircus/android-emulator-runner runs this script in a subshell
-            # that drops DOTNET_HOST_PATH from setup-dotnet. The android workload
-            # pulls SDK 10.0.300, whose ILLink ComputeManagedAssemblies task host
-            # bootstrap hard-fails with MSB4221 / MSB4027 when the var is missing.
-            export DOTNET_HOST_PATH="$(command -v dotnet)"
-            # select the test defined in the AppTester project, this project harnesses the UI tests.
-            dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --select avalonia-android
+          # reactivecircus/android-emulator-runner invokes each line of `script`
+          # as its own `sh -c` call, so a standalone `export` does not leak into
+          # the next line. The android workload pulls SDK 10.0.300 whose ILLink
+          # ComputeManagedAssemblies task host bootstrap hard-fails with MSB4221
+          # / MSB4027 unless DOTNET_HOST_PATH is set, so the export must share a
+          # shell with the dotnet invocation — keep them on one line.
+          script: export DOTNET_HOST_PATH="$(command -v dotnet)" && dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --select avalonia-android
 
       - name: Publish test results
         uses: dorny/test-reporter@v2.2.0
