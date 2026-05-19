@@ -42,8 +42,7 @@ testedApps
             "win-x64",
         msBuildArgs: [
             new("WindowsPackageType", "None"),
-            new("WindowsAppSDKSelfContained", "true"),
-            new("UseSrc", "false")
+            new("WindowsAppSDKSelfContained", "true")
         ])
 
     // == MAUI ==

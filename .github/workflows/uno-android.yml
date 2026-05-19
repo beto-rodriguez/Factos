@@ -44,7 +44,10 @@ jobs:
           # ComputeManagedAssemblies task host bootstrap hard-fails with MSB4221
           # / MSB4027 unless DOTNET_HOST_PATH is set, so the export must share a
           # shell with the dotnet invocation — keep them on one line.
-          script: export DOTNET_HOST_PATH="$(command -v dotnet)" && dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --select uno --test-env tfm=net10.0-android
+          # Dump the last 500 logcat lines on failure to diagnose app crashes
+          # (Microsoft.Android.Run reports "could not retrieve PID" but doesn't
+          # tell us *why* the app exited before pidof could see it).
+          script: bash -c 'export DOTNET_HOST_PATH="$(command -v dotnet)"; adb logcat -c; dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --select uno --test-env tfm=net10.0-android; rc=$?; if [ $rc -ne 0 ]; then echo "=== adb logcat (last 500 lines) ==="; adb logcat -d -t 500; echo "=== end logcat ==="; fi; exit $rc'
 
       - name: Publish test results
         uses: dorny/test-reporter@v2.2.0
