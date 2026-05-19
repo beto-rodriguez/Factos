@@ -40,7 +40,14 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7175" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.251106002" />
-    <PackageReference Include="Factos.WinUI" Version="0.4.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Factos.WinUI\Factos.WinUI.csproj" />
+    <ProjectReference
+        Include="..\..\..\src\CodeGen\CodeGen.csproj"
+        OutputItemType="Analyzer"
+        ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <!--
