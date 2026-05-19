@@ -47,7 +47,7 @@ jobs:
           # Dump the last 500 logcat lines on failure to diagnose app crashes
           # (Microsoft.Android.Run reports "could not retrieve PID" but doesn't
           # tell us *why* the app exited before pidof could see it).
-          script: bash -c 'export DOTNET_HOST_PATH="$(command -v dotnet)"; adb logcat -c; adb logcat -v threadtime > /tmp/logcat.txt 2>&1 & LOGCAT_PID=$!; dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --select uno --test-env tfm=net10.0-android; rc=$?; kill $LOGCAT_PID 2>/dev/null; if [ $rc -ne 0 ]; then echo "=== adb logcat (unotests + activity + crash) ==="; grep -E "unotests|UnoTests|ActivityTaskManager|AndroidRuntime|FATAL|am start|DOTNET" /tmp/logcat.txt | tail -200; echo "=== end logcat ==="; fi; exit $rc'
+          script: bash -c 'export DOTNET_HOST_PATH="$(command -v dotnet)"; adb logcat -c; adb logcat -v threadtime > /tmp/logcat.txt 2>&1 & LOGCAT_PID=$!; dotnet run --project samples/basic/AppTester -c Release --report-trx --no-progress --select uno --test-env tfm=net10.0-android; rc=$?; kill $LOGCAT_PID 2>/dev/null; if [ $rc -ne 0 ]; then echo "=== context lines around the FATAL signal ==="; grep -n FATAL /tmp/logcat.txt | head -1 | cut -d: -f1 | while read l; do awk -v s=$((l-80)) -v e=$((l+30)) "NR>=s && NR<=e" /tmp/logcat.txt; done; echo "=== end logcat ==="; fi; exit $rc'
 
       - name: Publish test results
         uses: dorny/test-reporter@v2.2.0
