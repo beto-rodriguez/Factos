@@ -37,6 +37,20 @@
       SkiaRenderer;
     </UnoFeatures>
   </PropertyGroup>
+
+  <!--
+      Uno (like MAUI) defaults RunAOTCompilation=true for Android Release. With
+      Android workload 36.1.53 / SDK 10.0.300 the resulting AOT image SIGSEGVs
+      (signal 11, fault addr 0x0) in MainActivity bring-up on the emulator, so
+      Microsoft.Android.Run reports "App started but could not retrieve PID."
+      Avalonia Android passes because its csproj disables profiled AOT. For
+      this test app we don't care about Android startup time, so disable AOT
+      to dodge the bug while keeping iOS AOT (which Apple requires).
+  -->
+  <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+    <RunAOTCompilation>false</RunAOTCompilation>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\src\Factos.Uno\Factos.Uno.csproj" />
     <ProjectReference

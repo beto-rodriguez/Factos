@@ -10,7 +10,7 @@ internal interface IServerSessionProtocol
 
     Task Finish(CancellationToken cancellationToken);
 
-    IAsyncEnumerable<TestNodeDto> RequestClient(string clientName, CancellationToken cancellationToken);
+    IAsyncEnumerable<TestNodeDto> RequestClient(string clientName, string[] testUids, CancellationToken cancellationToken);
 
     Task CloseClient(string clientName, CancellationToken cancellationToken);
 }

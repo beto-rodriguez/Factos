@@ -5,6 +5,7 @@ using Factos.Server.Settings.Apps;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
+using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.Services;
 using System.Runtime.CompilerServices;
 
@@ -77,6 +78,17 @@ internal sealed class FactosFramework
 
         try
         {
+            // MTP forwards the user's selection via context.Request.Filter.
+            // - NopFilter / non-filter request => run everything on every app (null sentinel).
+            // - TestNodeUidListFilter => only the listed UIDs, partitioned per app.
+            // Filter UIDs include the `[appName]` prefix that MTPResultsMapper attaches
+            // during discovery; strip it before forwarding to the client.
+            string[]? selectedUids = null;
+            if (context.Request is TestExecutionRequest req && req.Filter is TestNodeUidListFilter list)
+            {
+                selectedUids = [.. list.TestNodeUids.Select(u => (string)u.Value)];
+            }
+
             var appNames = new HashSet<string?>();
 
             for (int j = 0; j < testedApps.Count; j++)
@@ -93,13 +105,22 @@ internal sealed class FactosFramework
                     appName = $"{testedApp.Uid} ({i++})";
                 var cacheFile = $"{appName}_cache.json";
 
+                var (skip, appUids) = TestFilterPartitioner.PartitionForApp(selectedUids, appName);
+                if (skip)
+                {
+                    await deviceWriter.Dimmed(
+                        $"Skipping {appName}: no tests in the current filter target this app.",
+                        cancellationToken);
+                    continue;
+                }
+
                 await deviceWriter.Title($"Starting {appName}...", cancellationToken);
                 await appRunner.StartApp(testedApp, appName, cancellationToken);
 
                 var timeOut = new CancellationTokenSource(TimeSpan.FromSeconds(settings.ConnectionTimeout));
                 using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeOut.Token, cancellationToken);
 
-                var nodesStream = GetNodes(appName, context, 0, cancellationToken);
+                var nodesStream = GetNodes(appName, appUids, context, 0, cancellationToken);
 
                 await foreach (var node in nodesStream.WithCancellation(linkedCts.Token))
                 {
@@ -147,7 +168,7 @@ internal sealed class FactosFramework
         Task.FromResult(true);
 
     private async IAsyncEnumerable<TestNode> GetNodes(
-        string appName, ExecuteRequestContext context, int retry, [EnumeratorCancellation] CancellationToken cancellationToken)
+        string appName, string[] testUids, ExecuteRequestContext context, int retry, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         await deviceWriter.Blue(
             "Waiting for test to run in the client app...", cancellationToken);
@@ -156,7 +177,7 @@ internal sealed class FactosFramework
         cancellationToken = CancellationToken.None;
 
         var isEmpty = true;
-        await foreach (var node in protocol.RequestClient(appName, cancellationToken))
+        await foreach (var node in protocol.RequestClient(appName, testUids, cancellationToken))
         {
             isEmpty = false;
             yield return MTPResultsMapper.ReadNode(appName, node);
@@ -169,7 +190,7 @@ internal sealed class FactosFramework
 
             if (retry < 2)
             {
-                await foreach (var node in GetNodes(appName, context, retry + 1, cancellationToken))
+                await foreach (var node in GetNodes(appName, testUids, context, retry + 1, cancellationToken))
                     yield return node;
             }
             else
