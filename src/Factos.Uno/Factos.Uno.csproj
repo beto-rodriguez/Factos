@@ -1,4 +1,4 @@
-﻿<Project Sdk="Uno.Sdk/7.0.0-dev.87">
+﻿<Project Sdk="Uno.Sdk/7.0.5">
 	<PropertyGroup>
 		<!-- Uno Platform 7 renders every head with Skia: one net10.0 build serves them all. -->
 		<TargetFrameworks>net10.0;net10.0-windows10.0.19041</TargetFrameworks>
