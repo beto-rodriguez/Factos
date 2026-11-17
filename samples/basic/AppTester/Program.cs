@@ -33,6 +33,18 @@ var root = "samples/basic";
 // udid, e.g. --test-env device=:v2:udid=<UDID>
 MSBuildArg iosDevice = new("Device", "[device]");
 
+// A Release iOS build trims and fully AOT-compiles every assembly with LLVM, which took
+// ~14 minutes per CI job and buys nothing on a simulator. Build for the simulator RID with
+// the interpreter instead, like LiveCharts2 does for its iOS UI tests (~1-4 minutes).
+MSBuildArg[] iosSimulatorBuild = [
+    iosDevice,
+    new("RuntimeIdentifier", "iossimulator-arm64"),
+    new("MtouchUseLlvm", "false"),
+    new("MtouchLink", "SdkOnly"),
+    new("RunAOTCompilation", "false"),
+    new("UseInterpreter", "true")
+];
+
 testedApps
 
     // == WPF ==
@@ -53,13 +65,13 @@ testedApps
     // == MAUI ==
     .Add(project: $"{root}/MAUITests",              uid: "maui",                targetFramework: "[tfm]")
     .Add(project: $"{root}/MAUITests",              uid: "maui-ios",            targetFramework: "net10.0-ios",
-        msBuildArgs: [iosDevice])
+        msBuildArgs: iosSimulatorBuild)
 
     // == AVALONIA ==
     .Add(project: $"{root}/AvaloniaTests.Desktop",  uid: "avalonia-desktop")
     .Add(project: $"{root}/AvaloniaTests.Android",  uid: "avalonia-android")
     .Add(project: $"{root}/AvaloniaTests.iOS",      uid: "avalonia-ios",
-        msBuildArgs: [iosDevice])
+        msBuildArgs: iosSimulatorBuild)
     .Add(project: $"{root}/AvaloniaTests.Browser",  uid: "avalonia-browser",    appHost: AppHost.HeadlessChrome)
 
     // == UNO ==
