@@ -28,6 +28,11 @@ testedApps
 //    dotnet test -c Release --project samples/basic/AppTester --test-env key=value
 var root = "samples/basic";
 
+// iOS apps must name the simulator to run on: with more than one available, `dotnet run`
+// stops with "multiple devices are available". The workflow boots one and passes its
+// udid, e.g. --test-env device=:v2:udid=<UDID>
+MSBuildArg iosDevice = new("Device", "[device]");
+
 testedApps
 
     // == WPF ==
@@ -47,11 +52,14 @@ testedApps
 
     // == MAUI ==
     .Add(project: $"{root}/MAUITests",              uid: "maui",                targetFramework: "[tfm]")
+    .Add(project: $"{root}/MAUITests",              uid: "maui-ios",            targetFramework: "net10.0-ios",
+        msBuildArgs: [iosDevice])
 
     // == AVALONIA ==
     .Add(project: $"{root}/AvaloniaTests.Desktop",  uid: "avalonia-desktop")
     .Add(project: $"{root}/AvaloniaTests.Android",  uid: "avalonia-android")
-    .Add(project: $"{root}/AvaloniaTests.iOS",      uid: "avalonia-ios")
+    .Add(project: $"{root}/AvaloniaTests.iOS",      uid: "avalonia-ios",
+        msBuildArgs: [iosDevice])
     .Add(project: $"{root}/AvaloniaTests.Browser",  uid: "avalonia-browser",    appHost: AppHost.HeadlessChrome)
 
     // == UNO ==
