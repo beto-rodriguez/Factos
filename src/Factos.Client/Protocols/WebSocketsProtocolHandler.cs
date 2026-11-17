@@ -92,7 +92,33 @@ public class WebSocketsProtocolHandler : IProtocolHandler
             tcs.SetResult(new());
         });
 
-        await connection.StartAsync();
+        await StartWithRetries(connection, controller);
         await tcs.Task;
+    }
+
+    // A single failed connect used to drop the app into the local-run fallback for good,
+    // and the test runner waited for results that never came. Retry for a short while
+    // first, e.g. a cold emulator whose network is not up yet; when no runner is listening
+    // (a local run) this only delays the local results by a few seconds.
+    static readonly TimeSpan[] s_connectRetryDelays =
+        [TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(4)];
+
+    private static async Task StartWithRetries(HubConnection connection, AppController controller)
+    {
+        for (var attempt = 0; ; attempt++)
+        {
+            try
+            {
+                await connection.StartAsync();
+                return;
+            }
+            catch (Exception ex) when (attempt < s_connectRetryDelays.Length)
+            {
+                var delay = s_connectRetryDelays[attempt];
+                controller.LogMessage(
+                    $"Could not connect to the test runner ({ex.Message}), retrying in {delay.TotalSeconds}s...");
+                await Task.Delay(delay);
+            }
+        }
     }
 }
