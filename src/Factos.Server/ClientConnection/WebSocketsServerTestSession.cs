@@ -18,37 +18,38 @@ internal sealed class WebSocketsServerTestSession(
 
     public async Task Start(CancellationToken cancellationToken)
     {
-        string[] args = [];
+        var builder = WebApplication.CreateBuilder();
 
-        _ = Task.Run(() =>
-        {
-            var builder = WebApplication.CreateBuilder(args);
+        // avoid noise from asp logs
+        builder.Logging.ClearProviders();
 
-            // avoid noise from asp logs
-            builder.Logging.ClearProviders();
+        // Add SignalR services
+        builder.Services.AddSignalR();
 
-            // Add SignalR services
-            builder.Services.AddSignalR();
+        // receive from any origin
+        builder.Services.AddCors(options =>
+            options.AddPolicy("AllowAll",
+                policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
-            // receive from any origin
-            builder.Services.AddCors(options =>
-                options.AddPolicy("AllowAll",
-                    policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+        var webApp = builder.Build();
 
-            app = builder.Build();
+        webApp.UseCors("AllowAll");
+        webApp.MapHub<TestHub>("/test");
 
-            app.UseCors("AllowAll");
-            app.MapHub<TestHub>("/test");
+        // Bind to all interfaces, not the literal "localhost" host portion of
+        // settings.WebSocketsUri. Android emulators reach the host machine via
+        // the special address 10.0.2.2 — when Kestrel listens on
+        // http://localhost:7008 only it binds 127.0.0.1 / ::1 and the request
+        // arriving from the emulator (with Host: 10.0.2.2:7008) cannot be
+        // routed. Substituting "+" makes Kestrel listen on every interface so
+        // both same-host clients and emulator/simulator clients can connect.
+        webApp.Urls.Add(settings.WebSocketsUri.Replace("localhost", "+"));
 
-            // Bind to all interfaces, not the literal "localhost" host portion of
-            // settings.WebSocketsUri. Android emulators reach the host machine via
-            // the special address 10.0.2.2 — when Kestrel listens on
-            // http://localhost:7008 only it binds 127.0.0.1 / ::1 and the request
-            // arriving from the emulator (with Host: 10.0.2.2:7008) cannot be
-            // routed. Substituting "+" makes Kestrel listen on every interface so
-            // both same-host clients and emulator/simulator clients can connect.
-            app.Run(settings.WebSocketsUri.Replace("localhost", "+"));
-        }, cancellationToken);
+        // StartAsync returns once Kestrel is listening and throws if it cannot bind
+        // (e.g. the port is taken). The former fire-and-forget app.Run swallowed that
+        // error, the client never connected and the run waited until it timed out.
+        await webApp.StartAsync(cancellationToken);
+        app = webApp;
 
         await deviceWritter.Dimmed(
             $"WebSockets server listening on {settings.WebSocketsUri}/test'.", cancellationToken);
@@ -58,67 +59,66 @@ internal sealed class WebSocketsServerTestSession(
     {
         if (app is null) return;
         await app.StopAsync(cancellationToken);
+        await app.DisposeAsync();
+        app = null;
 
         await deviceWritter.Dimmed("WebSockets server stopped", cancellationToken);
     }
 
-    public async IAsyncEnumerable<TestNodeDto> RequestClient(
-        string clientName, string[] testUids, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public void PrepareClient(string clientName, string[] testUids) =>
+        TestHub.CurrentSession = new ClientSession(clientName, testUids);
+
+    public void AbortClient(string clientName, string reason)
     {
-        // The hub reads this on OnConnectedAsync to forward the per-app filter
-        // to the client app over the SignalR RunTests invocation.
-        TestHub.PendingTestUids = testUids;
+        // The abort comes from a process-exit callback that can run late, after the runner
+        // already moved on to the next app; only abort the session of the app it belongs to
+        // (app names are unique within a run, see FactosFramework).
+        var session = TestHub.CurrentSession;
+        if (session is null || session.ClientName != clientName) return;
 
-        // this will run as soon as the client connects
-        // see TestHub.OnConnectedAsync
+        session.Abort(reason);
+    }
 
+    public async IAsyncEnumerable<TestNodeDto> RequestClient(
+        string clientName, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var session = TestHub.CurrentSession ?? throw new InvalidOperationException(
+            $"{nameof(PrepareClient)} must be called before requesting results from '{clientName}'.");
+
+        // the client starts sending nodes as soon as it connects, see TestHub.OnConnectedAsync
         while (true)
         {
-            var tcs = new TaskCompletionSource<TestNodeDto>();
-
-            void OnTestNodeGenerated(TestNodeDto nodeDto)
-            {
-                tcs.TrySetResult(nodeDto);
-                TestHub.OnTestNodeGenerated -= OnTestNodeGenerated;
-            }
-
-            void OnAllTestsCompleted()
-            {
-                tcs.TrySetCanceled(cancellationToken);
-                TestHub.OnAllTestsCompleted -= OnAllTestsCompleted;
-            }
-
-            await using var cancellationRegistration = cancellationToken.Register(async () =>
-            {
-                await deviceWritter.Red(
-                    $"Cancellation requested while waiting for test node from client '{clientName}'.", CancellationToken.None);
-
-                tcs.TrySetCanceled();
-                TestHub.OnTestNodeGenerated -= OnTestNodeGenerated;
-            });
-
-            TestHub.OnTestNodeGenerated += OnTestNodeGenerated;
-            TestHub.OnAllTestsCompleted += OnAllTestsCompleted;
-
-            TestNodeDto node;
+            TestNodeDto? node = null;
+            var isCancelled = false;
 
             try
             {
-                node = await tcs.Task.ConfigureAwait(false);
+                if (!await session.Reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false))
+                    yield break; // the client signed off, or the session was aborted
+
+                if (!session.Reader.TryRead(out node))
+                    continue;
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException)
             {
-                break;
+                isCancelled = true;
             }
-            catch (Exception ex)
+
+            if (isCancelled)
             {
                 await deviceWritter.Red(
-                    $"Error receiving test node from client '{clientName}': {ex.Message}", cancellationToken);
+                    $"Timed out (or cancelled) while waiting for test results from '{clientName}'.", CancellationToken.None);
 
-                break;
+                // surface it as a failed node, so the run fails instead of hanging or passing
+                yield return ClientSession.CreateFailedNode(
+                    ClientSession.TIMEOUT_NODE_UID,
+                    "Factos session timed out",
+                    $"The client app '{clientName}' did not finish the tests before the timeout or the run was cancelled.");
+
+                yield break;
             }
 
-            yield return node;
+            yield return node!;
         }
     }
 
@@ -131,65 +131,57 @@ internal sealed class WebSocketsServerTestSession(
 
     public class TestHub : Hub
     {
-        public static event Action<TestNodeDto>? OnTestNodeGenerated;
-        public static event Action? OnAllTestsCompleted;
+        internal const string SESSION_KEY = "factos-session";
 
-        // Set by RequestClient before the per-app launch so OnConnectedAsync
-        // can forward the filter on the RunTests invocation. Empty = run all.
-        public static string[] PendingTestUids { get; set; } = [];
+        // The session of the app being tested; FactosFramework prepares it before
+        // the app starts so the hub can forward the per-app filter on connection.
+        internal static ClientSession? CurrentSession { get; set; }
 
-        // Tracks whether the client signed off via the AllTestsCompleted RPC.
-        // Without this, a SignalR transport drop (client SIGSEGV, simulator
-        // killed, etc.) used to fire OnAllTestsCompleted just like a graceful
-        // exit, so partial result sets were reported as passing runs.
-        private static bool _completedGracefully;
+        // Each connection keeps the session that was current when it connected, so a
+        // late disconnect from the previous app cannot end the next app's session.
+        // A connection with no session (it connected before any app was prepared, e.g.
+        // a stray app) targets nothing; only a hub without a connection, as built by the
+        // unit tests, falls back to the current session.
+        ClientSession? Session =>
+            Context is null
+                ? CurrentSession
+                : Context.Items.TryGetValue(SESSION_KEY, out var session) ? session as ClientSession : null;
 
-        public async Task TestNodeGenerated(TestNodeDto nodeDto)
+        public Task TestNodeGenerated(TestNodeDto nodeDto)
         {
-            OnTestNodeGenerated?.Invoke(nodeDto);
+            Session?.Publish(nodeDto);
+            return Task.CompletedTask;
         }
 
-        public async Task AllTestsCompleted()
+        public Task AllTestsCompleted()
         {
-            _completedGracefully = true;
-            OnAllTestsCompleted?.Invoke();
+            Session?.CompleteGracefully();
+            return Task.CompletedTask;
         }
 
         public override Task OnConnectedAsync()
         {
-            _completedGracefully = false;
-            var connectionId = Context.ConnectionId;
-            Clients.Client(connectionId).SendAsync("RunTests", PendingTestUids);
+            var session = CurrentSession;
+            if (session is not null)
+                Context.Items[SESSION_KEY] = session;
+
+            // Empty = run all.
+            _ = Clients.Caller.SendAsync("RunTests", session?.TestUids ?? []);
             return base.OnConnectedAsync();
         }
 
         public override Task OnDisconnectedAsync(Exception? exception)
         {
-            if (!_completedGracefully)
-            {
-                // Surface the abort as a failed test node so MTP marks the run
-                // failed (exit code != 0). FactosFramework breaks the result
-                // stream on the first failed/error node, so emitting one is
-                // enough to terminate the iterator.
-                var reason = exception?.Message ?? "the client disconnected before reporting completion";
-                OnTestNodeGenerated?.Invoke(new TestNodeDto
-                {
-                    Uid = "factos-session-aborted",
-                    DisplayName = "Factos session aborted",
-                    Properties =
-                    [
-                        new FailedTestNodeStatePropertyDto
-                        {
-                            Explanation =
-                                "The client app disconnected before sending AllTestsCompleted; " +
-                                "the remaining tests did not run. " +
-                                $"Reason: {reason}"
-                        }
-                    ]
-                });
-            }
+            // A transport drop (client SIGSEGV, simulator killed, etc.) without the
+            // AllTestsCompleted sign-off is surfaced as a failed node so MTP marks the
+            // run failed (exit code != 0); after a graceful sign-off this is a no-op.
+            var reason = exception?.Message ?? "the client disconnected before reporting completion";
 
-            OnAllTestsCompleted?.Invoke();
+            Session?.Abort(
+                "The client app disconnected before sending AllTestsCompleted; " +
+                "the remaining tests did not run. " +
+                $"Reason: {reason}");
+
             return base.OnDisconnectedAsync(exception);
         }
     }

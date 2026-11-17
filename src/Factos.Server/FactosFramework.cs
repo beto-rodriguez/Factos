@@ -115,12 +115,20 @@ internal sealed class FactosFramework
                 }
 
                 await deviceWriter.Title($"Starting {appName}...", cancellationToken);
-                await appRunner.StartApp(testedApp, appName, cancellationToken);
 
-                var timeOut = new CancellationTokenSource(TimeSpan.FromSeconds(settings.ConnectionTimeout));
+                var protocol = ProtocolosLifeTime.ActiveProtocols.First();
+
+                // the session must exist before the app starts: the client may connect at any
+                // moment after that, and a crashed app process ends the session right away
+                protocol.PrepareClient(appName, appUids);
+                await appRunner.StartApp(
+                    testedApp, appName, cancellationToken,
+                    reason => protocol.AbortClient(appName, $"The app process exited before the tests finished.\n{reason}"));
+
+                using var timeOut = new CancellationTokenSource(TimeSpan.FromSeconds(settings.ConnectionTimeout));
                 using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeOut.Token, cancellationToken);
 
-                var nodesStream = GetNodes(appName, appUids, context, 0, cancellationToken);
+                var nodesStream = GetNodes(appName, protocol, cancellationToken);
 
                 await foreach (var node in nodesStream.WithCancellation(linkedCts.Token))
                 {
@@ -138,7 +146,6 @@ internal sealed class FactosFramework
                     }
                 }
 
-                var protocol = ProtocolosLifeTime.ActiveProtocols.First();
                 await appRunner.EndApp(protocol, appName, cancellationToken);
 
                 await MTPResultsMapper.LogCount(appName, deviceWriter, cancellationToken);
@@ -168,16 +175,14 @@ internal sealed class FactosFramework
         Task.FromResult(true);
 
     private async IAsyncEnumerable<TestNode> GetNodes(
-        string appName, string[] testUids, ExecuteRequestContext context, int retry, [EnumeratorCancellation] CancellationToken cancellationToken)
+        string appName, IServerSessionProtocol protocol, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         await deviceWriter.Blue(
             "Waiting for test to run in the client app...", cancellationToken);
 
-        var protocol = ProtocolosLifeTime.ActiveProtocols.First();
-        cancellationToken = CancellationToken.None;
-
+        // the token carries the per-app timeout, RequestClient turns it into a failed node.
         var isEmpty = true;
-        await foreach (var node in protocol.RequestClient(appName, testUids, cancellationToken))
+        await foreach (var node in protocol.RequestClient(appName, cancellationToken))
         {
             isEmpty = false;
             yield return MTPResultsMapper.ReadNode(appName, node);
@@ -185,19 +190,12 @@ internal sealed class FactosFramework
 
         if (isEmpty)
         {
-            await deviceWriter.Green(
-                $"No test results were received from the client app, attempt {retry + 1}/3", cancellationToken);
-
-            if (retry < 2)
-            {
-                await foreach (var node in GetNodes(appName, testUids, context, retry + 1, cancellationToken))
-                    yield return node;
-            }
-            else
-            {
-                await deviceWriter.Red(
-                    "Maximum retry attempts reached. No test results were received from the client app.", cancellationToken);
-            }
+            // The session ends only when the client signs off, disconnects, its process dies
+            // or the timeout fires; waiting again would not bring more results. The former
+            // retries made up for the previous app's disconnect ending this app's stream,
+            // which the per-connection session in the hub now prevents.
+            await deviceWriter.Red(
+                $"No test results were received from '{appName}'.", CancellationToken.None);
         }
     }
 }

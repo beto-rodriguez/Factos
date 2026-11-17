@@ -39,16 +39,15 @@
 	</PropertyGroup>
 
 	<!--
-	    MAUI defaults RunAOTCompilation=true for Android Release builds. With
-	    Android workload 36.1.53 / SDK 10.0.300 the resulting AOT image SIGSEGVs
-	    (signal 11, fault addr 0x0) in MainActivity bring-up on the emulator, so
-	    Microsoft.Android.Run reports "App started but could not retrieve PID."
-	    Avalonia Android passes because its csproj disables profiled AOT. For
-	    these test apps we don't care about Android startup time, so disable AOT
-	    to dodge the bug while keeping iOS/MacCatalyst AOT (which Apple requires).
+	    Marshal methods (on by default for Android Release in .NET 10) crash this test
+	    app at startup on the x86_64 CI emulator: SIGSEGV in libmonosgen-2.0.so while
+	    resolving the first managed method, "App started but could not retrieve PID".
+	    Turning them off is the only build switch that fixed it (AOT, apk vs aab,
+	    interpreter and assembly store made no difference). They only speed up
+	    Java-to-.NET calls, which a test app does not need.
 	-->
 	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
-		<RunAOTCompilation>false</RunAOTCompilation>
+		<AndroidEnableMarshalMethods>false</AndroidEnableMarshalMethods>
 	</PropertyGroup>
 
 	<ItemGroup>

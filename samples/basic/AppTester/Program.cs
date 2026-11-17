@@ -28,6 +28,27 @@ testedApps
 //    dotnet test -c Release --project samples/basic/AppTester --test-env key=value
 var root = "samples/basic";
 
+// iOS apps must name the simulator to run on: with more than one available, `dotnet run`
+// stops with "multiple devices are available". The workflow boots one and passes its
+// udid, e.g. --test-env device=:v2:udid=<UDID>
+MSBuildArg iosDevice = new("Device", "[device]");
+
+// A Release iOS build trims and fully AOT-compiles every assembly with LLVM, which took
+// ~14 minutes per CI job and buys nothing on a simulator. Build for the simulator RID with
+// the interpreter instead, like LiveCharts2 does for its iOS UI tests (~1-4 minutes).
+MSBuildArg[] iosSimulatorBuild = [
+    iosDevice,
+    new("RuntimeIdentifier", "iossimulator-arm64"),
+    new("MtouchUseLlvm", "false"),
+    new("MtouchLink", "SdkOnly"),
+    new("RunAOTCompilation", "false"),
+    new("UseInterpreter", "true"),
+    // `dotnet run` launches the app with mlaunch, which opens Simulator.app first by default;
+    // that shuts down a simulator the workflow booted headless, and the install then fails
+    // with HE0046 "Unable to lookup in current state: Shutdown". Keep mlaunch from opening it.
+    new("MlaunchAdditionalArgumentsProperty", "--quiet-simulator")
+];
+
 testedApps
 
     // == WPF ==
@@ -47,11 +68,14 @@ testedApps
 
     // == MAUI ==
     .Add(project: $"{root}/MAUITests",              uid: "maui",                targetFramework: "[tfm]")
+    .Add(project: $"{root}/MAUITests",              uid: "maui-ios",            targetFramework: "net10.0-ios",
+        msBuildArgs: iosSimulatorBuild)
 
     // == AVALONIA ==
     .Add(project: $"{root}/AvaloniaTests.Desktop",  uid: "avalonia-desktop")
     .Add(project: $"{root}/AvaloniaTests.Android",  uid: "avalonia-android")
-    .Add(project: $"{root}/AvaloniaTests.iOS",      uid: "avalonia-ios")
+    .Add(project: $"{root}/AvaloniaTests.iOS",      uid: "avalonia-ios",
+        msBuildArgs: iosSimulatorBuild)
     .Add(project: $"{root}/AvaloniaTests.Browser",  uid: "avalonia-browser",    appHost: AppHost.HeadlessChrome)
 
     // == UNO ==

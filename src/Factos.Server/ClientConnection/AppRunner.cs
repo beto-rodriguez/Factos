@@ -22,7 +22,8 @@ internal class AppRunner
     protected override string Id =>
         nameof(AppRunner);
 
-    public virtual async Task StartApp(TestedApp app, string appName, CancellationToken cancellationToken)
+    public virtual async Task StartApp(
+        TestedApp app, string appName, CancellationToken cancellationToken, Action<string>? onAppProcessFailed = null)
     {
         await deviceWritter.Dimmed(
             $"{appName} app is starting...", cancellationToken);
@@ -58,7 +59,7 @@ internal class AppRunner
             }
             else
             {
-                _activeProcesses.Add(new ProcessHandler(command, deviceWritter, cancellationToken));
+                _activeProcesses.Add(new ProcessHandler(command, deviceWritter, cancellationToken, onAppProcessFailed));
             }
         }
     }
