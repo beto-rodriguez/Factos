@@ -25,6 +25,16 @@ jobs:
       - name: Select Xcode 26.2
         run: sudo xcode-select -s /Applications/Xcode_26.2.app
 
+      # Boot the simulator as early as possible and don't wait for it: the first boot of a
+      # fresh simulator runs minutes of indexing and setup work, let that overlap the
+      # .NET and workload setup below.
+      - name: Launch iOS Simulator
+        id: simulator
+        uses: futureware-tech/simulator-action@v5
+        with:
+          model: 'iPhone 16e'
+          wait_for_boot: false
+
       - name: Verify Xcode version
         run: xcodebuild -version
 
@@ -32,14 +42,15 @@ jobs:
         run:
           dotnet workload install maui --from-rollback-file ${{ github.workspace }}/.github/workloads/rollback.json
 
-      - name: Launch iOS Simulator
-        id: simulator
-        uses: futureware-tech/simulator-action@v5
-        with:
-          model: 'iPhone 16e'
-          wait_for_boot: true
+      # Wait for the boot to finish, then launch Safari in the background: the first app
+      # launch on a fresh simulator can take minutes, pay it while our app builds.
+      - name: Warm up the simulator
+        run: |
+          xcrun simctl bootstatus ${{ steps.simulator.outputs.udid }} -b
+          nohup xcrun simctl launch ${{ steps.simulator.outputs.udid }} com.apple.mobilesafari > /dev/null 2>&1 &
 
       - name: Run tests
+        timeout-minutes: 30
         run:
           # select the test defined in the AppTester project, this project harnesses the UI tests.
           # the Device property names the simulator, `dotnet run` refuses to pick one when several are available.

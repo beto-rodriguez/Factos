@@ -42,7 +42,11 @@ MSBuildArg[] iosSimulatorBuild = [
     new("MtouchUseLlvm", "false"),
     new("MtouchLink", "SdkOnly"),
     new("RunAOTCompilation", "false"),
-    new("UseInterpreter", "true")
+    new("UseInterpreter", "true"),
+    // `dotnet run` launches the app with mlaunch, which opens Simulator.app first by default;
+    // that shuts down a simulator the workflow booted headless, and the install then fails
+    // with HE0046 "Unable to lookup in current state: Shutdown". Keep mlaunch from opening it.
+    new("MlaunchAdditionalArgumentsProperty", "--quiet-simulator")
 ];
 
 testedApps
