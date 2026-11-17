@@ -38,6 +38,18 @@
     </UnoFeatures>
   </PropertyGroup>
 
+  <!--
+      Marshal methods (on by default for Android Release in .NET 10) crash this test
+      app at startup on the x86_64 CI emulator: SIGSEGV in libmonosgen-2.0.so while
+      resolving the first managed method, "App started but could not retrieve PID".
+      Turning them off is the only build switch that fixed it (AOT, apk vs aab,
+      interpreter and assembly store made no difference). They only speed up
+      Java-to-.NET calls, which a test app does not need.
+  -->
+  <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+    <AndroidEnableMarshalMethods>false</AndroidEnableMarshalMethods>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\src\Factos.Uno\Factos.Uno.csproj" />
     <ProjectReference
