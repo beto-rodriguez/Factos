@@ -162,6 +162,25 @@ internal static class TestHubDisconnectTests
         AssertEqual(0, nodes.Count, "no abort node after a graceful sign-off");
     }
 
+    public static async Task Late_abort_of_the_previous_app_does_not_end_the_next_session()
+    {
+        NewSession(out var sut, "first");
+        await new WebSocketsServerTestSession.TestHub().AllTestsCompleted();
+
+        // the first app's process-exit callback runs only after the runner moved on
+        sut.PrepareClient("second", []);
+        sut.AbortClient("first", "exited with 0xC000027B on shutdown");
+
+        var hub = new WebSocketsServerTestSession.TestHub();
+        await hub.TestNodeGenerated(PassedNode("second-t1"));
+        await hub.AllTestsCompleted();
+
+        var nodes = await ReadAll(sut, "second");
+
+        AssertEqual(1, nodes.Count, "the second app's session is not aborted");
+        AssertEqual("second-t1", nodes[0].Uid, "the second app's node");
+    }
+
     public static async Task Background_process_with_non_zero_exit_reports_instead_of_exiting()
     {
         var failed = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);

@@ -31,6 +31,10 @@ failures += await Run(
     TestHubDisconnectTests.AbortClient_ends_the_session_unless_the_client_signed_off);
 
 failures += await Run(
+    nameof(TestHubDisconnectTests.Late_abort_of_the_previous_app_does_not_end_the_next_session),
+    TestHubDisconnectTests.Late_abort_of_the_previous_app_does_not_end_the_next_session);
+
+failures += await Run(
     nameof(TestHubDisconnectTests.Background_process_with_non_zero_exit_reports_instead_of_exiting),
     TestHubDisconnectTests.Background_process_with_non_zero_exit_reports_instead_of_exiting);
 

@@ -68,8 +68,16 @@ internal sealed class WebSocketsServerTestSession(
     public void PrepareClient(string clientName, string[] testUids) =>
         TestHub.CurrentSession = new ClientSession(clientName, testUids);
 
-    public void AbortClient(string clientName, string reason) =>
-        TestHub.CurrentSession?.Abort(reason);
+    public void AbortClient(string clientName, string reason)
+    {
+        // The abort comes from a process-exit callback that can run late, after the runner
+        // already moved on to the next app; only abort the session of the app it belongs to
+        // (app names are unique within a run, see FactosFramework).
+        var session = TestHub.CurrentSession;
+        if (session is null || session.ClientName != clientName) return;
+
+        session.Abort(reason);
+    }
 
     public async IAsyncEnumerable<TestNodeDto> RequestClient(
         string clientName, [EnumeratorCancellation] CancellationToken cancellationToken)
