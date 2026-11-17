@@ -139,10 +139,13 @@ internal sealed class WebSocketsServerTestSession(
 
         // Each connection keeps the session that was current when it connected, so a
         // late disconnect from the previous app cannot end the next app's session.
+        // A connection with no session (it connected before any app was prepared, e.g.
+        // a stray app) targets nothing; only a hub without a connection, as built by the
+        // unit tests, falls back to the current session.
         ClientSession? Session =>
-            Context?.Items.TryGetValue(SESSION_KEY, out var session) == true
-                ? session as ClientSession
-                : CurrentSession;
+            Context is null
+                ? CurrentSession
+                : Context.Items.TryGetValue(SESSION_KEY, out var session) ? session as ClientSession : null;
 
         public Task TestNodeGenerated(TestNodeDto nodeDto)
         {

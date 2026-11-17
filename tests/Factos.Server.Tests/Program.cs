@@ -35,6 +35,10 @@ failures += await Run(
     TestHubDisconnectTests.Late_abort_of_the_previous_app_does_not_end_the_next_session);
 
 failures += await Run(
+    nameof(TestHubDisconnectTests.Connection_without_a_session_does_not_target_a_later_app),
+    TestHubDisconnectTests.Connection_without_a_session_does_not_target_a_later_app);
+
+failures += await Run(
     nameof(TestHubDisconnectTests.Background_process_with_non_zero_exit_reports_instead_of_exiting),
     TestHubDisconnectTests.Background_process_with_non_zero_exit_reports_instead_of_exiting);
 

@@ -181,6 +181,27 @@ internal static class TestHubDisconnectTests
         AssertEqual("second-t1", nodes[0].Uid, "the second app's node");
     }
 
+    public static async Task Connection_without_a_session_does_not_target_a_later_app()
+    {
+        // a stray client connected before any app was prepared, so it has no bound session
+        var strayHub = new WebSocketsServerTestSession.TestHub { Context = new FakeCallerContext(null) };
+
+        NewSession(out var sut, "app");
+
+        await strayHub.TestNodeGenerated(PassedNode("stray-t1"));
+        await strayHub.AllTestsCompleted();
+        await strayHub.OnDisconnectedAsync(new InvalidOperationException("stray app killed"));
+
+        var hub = new WebSocketsServerTestSession.TestHub();
+        await hub.TestNodeGenerated(PassedNode("app-t1"));
+        await hub.AllTestsCompleted();
+
+        var nodes = await ReadAll(sut, "app");
+
+        AssertEqual(1, nodes.Count, "the stray client neither completes, aborts nor feeds the app's stream");
+        AssertEqual("app-t1", nodes[0].Uid, "the app's node");
+    }
+
     public static async Task Background_process_with_non_zero_exit_reports_instead_of_exiting()
     {
         var failed = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -249,8 +270,11 @@ internal static class TestHubDisconnectTests
 
     sealed class FakeCallerContext : HubCallerContext
     {
-        public FakeCallerContext(ClientSession session) =>
-            Items[WebSocketsServerTestSession.TestHub.SESSION_KEY] = session;
+        public FakeCallerContext(ClientSession? session)
+        {
+            if (session is not null)
+                Items[WebSocketsServerTestSession.TestHub.SESSION_KEY] = session;
+        }
 
         public override string ConnectionId => "fake";
         public override string? UserIdentifier => null;
